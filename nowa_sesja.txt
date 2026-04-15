@@ -1,0 +1,1 @@
+Następna sesja może zacząć od jednego Read History.md + Read data/keypoints/_quality_report.md i będzie miała pełny kontekst.

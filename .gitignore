@@ -1,0 +1,23 @@
+# Środowisko
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Dane wyjściowe (keypointy i etykiety mogą być duże)
+# data/videos/ pozostawiamy — dataset wejściowy
+# Keypointy zostają wersjonowane do czasu decyzji o LFS
+
+# System
+.DS_Store
+Thumbs.db
+
+# Raporty tymczasowe
+*.log

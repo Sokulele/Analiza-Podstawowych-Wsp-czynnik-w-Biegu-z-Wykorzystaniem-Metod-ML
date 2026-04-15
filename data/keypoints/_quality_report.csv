@@ -1,0 +1,10 @@
+video,fps,duration_s,frames_total,frames_with_pose,detection_rate,key_visibility_mean,key_low_visibility_ratio,jitter_raw,jitter_smoothed,jitter_reduction_pct,quality_flag
+01 - Slow Motion Treadmill Running - Shod Side View.mp4,29.97,31.66,949,949,1.0,0.973,0.0,0.01993,0.00284,85.8,OK
+02 - Running at 13km⧸h - Side View.mp4,30.0,10.0,300,300,1.0,0.911,0.013,0.10625,0.0146,86.3,OK
+03 - Running at 15km⧸h - Side View.mp4,30.0,10.0,300,300,1.0,0.878,0.054,0.02989,0.00926,69.0,OK
+08 - Treadmill Running Technique - How to run safely on a treadmill.__segment_1__cropped.mp4,29.97,22.02,660,660,1.0,0.911,0.01,0.0424,0.00688,83.8,OK
+08 - Treadmill Running Technique - How to run safely on a treadmill.__segment_2__cropped.mp4,29.97,10.01,300,300,1.0,0.919,0.009,0.03394,0.00535,84.2,OK
+09 - RUNNING FORM ANALYSIS AT MARATHON PACE： SAGE CANADAY TREADMILL TECHNIQUE__segment_3__cropped.mp4,29.97,49.98,1498,1332,0.889,0.912,0.003,0.04539,0.00754,83.4,BAD
+16 - Running at 5 m⧸s.mp4,13.333,60.0,800,800,1.0,0.911,0.011,0.07144,0.01022,85.7,BAD
+18 - Running while wearing a hip exoskeleton ｜ Wearable Robotics ｜ Augmentation ｜ Biomechanics__segment_2__cropped.mp4,23.976,32.03,768,768,1.0,0.955,0.0,0.01218,0.00572,53.0,WARN
+20 - Transitioning from Walking to Running (0.8 to 3.5 m⧸s)__segment_1.mp4,30.0,29.0,870,870,1.0,0.95,0.0,0.02158,0.00499,76.9,OK

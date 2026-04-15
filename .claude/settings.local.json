@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.venv/Scripts/python.exe -m pip install \"mediapipe==0.10.14\")",
+      "Bash(.venv/Scripts/python.exe -c \"import mediapipe as mp; pose = mp.solutions.pose; print\\('OK, PoseLandmark count:', len\\(list\\(pose.PoseLandmark\\)\\)\\)\")",
+      "Bash(.venv/Scripts/python.exe src/extraction/extract_keypoints.py --video \"data/videos/08 - Treadmill Running Technique - How to run safely on a treadmill.__segment_2__cropped.mp4\" --output-dir data/keypoints)",
+      "Bash(.venv/Scripts/python.exe -c ' *)",
+      "Bash(.venv/Scripts/python.exe src/extraction/extract_keypoints.py)"
+    ]
+  }
+}
