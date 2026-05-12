@@ -1,0 +1,250 @@
+{
+  "config": {
+    "window_size": 15,
+    "hidden_size": 128,
+    "num_layers": 2,
+    "dropout": 0.3,
+    "lr": 0.001,
+    "batch_size": 64,
+    "weight_decay": 1e-05,
+    "epochs_run": 16,
+    "best_epoch": 1,
+    "patience": 15,
+    "seed": 42,
+    "n_features": 106,
+    "feature_set": "engineered (normalized + angles)",
+    "labels": [
+      "FLIGHT",
+      "LEFT_STANCE",
+      "RIGHT_STANCE"
+    ],
+    "n_params": 637699
+  },
+  "n_train_windows": 5699,
+  "n_val_windows": 709,
+  "n_test_windows": 1448,
+  "val": {
+    "name": "VAL",
+    "n": 709,
+    "accuracy": 0.7827926657263752,
+    "f1_macro": 0.7796585122672081,
+    "labels": [
+      "FLIGHT",
+      "LEFT_STANCE",
+      "RIGHT_STANCE"
+    ],
+    "confusion_matrix": [
+      [
+        154,
+        23,
+        47
+      ],
+      [
+        61,
+        177,
+        1
+      ],
+      [
+        21,
+        1,
+        224
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n      FLIGHT      0.653     0.688     0.670       224\n LEFT_STANCE      0.881     0.741     0.805       239\nRIGHT_STANCE      0.824     0.911     0.865       246\n\n    accuracy                          0.783       709\n   macro avg      0.786     0.780     0.780       709\nweighted avg      0.789     0.783     0.783       709\n"
+  },
+  "test": {
+    "name": "TEST",
+    "n": 1448,
+    "accuracy": 0.6602209944751382,
+    "f1_macro": 0.6583384751392501,
+    "labels": [
+      "FLIGHT",
+      "LEFT_STANCE",
+      "RIGHT_STANCE"
+    ],
+    "confusion_matrix": [
+      [
+        267,
+        101,
+        108
+      ],
+      [
+        141,
+        305,
+        51
+      ],
+      [
+        75,
+        16,
+        384
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n      FLIGHT      0.553     0.561     0.557       476\n LEFT_STANCE      0.723     0.614     0.664       497\nRIGHT_STANCE      0.707     0.808     0.754       475\n\n    accuracy                          0.660      1448\n   macro avg      0.661     0.661     0.658      1448\nweighted avg      0.662     0.660     0.658      1448\n"
+  },
+  "per_file_test": {
+    "02 - Running at 13km⧸h - Side View.csv": {
+      "n": 286,
+      "accuracy": 0.5629370629370629,
+      "f1_macro": 0.558184289501662,
+      "confusion_matrix": [
+        [
+          67,
+          9,
+          17
+        ],
+        [
+          46,
+          61,
+          6
+        ],
+        [
+          42,
+          5,
+          33
+        ]
+      ]
+    },
+    "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+      "n": 856,
+      "accuracy": 0.677570093457944,
+      "f1_macro": 0.6700453759796156,
+      "confusion_matrix": [
+        [
+          196,
+          38,
+          55
+        ],
+        [
+          95,
+          139,
+          44
+        ],
+        [
+          33,
+          11,
+          245
+        ]
+      ]
+    },
+    "22 - Running Analysis with Physiotherapist.csv": {
+      "n": 306,
+      "accuracy": 0.7026143790849673,
+      "f1_macro": 0.5751637019132879,
+      "confusion_matrix": [
+        [
+          4,
+          54,
+          36
+        ],
+        [
+          0,
+          105,
+          1
+        ],
+        [
+          0,
+          0,
+          106
+        ]
+      ]
+    }
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.5595744828383128,
+      "val_loss": 0.48405172517168504,
+      "val_acc": 0.7827926657263752
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.4034889010919465,
+      "val_loss": 0.48768639673803355,
+      "val_acc": 0.8067700987306065
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.3578866640726725,
+      "val_loss": 0.6176971972661227,
+      "val_acc": 0.7277856135401974
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.3302841475026475,
+      "val_loss": 0.598478306079617,
+      "val_acc": 0.7291960507757405
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.29123609192255473,
+      "val_loss": 0.5344977303603808,
+      "val_acc": 0.8025387870239774
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.270101942618688,
+      "val_loss": 0.5688578864751312,
+      "val_acc": 0.765867418899859
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.25629448890686035,
+      "val_loss": 0.8113410435038998,
+      "val_acc": 0.6784203102961918
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.2334063123911619,
+      "val_loss": 0.7612513186481003,
+      "val_acc": 0.7080394922425952
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.20524023448427517,
+      "val_loss": 0.8715876172728868,
+      "val_acc": 0.685472496473907
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.20349229988124634,
+      "val_loss": 0.8066644265890458,
+      "val_acc": 0.7179125528913963
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.199974605275525,
+      "val_loss": 0.914387799957071,
+      "val_acc": 0.7066290550070522
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.19429111315144432,
+      "val_loss": 0.8582928527897941,
+      "val_acc": 0.7009873060648801
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.17354105335349837,
+      "val_loss": 0.9673557137316474,
+      "val_acc": 0.6995768688293371
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.17156517101037833,
+      "val_loss": 0.9039776261754029,
+      "val_acc": 0.7009873060648801
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.14857305304871665,
+      "val_loss": 1.0154185490144156,
+      "val_acc": 0.6840620592383639
+    },
+    {
+      "epoch": 16,
+      "train_loss": 0.1370196607377794,
+      "val_loss": 0.9404770763451693,
+      "val_acc": 0.7038081805359662
+    }
+  ]
+}

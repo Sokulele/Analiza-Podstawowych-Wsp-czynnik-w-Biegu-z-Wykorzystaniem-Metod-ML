@@ -1,0 +1,48 @@
+{
+  "gct": {
+    "left_ms": 203.9,
+    "right_ms": 367.59999999999997,
+    "delta_ms": 163.7,
+    "symmetry_index_pct": 57.29,
+    "classification": "asymetria znacząca"
+  },
+  "cycle_time": {
+    "left_ms": 825.3000000000001,
+    "right_ms": 857.6,
+    "delta_ms": 32.3,
+    "symmetry_index_pct": 3.84,
+    "classification": "symetria zdrowa"
+  },
+  "duty_factor": {
+    "left": 0.247,
+    "right": 0.429,
+    "delta": 0.182,
+    "symmetry_index_pct": 53.85,
+    "classification": "asymetria znacząca"
+  },
+  "knee_angle_stance": {
+    "left_deg": 163.53,
+    "right_deg": 161.14,
+    "delta_deg": -2.39,
+    "symmetry_index_pct": 1.47,
+    "classification": "symetria zdrowa"
+  },
+  "ankle_angle_stance": {
+    "left_deg": 105.38,
+    "right_deg": 98.52,
+    "delta_deg": -6.86,
+    "symmetry_index_pct": 6.73,
+    "classification": "asymetria łagodna"
+  },
+  "foot_strike": {
+    "left_dominant": "heel strike",
+    "right_dominant": "heel strike",
+    "left_pct_forefoot": 2.9,
+    "right_pct_forefoot": 5.9,
+    "consistent": true
+  },
+  "overall": {
+    "max_si_pct": 57.29,
+    "mean_si_pct": 24.64
+  }
+}

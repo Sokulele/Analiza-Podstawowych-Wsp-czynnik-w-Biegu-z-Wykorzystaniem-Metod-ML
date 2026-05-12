@@ -1,0 +1,216 @@
+{
+  "config": {
+    "n_estimators": 300,
+    "max_depth": null,
+    "min_samples_leaf": 1,
+    "class_weight": "balanced",
+    "seed": 42,
+    "n_features": 132,
+    "include_visibility": true
+  },
+  "classes": [
+    "FLIGHT",
+    "LEFT_STANCE",
+    "RIGHT_STANCE"
+  ],
+  "n_train": 5811,
+  "n_val": 737,
+  "n_test": 1490,
+  "val": {
+    "name": "VAL",
+    "n": 737,
+    "accuracy": 0.8059701492537313,
+    "f1_macro": 0.8033095394661532,
+    "labels": [
+      "FLIGHT",
+      "LEFT_STANCE",
+      "RIGHT_STANCE"
+    ],
+    "confusion_matrix": [
+      [
+        164,
+        41,
+        19
+      ],
+      [
+        30,
+        218,
+        12
+      ],
+      [
+        27,
+        14,
+        212
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n      FLIGHT      0.742     0.732     0.737       224\n LEFT_STANCE      0.799     0.838     0.818       260\nRIGHT_STANCE      0.872     0.838     0.855       253\n\n    accuracy                          0.806       737\n   macro avg      0.804     0.803     0.803       737\nweighted avg      0.807     0.806     0.806       737\n"
+  },
+  "test": {
+    "name": "TEST",
+    "n": 1490,
+    "accuracy": 0.5899328859060403,
+    "f1_macro": 0.5828534070129923,
+    "labels": [
+      "FLIGHT",
+      "LEFT_STANCE",
+      "RIGHT_STANCE"
+    ],
+    "confusion_matrix": [
+      [
+        203,
+        192,
+        81
+      ],
+      [
+        74,
+        372,
+        79
+      ],
+      [
+        79,
+        106,
+        304
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n      FLIGHT      0.570     0.426     0.488       476\n LEFT_STANCE      0.555     0.709     0.623       525\nRIGHT_STANCE      0.655     0.622     0.638       489\n\n    accuracy                          0.590      1490\n   macro avg      0.594     0.586     0.583      1490\nweighted avg      0.593     0.590     0.585      1490\n"
+  },
+  "per_file_test": {
+    "02 - Running at 13km⧸h - Side View.csv": {
+      "n": 300,
+      "accuracy": 0.47,
+      "f1_macro": 0.35237315875613745
+    },
+    "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+      "n": 870,
+      "accuracy": 0.6091954022988506,
+      "f1_macro": 0.6051911990116259
+    },
+    "22 - Running Analysis with Physiotherapist.csv": {
+      "n": 320,
+      "accuracy": 0.65,
+      "f1_macro": 0.6046852425180599
+    }
+  },
+  "top_features": [
+    [
+      "RIGHT_ANKLE_y",
+      0.036287573599890204
+    ],
+    [
+      "LEFT_FOOT_INDEX_y",
+      0.03426611042867348
+    ],
+    [
+      "LEFT_HEEL_y",
+      0.03313052507355492
+    ],
+    [
+      "LEFT_ANKLE_y",
+      0.0324692884129415
+    ],
+    [
+      "RIGHT_FOOT_INDEX_y",
+      0.03186897962216554
+    ],
+    [
+      "RIGHT_HEEL_y",
+      0.029989920152557355
+    ],
+    [
+      "RIGHT_KNEE_x",
+      0.01810673317606988
+    ],
+    [
+      "RIGHT_FOOT_INDEX_x",
+      0.014997243290422761
+    ],
+    [
+      "LEFT_FOOT_INDEX_x",
+      0.01382910064707033
+    ],
+    [
+      "RIGHT_SHOULDER_visibility",
+      0.013432281228297439
+    ],
+    [
+      "RIGHT_THUMB_visibility",
+      0.012793446678816546
+    ],
+    [
+      "LEFT_KNEE_x",
+      0.011197455052161506
+    ],
+    [
+      "LEFT_THUMB_visibility",
+      0.010816732559516923
+    ],
+    [
+      "RIGHT_HEEL_x",
+      0.010757187671807392
+    ],
+    [
+      "RIGHT_KNEE_z",
+      0.01034871223165648
+    ],
+    [
+      "LEFT_ANKLE_visibility",
+      0.010261258100997352
+    ],
+    [
+      "RIGHT_ANKLE_x",
+      0.010210856936990106
+    ],
+    [
+      "MOUTH_RIGHT_visibility",
+      0.010180582439633322
+    ],
+    [
+      "RIGHT_INDEX_x",
+      0.010105735856950673
+    ],
+    [
+      "RIGHT_FOOT_INDEX_z",
+      0.010081537619085394
+    ],
+    [
+      "LEFT_ANKLE_x",
+      0.010030767028718801
+    ],
+    [
+      "RIGHT_PINKY_x",
+      0.009804402871425809
+    ],
+    [
+      "RIGHT_INDEX_visibility",
+      0.009786313571411872
+    ],
+    [
+      "LEFT_HEEL_visibility",
+      0.00975574826910438
+    ],
+    [
+      "RIGHT_PINKY_visibility",
+      0.009526347848469814
+    ],
+    [
+      "RIGHT_WRIST_x",
+      0.009325225356910183
+    ],
+    [
+      "LEFT_HEEL_x",
+      0.009224367429446823
+    ],
+    [
+      "LEFT_INDEX_visibility",
+      0.00917628205887682
+    ],
+    [
+      "MOUTH_LEFT_visibility",
+      0.009175005232499476
+    ],
+    [
+      "RIGHT_KNEE_y",
+      0.009047704362178282
+    ]
+  ]
+}

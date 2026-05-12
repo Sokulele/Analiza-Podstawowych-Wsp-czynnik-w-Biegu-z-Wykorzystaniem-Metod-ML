@@ -1,0 +1,111 @@
+{
+  "recommendations": [
+    {
+      "rule_id": "quality_max_si_high",
+      "severity": "warning",
+      "category": "jakość_predykcji",
+      "title": "Bardzo wysoka maksymalna asymetria",
+      "message": "Max Symmetry Index = 35.0% (próg 'potencjalnego problemu' to 10%). W połączeniu z niską confidence lub asymetrią kroków, prawdopodobnie artefakt predykcji, nie biegacza.",
+      "citation": "Robinson et al. 1987",
+      "detail": "max SI = 35.0%",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "gct_lewa_long",
+      "severity": "warning",
+      "category": "GCT",
+      "title": "GCT lewa: przedłużony",
+      "message": "GCT lewa w zakresie 280–350 ms wskazuje na wolne tempo lub długi krok. U biegaczy rekreacyjnych zalecane 220–280 ms — krótszy GCT poprawia ekonomię biegu.",
+      "citation": "Souza 2016; Heiderscheit et al. 2011",
+      "detail": "GCT lewa: 285 ms",
+      "suggestion": "Spróbuj zwiększyć kadencję o ~5–10% — zwykle skraca GCT bez wysiłku."
+    },
+    {
+      "rule_id": "symmetry_significant",
+      "severity": "warning",
+      "category": "symetria",
+      "title": "Asymetria L/P powyżej 10% — rozważ konsultację",
+      "message": "Wskaźnik symetrii Robinsona (SI = 200·|L−R|/(L+R)) powyżej 10% literatura traktuje jako sygnał potencjalnego dysbalansu mięśniowego lub kompensacji po przebytej kontuzji. UWAGA: część asymetrii w danych monocularnych 2D może być artefaktem perspektywy (strona bliżej kamery wydaje się ruszać 'większą amplitudą').",
+      "citation": "Robinson et al. 1987; Souza 2016",
+      "detail": "GCT (czas kontaktu) SI=22.8%; duty factor SI=21.4%; kąt kolana w fazie stance SI=35.0%",
+      "suggestion": "Jeżeli asymetria utrzymuje się na innych nagraniach, konsultacja z fizjoterapeutą."
+    },
+    {
+      "rule_id": "cadence_recreational",
+      "severity": "watch",
+      "category": "kadencja",
+      "title": "Kadencja rekreacyjna — możliwość poprawy",
+      "message": "Kadencja w zakresie 160–170 spm jest typowa dla biegaczy rekreacyjnych. Stopniowe podniesienie do 170–180 spm może zmniejszyć obciążenie stawów.",
+      "citation": "Heiderscheit et al. 2011",
+      "detail": "kadencja: 163 spm",
+      "suggestion": "Cel długoterminowy: 170–180 spm. Wprowadzaj zmianę stopniowo (~5%/tydzień)."
+    },
+    {
+      "rule_id": "knee_lewa_sitting",
+      "severity": "watch",
+      "category": "kolano@kontakt",
+      "title": "Kolano lewa przy kontakcie: zbyt ugięte ('siedzący' bieg)",
+      "message": "Kąt kolana < 155° przy kontakcie wskazuje na 'siedzący' wzorzec biegu — więcej pracy mięśni przy każdym kroku, mniejsze wykorzystanie energii elastycznej ścięgien. UWAGA: bardzo niskie wartości (<100°) zwykle oznaczają błąd predykcji klatki kontaktu.",
+      "citation": "Novacheck 1998",
+      "detail": "kąt kolana lewa: 98.2°",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "knee_prawa_sitting",
+      "severity": "watch",
+      "category": "kolano@kontakt",
+      "title": "Kolano prawa przy kontakcie: zbyt ugięte ('siedzący' bieg)",
+      "message": "Kąt kolana < 155° przy kontakcie wskazuje na 'siedzący' wzorzec biegu — więcej pracy mięśni przy każdym kroku, mniejsze wykorzystanie energii elastycznej ścięgien. UWAGA: bardzo niskie wartości (<100°) zwykle oznaczają błąd predykcji klatki kontaktu.",
+      "citation": "Novacheck 1998",
+      "detail": "kąt kolana prawa: 137.4°",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "vert_osc_low",
+      "severity": "watch",
+      "category": "vert_osc",
+      "title": "Bardzo niska oscylacja pionowa",
+      "message": "Oscylacja < 0.12 torso jest nietypowa — może być wynikiem szumu keypointów MediaPipe (brak czubka głowy, biodro zasłonięte) lub bardzo płaskiego, krótkiego kroku.",
+      "citation": "Diaz et al. 2019",
+      "detail": "vert osc / torso: 0.100",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "symmetry_mild",
+      "severity": "watch",
+      "category": "symetria",
+      "title": "Łagodna asymetria L/P (5–10%)",
+      "message": "Wskaźnik symetrii Robinsona 5–10% to wartość 'do monitorowania' — drobne różnice między nogami są powszechne u rekreacyjnych biegaczy, ale warto obserwować trend w czasie.",
+      "citation": "Robinson et al. 1987",
+      "detail": "kąt kostki w fazie stance SI=7.2%",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "torso_optimal",
+      "severity": "info",
+      "category": "tułów",
+      "title": "Pochylenie tułowia prawidłowe",
+      "message": "Pochylenie tułowia w zakresie 5–15° to optymalne wykorzystanie grawitacji w biegu.",
+      "citation": "Novacheck 1998",
+      "detail": "pochylenie: 9.9°",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "foot_strike_consistent",
+      "severity": "info",
+      "category": "foot_strike",
+      "title": "Spójny wzorzec lądowania (forefoot strike)",
+      "message": "Obie stopy lądują tym samym wzorcem (forefoot strike). Literatura nie wskazuje jednoznacznie 'najlepszego' wzorca foot strike u dorosłych biegaczy — istotniejsza jest stabilność wzorca i brak overstridingu.",
+      "citation": "Daoud et al. 2012",
+      "detail": "L=P=forefoot strike",
+      "suggestion": ""
+    }
+  ],
+  "summary": {
+    "total": 10,
+    "critical": 0,
+    "warning": 3,
+    "watch": 5,
+    "info": 2
+  }
+}

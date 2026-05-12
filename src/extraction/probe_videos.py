@@ -57,7 +57,10 @@ def main() -> None:
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
 
-    videos = sorted(videos_dir.glob("*.mp4"))
+    # Obsługa .mp4 i .mov (case-insensitive na Windows nie wymaga osobnych globów MOV/MP4)
+    videos = sorted(
+        list(videos_dir.glob("*.mp4")) + list(videos_dir.glob("*.mov"))
+    )
     log.info("Znaleziono %d filmików w %s", len(videos), videos_dir)
 
     rows = [probe_video(v) for v in videos]

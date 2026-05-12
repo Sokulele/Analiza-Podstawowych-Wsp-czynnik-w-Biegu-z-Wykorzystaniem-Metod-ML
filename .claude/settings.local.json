@@ -5,7 +5,26 @@
       "Bash(.venv/Scripts/python.exe -c \"import mediapipe as mp; pose = mp.solutions.pose; print\\('OK, PoseLandmark count:', len\\(list\\(pose.PoseLandmark\\)\\)\\)\")",
       "Bash(.venv/Scripts/python.exe src/extraction/extract_keypoints.py --video \"data/videos/08 - Treadmill Running Technique - How to run safely on a treadmill.__segment_2__cropped.mp4\" --output-dir data/keypoints)",
       "Bash(.venv/Scripts/python.exe -c ' *)",
-      "Bash(.venv/Scripts/python.exe src/extraction/extract_keypoints.py)"
+      "Bash(.venv/Scripts/python.exe src/extraction/extract_keypoints.py)",
+      "Bash(python -c ' *)",
+      "Bash(.venv/Scripts/python -c ' *)",
+      "Bash(.venv/Scripts/python src/labeling/auto_label.py --file \"data/keypoints/02 - Running at 13km⧸h - Side View.csv\" --dry-run)",
+      "Bash(.venv/Scripts/python src/labeling/auto_label.py --file \"data/keypoints/02 - Running at 13km⧸h - Side View.csv\" --flight-fraction 0.4 --median-kernel 3 --dry-run)",
+      "Bash(.venv/Scripts/python src/labeling/auto_label.py --file \"data/keypoints/02 - Running at 13km⧸h - Side View.csv\")",
+      "Bash(.venv/Scripts/python -c \"import py_compile; py_compile.compile\\('src/labeling/auto_label.py', doraise=True\\); print\\('OK'\\)\")",
+      "Bash(.venv/Scripts/python src/visualization/render_frames.py --video \"data/videos/02 - Running at 13km⧸h - Side View.mp4\" --keypoints \"data/keypoints/02 - Running at 13km⧸h - Side View.csv\" --n-per-phase 2)",
+      "Bash(python -c \"from pathlib import Path; files=sorted\\(Path\\('.'\\).glob\\('*.png'\\)\\); [print\\(f\\) for f in files]\")",
+      "Bash(python *)",
+      "Bash(tasklist)",
+      "Bash(ls -la \"data/videos/\"*.mp4)",
+      "Bash(awk '{print $5, $NF}')",
+      "Bash(.venv/Scripts/python.exe -c \"import sklearn; print\\(sklearn.__version__\\)\")",
+      "Bash(.venv/Scripts/python.exe -m pip install scikit-learn joblib)",
+      "Bash(.venv/Scripts/python.exe *)",
+      "Bash(tee models/lstm_primary_train.log)",
+      "Bash(where ffmpeg *)",
+      "Bash(ffmpeg -hide_banner -loglevel warning -i \"data/videos/_originals_4k/23 - Pawel bieg__segment_1__4k.mov\" -vf \"scale=1280:720\" -c:v libx264 -preset medium -crf 20 -an \"data/videos/23 - Pawel bieg__segment_1.mp4\")",
+      "Bash(tee models/lstm_run1_overfit_train.log)"
     ]
   }
 }

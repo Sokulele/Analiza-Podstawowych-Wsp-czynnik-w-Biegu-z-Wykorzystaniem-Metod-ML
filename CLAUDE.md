@@ -1,4 +1,4 @@
-# Analiza Podstawowych Współczynników Biegu z Wykorzystaniem Metod ML
+# git branch -M main
 
 ## Projekt
 
@@ -57,11 +57,13 @@ Reguły kodowane ręcznie na podstawie literatury biomechanicznej — NIE uczone
 ```
 /data/
   /videos/          — surowe filmiki (.mp4)
-  /keypoints/        — wyekstrahowane keypointy (CSV/JSON)
+  /keypoints/        — wyekstrahowane keypointy (CSV/JSON) + kolumny phase_auto/phase po etykietowaniu
+  /visualizations/   — wyrenderowane klatki ze szkieletem i etykietą fazy (PNG)
   /labels/           — etykiety faz biegu
 /src/
   /extraction/       — ekstrakcja keypointów (MediaPipe)
   /labeling/         — auto-etykietowanie + narzędzia korekty
+  /visualization/    — renderowanie klatek ze szkieletem i etykietą fazy
   /training/         — trenowanie klasyfikatorów
   /coefficients/     — obliczanie współczynników biegu
   /recommendations/  — reguły rekomendacji
@@ -102,3 +104,24 @@ Reguły kodowane ręcznie na podstawie literatury biomechanicznej — NIE uczone
 - Nie ucz rekomendacji z danych — to reguły z literatury
 - Nie zakładaj stałego FPS — odczytuj z wideo
 - Nie ignoruj szumu MediaPipe — zawsze filtruj
+
+## Notatki do pracy magisterskiej (auto-zapis)
+
+Folder `docs/thesis-notes/` gromadzi materiał źródłowy do rozdziałów pracy.
+**Zapisuj notatki PROAKTYWNIE, bez pytania o pozwolenie.**
+
+### Kiedy auto-zapisywać notatkę
+
+- **Decyzje metodologiczne** — wybór między alternatywami (algorytm, architektura, split, cechy) z uzasadnieniem dlaczego właśnie to podejście
+- **Dewagacje i konsternacje** — dyskusje o kierunku pracy, rozważane opcje, wątpliwości, kompromisy
+- **Wyniki eksperymentów** — metryki, confusion matrix, feature importance, analiza błędów per-film
+- **Obserwacje biomechaniczne / diagnostyka modeli** — co keypointy mówią o fazie, dlaczego model się myli
+- **Ograniczenia i zastrzeżenia** — co uczciwie trzeba omówić w sekcji "limitations"
+
+### Konwencja
+
+- Nazwa pliku: `YYYY-MM-DD-temat.md` (jeden plik = jedno zagadnienie / jedna decyzja / jedna sesja eksperymentów)
+- Aktualizuj `docs/thesis-notes/README.md` — dopisuj link do każdej nowej notatki
+- Struktura typowej notatki: kontekst → rozważane alternatywy → decyzja → uzasadnienie → oczekiwane wyniki / dalsze kroki
+- Po polsku, z surowymi liczbami i tabelami (do wklejenia do pracy)
+- Lepiej zapisać za dużo niż za mało — później łatwo wyciąć fragment, trudno odtworzyć tok myślenia sprzed tygodni

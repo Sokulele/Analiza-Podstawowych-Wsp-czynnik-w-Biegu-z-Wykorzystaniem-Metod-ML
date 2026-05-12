@@ -1,0 +1,14 @@
+{
+  "title": "02 - Running at 13km⧸h - Side View",
+  "video": "02 - Running at 13km⧸h - Side View.mp4",
+  "fps": 30.0,
+  "n_frames": 300,
+  "duration_s": 10.0,
+  "width": 360,
+  "height": 450,
+  "model_dir": "models\\lstm_run1_overfit",
+  "model_test_acc": 0.709,
+  "avg_confidence": 0.795,
+  "inference_time_s": 28.3,
+  "generated": "2026-05-09 09:43:41"
+}

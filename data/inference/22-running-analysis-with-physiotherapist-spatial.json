@@ -1,0 +1,275 @@
+{
+  "joint_angles": {
+    "left_knee": {
+      "overall": {
+        "n": 320,
+        "mean": 126.33,
+        "std": 34.89,
+        "min": 54.87,
+        "max": 172.73
+      },
+      "LEFT_STANCE": {
+        "n": 128,
+        "mean": 92.11,
+        "std": 27.99,
+        "min": 54.87,
+        "max": 172.73
+      },
+      "RIGHT_STANCE": {
+        "n": 95,
+        "mean": 156.7,
+        "std": 9.43,
+        "min": 122.12,
+        "max": 170.11
+      },
+      "FLIGHT": {
+        "n": 97,
+        "mean": 141.73,
+        "std": 14.49,
+        "min": 105.93,
+        "max": 166.95
+      }
+    },
+    "right_knee": {
+      "overall": {
+        "n": 320,
+        "mean": 146.62,
+        "std": 14.8,
+        "min": 99.33,
+        "max": 171.3
+      },
+      "LEFT_STANCE": {
+        "n": 128,
+        "mean": 159.75,
+        "std": 10.15,
+        "min": 99.33,
+        "max": 171.3
+      },
+      "RIGHT_STANCE": {
+        "n": 95,
+        "mean": 131.26,
+        "std": 5.76,
+        "min": 120.05,
+        "max": 152.0
+      },
+      "FLIGHT": {
+        "n": 97,
+        "mean": 144.35,
+        "std": 9.53,
+        "min": 121.85,
+        "max": 160.99
+      }
+    },
+    "left_hip": {
+      "overall": {
+        "n": 320,
+        "mean": 137.64,
+        "std": 28.88,
+        "min": 77.38,
+        "max": 172.15
+      },
+      "LEFT_STANCE": {
+        "n": 128,
+        "mean": 114.09,
+        "std": 26.73,
+        "min": 77.38,
+        "max": 170.35
+      },
+      "RIGHT_STANCE": {
+        "n": 95,
+        "mean": 162.71,
+        "std": 6.49,
+        "min": 138.59,
+        "max": 172.15
+      },
+      "FLIGHT": {
+        "n": 97,
+        "mean": 144.16,
+        "std": 19.43,
+        "min": 93.39,
+        "max": 165.34
+      }
+    },
+    "right_hip": {
+      "overall": {
+        "n": 320,
+        "mean": 134.97,
+        "std": 15.3,
+        "min": 101.78,
+        "max": 167.07
+      },
+      "LEFT_STANCE": {
+        "n": 128,
+        "mean": 133.93,
+        "std": 15.6,
+        "min": 101.78,
+        "max": 160.96
+      },
+      "RIGHT_STANCE": {
+        "n": 95,
+        "mean": 132.35,
+        "std": 7.43,
+        "min": 120.11,
+        "max": 153.89
+      },
+      "FLIGHT": {
+        "n": 97,
+        "mean": 138.91,
+        "std": 19.32,
+        "min": 104.18,
+        "max": 167.07
+      }
+    },
+    "left_ankle": {
+      "overall": {
+        "n": 320,
+        "mean": 77.51,
+        "std": 35.26,
+        "min": 35.71,
+        "max": 148.63
+      },
+      "LEFT_STANCE": {
+        "n": 128,
+        "mean": 113.68,
+        "std": 26.93,
+        "min": 43.97,
+        "max": 148.63
+      },
+      "RIGHT_STANCE": {
+        "n": 95,
+        "mean": 47.69,
+        "std": 7.58,
+        "min": 35.71,
+        "max": 70.19
+      },
+      "FLIGHT": {
+        "n": 97,
+        "mean": 58.97,
+        "std": 12.16,
+        "min": 36.64,
+        "max": 88.84
+      }
+    },
+    "right_ankle": {
+      "overall": {
+        "n": 320,
+        "mean": 93.15,
+        "std": 22.9,
+        "min": 52.13,
+        "max": 144.4
+      },
+      "LEFT_STANCE": {
+        "n": 128,
+        "mean": 79.4,
+        "std": 10.74,
+        "min": 52.13,
+        "max": 101.44
+      },
+      "RIGHT_STANCE": {
+        "n": 95,
+        "mean": 122.22,
+        "std": 15.39,
+        "min": 69.55,
+        "max": 144.4
+      },
+      "FLIGHT": {
+        "n": 97,
+        "mean": 82.83,
+        "std": 12.75,
+        "min": 53.88,
+        "max": 117.48
+      }
+    }
+  },
+  "knee_angle_at_contact": {
+    "left_knee": {
+      "n": 15,
+      "mean": 98.23,
+      "std": 20.8,
+      "min": 81.84,
+      "max": 172.73
+    },
+    "right_knee": {
+      "n": 14,
+      "mean": 137.42,
+      "std": 6.15,
+      "min": 126.29,
+      "max": 152.0
+    }
+  },
+  "torso_lean": {
+    "overall": {
+      "n": 320,
+      "mean": 9.93,
+      "std": 1.97,
+      "min": 4.49,
+      "max": 14.64
+    },
+    "LEFT_STANCE": {
+      "n": 128,
+      "mean": 10.69,
+      "std": 1.23,
+      "min": 6.94,
+      "max": 13.54
+    },
+    "RIGHT_STANCE": {
+      "n": 95,
+      "mean": 9.33,
+      "std": 2.37,
+      "min": 4.49,
+      "max": 14.64
+    },
+    "FLIGHT": {
+      "n": 97,
+      "mean": 9.51,
+      "std": 1.99,
+      "min": 4.86,
+      "max": 14.5
+    }
+  },
+  "vertical_oscillation": {
+    "vertical_oscillation_raw": {
+      "n": 14,
+      "mean": 0.02,
+      "std": 0.0,
+      "min": 0.02,
+      "max": 0.04
+    },
+    "vertical_oscillation_per_torso": {
+      "n": 14,
+      "mean": 0.1,
+      "std": 0.02,
+      "min": 0.08,
+      "max": 0.15
+    },
+    "n_cycles_used": 14
+  },
+  "foot_strike": {
+    "left_foot": {
+      "contact_angle_deg": {
+        "n": 15,
+        "mean": -96.98,
+        "std": 18.07,
+        "min": -159.66,
+        "max": -80.95
+      },
+      "n_heel": 0,
+      "n_mid": 0,
+      "n_forefoot": 15,
+      "dominant": "forefoot strike"
+    },
+    "right_foot": {
+      "contact_angle_deg": {
+        "n": 14,
+        "mean": -98.76,
+        "std": 21.04,
+        "min": -147.15,
+        "max": -76.49
+      },
+      "n_heel": 0,
+      "n_mid": 0,
+      "n_forefoot": 14,
+      "dominant": "forefoot strike"
+    }
+  }
+}

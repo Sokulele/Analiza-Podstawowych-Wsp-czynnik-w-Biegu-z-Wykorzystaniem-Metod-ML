@@ -1,26 +1,27 @@
 # Plan pracy — etapy projektu
 
-## Etap 1: Przygotowanie datasetu
-- [ ] Zebranie 15-20 filmików z YouTube (bieżnia, profil, cała sylwetka)
-- [ ] Pobranie filmików za pomocą yt-dlp do data/videos/
-- [ ] Weryfikacja jakości: FPS, rozdzielczość, widoczność nóg
+## Etap 1: Przygotowanie datasetu ✅
+- [x] Zebranie filmików z YouTube (bieżnia, profil, cała sylwetka) — 14 filmów (+ segmenty)
+- [x] Pobranie filmików za pomocą yt-dlp do data/videos/
+- [x] Weryfikacja jakości: FPS, rozdzielczość, widoczność nóg
+- [x] Audyt datasetu: film 09 pocięty (luka bez detekcji), film 16 → test_edge_cases
 
-## Etap 2: Ekstrakcja keypointów
-- [ ] Skrypt: src/extraction/extract_keypoints.py
-- [ ] Przetworzenie wszystkich filmików → CSV w data/keypoints/
-- [ ] Wizualna weryfikacja keypointów na kilku klatkach (nałożenie szkieletu na obraz)
-- [ ] Wygładzenie sygnału (Savitzky-Golay)
+## Etap 2: Ekstrakcja keypointów ✅
+- [x] Skrypt: src/extraction/extract_keypoints.py
+- [x] Przetworzenie wszystkich filmików → CSV w data/keypoints/
+- [x] Wizualna weryfikacja keypointów na kilku klatkach — src/visualization/render_frames.py
+- [x] Wygładzenie sygnału (Savitzky-Golay) — redukcja jittera 53–86%
 
-## Etap 3: Auto-etykietowanie
-- [ ] Skrypt: src/labeling/auto_label.py
-- [ ] Wyznaczenie poziomu podłoża dla każdego filmiku
-- [ ] Automatyczne etykietowanie faz biegu
-- [ ] Filtr medianowy na sekwencji etykiet
+## Etap 3: Auto-etykietowanie ✅
+- [x] Skrypt: src/labeling/auto_label.py (algorytm peak-based)
+- [x] Test na filmie 02 — kadencja 162 spm, 0 direct L↔R, wyniki zgodne z literaturą
+- [x] Uruchomienie na wszystkich 13 filmach — 0 direct L↔R, 0 zmian filtra medianowego
+- [x] Film 09: pocięty na 2 czyste segmenty (ffmpeg), oba OK
+- [x] Film 16: przeniesiony do test_edge_cases (13 FPS)
+- [x] Finalny dataset: 13 filmów, 8039 klatek, ~33/32/34% rozkład klas
 
-## Etap 4: Korekta ręczna etykiet
-- [ ] Skrypt/narzędzie: src/labeling/label_viewer.py (wizualizacja klatka po klatce z etykietą)
-- [ ] Przejrzenie i korekta problematycznych fragmentów
-- [ ] Zapisanie finalnych etykiet do data/labels/
+## Etap 4: Korekta ręczna etykiet — POMINIĘTY
+Algorytm peak-based okazał się wystarczająco czysty (0 zmian filtra medianowego, 0 direct L↔R we wszystkich filmach). Korekta ręczna niepotrzebna na tym etapie. Jeśli model będzie słaby → wrócić.
 
 ## Etap 5: Trenowanie klasyfikatora
 - [ ] Podział danych: train/val/test (per filmik, nie per klatka!)

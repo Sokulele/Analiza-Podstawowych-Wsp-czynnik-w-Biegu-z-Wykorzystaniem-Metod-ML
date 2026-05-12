@@ -1,0 +1,14 @@
+{
+  "title": "22 - Running Analysis with Physiotherapist",
+  "video": "22 - Running Analysis with Physiotherapist.mp4",
+  "fps": 29.97,
+  "n_frames": 320,
+  "duration_s": 10.68,
+  "width": 608,
+  "height": 1080,
+  "model_dir": "models\\lstm_run1_overfit",
+  "model_test_acc": 0.709,
+  "avg_confidence": 0.89,
+  "inference_time_s": 32.6,
+  "generated": "2026-05-09 09:45:57"
+}

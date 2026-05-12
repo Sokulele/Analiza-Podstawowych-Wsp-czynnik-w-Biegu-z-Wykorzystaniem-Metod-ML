@@ -21,3 +21,4 @@ Thumbs.db
 
 # Raporty tymczasowe
 *.log
+data/videos/_originals_4k/*.mov

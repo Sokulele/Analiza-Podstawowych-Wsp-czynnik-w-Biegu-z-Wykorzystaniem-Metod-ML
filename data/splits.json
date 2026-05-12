@@ -1,0 +1,54 @@
+{
+  "splits": {
+    "train": [
+      "01 - Slow Motion Treadmill Running - Shod Side View.csv",
+      "06 - Running on a treadmill at 15km⧸h - Side View.csv",
+      "08 - Treadmill Running Technique - How to run safely on a treadmill.__segment_1__cropped.csv",
+      "08 - Treadmill Running Technique - How to run safely on a treadmill.__segment_2__cropped.csv",
+      "09 - RUNNING FORM ANALYSIS AT MARATHON PACE： SAGE CANADAY TREADMILL TECHNIQUE__segment_3__cropped__segment_1.csv",
+      "15 - Mechanics of running at 4m⧸s (~4.15min⧸km).csv",
+      "19 - Barefoot running in slow motion at 16km⧸h.csv",
+      "23 - Pawel bieg__segment_1.csv",
+      "24 - Adam bieg__segment_1.csv",
+      "Running at 4ms - Side View.csv"
+    ],
+    "val": [
+      "03 - Running at 15km⧸h - Side View.csv",
+      "09 - RUNNING FORM ANALYSIS AT MARATHON PACE： SAGE CANADAY TREADMILL TECHNIQUE__segment_3__cropped__segment_2.csv"
+    ],
+    "test": [
+      "02 - Running at 13km⧸h - Side View.csv",
+      "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv",
+      "22 - Running Analysis with Physiotherapist.csv"
+    ]
+  },
+  "stats": {
+    "train": {
+      "n_files": 10,
+      "frames": 9779,
+      "per_class": {
+        "LEFT_STANCE": 3334,
+        "FLIGHT": 3340,
+        "RIGHT_STANCE": 3105
+      }
+    },
+    "val": {
+      "n_files": 2,
+      "frames": 738,
+      "per_class": {
+        "RIGHT_STANCE": 253,
+        "LEFT_STANCE": 261,
+        "FLIGHT": 224
+      }
+    },
+    "test": {
+      "n_files": 3,
+      "frames": 1490,
+      "per_class": {
+        "LEFT_STANCE": 525,
+        "FLIGHT": 476,
+        "RIGHT_STANCE": 489
+      }
+    }
+  }
+}

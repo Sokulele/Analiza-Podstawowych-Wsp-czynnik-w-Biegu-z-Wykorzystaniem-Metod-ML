@@ -293,7 +293,11 @@ def main() -> None:
     if args.video:
         videos = [Path(args.video)]
     else:
-        videos = sorted(Path(args.videos_dir).glob("*.mp4"))
+        # Obsługa .mp4 i .mov (case-insensitive na Windows)
+        videos_dir = Path(args.videos_dir)
+        videos = sorted(
+            list(videos_dir.glob("*.mp4")) + list(videos_dir.glob("*.mov"))
+        )
 
     log.info("Do przetworzenia: %d filmików", len(videos))
 

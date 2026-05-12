@@ -1,0 +1,442 @@
+{
+  "rf_v1": {
+    "label": "RF v1 (raw)",
+    "baseline": {
+      "acc": 0.6268456375838927,
+      "f1": 0.6170398772763084,
+      "per_film": {
+        "02 - Running at 13km⧸h - Side View.csv": {
+          "n": 300,
+          "accuracy": 0.5166666666666667,
+          "f1_macro": 0.4221619993977717
+        },
+        "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+          "n": 870,
+          "accuracy": 0.6367816091954023,
+          "f1_macro": 0.6335721364993084
+        },
+        "22 - Running Analysis with Physiotherapist.csv": {
+          "n": 320,
+          "accuracy": 0.703125,
+          "f1_macro": 0.6437733589752893
+        }
+      }
+    },
+    "filtered": {
+      "3": {
+        "acc": 0.6228187919463087,
+        "f1": 0.6124130964650166,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 300,
+            "accuracy": 0.5133333333333333,
+            "f1_macro": 0.41321852269439147
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 870,
+            "accuracy": 0.635632183908046,
+            "f1_macro": 0.6323596998284274
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 320,
+            "accuracy": 0.690625,
+            "f1_macro": 0.6228116288331341
+          }
+        }
+      },
+      "5": {
+        "acc": 0.6181208053691275,
+        "f1": 0.6064386280552537,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 300,
+            "accuracy": 0.49333333333333335,
+            "f1_macro": 0.37778566569053745
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 870,
+            "accuracy": 0.635632183908046,
+            "f1_macro": 0.6321552106094025
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 320,
+            "accuracy": 0.6875,
+            "f1_macro": 0.613363572508542
+          }
+        }
+      },
+      "7": {
+        "acc": 0.5892617449664429,
+        "f1": 0.5671847075150697,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 300,
+            "accuracy": 0.4633333333333333,
+            "f1_macro": 0.31777733044561557
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 870,
+            "accuracy": 0.5977011494252874,
+            "f1_macro": 0.5871238775910277
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 320,
+            "accuracy": 0.684375,
+            "f1_macro": 0.5973681116189398
+          }
+        }
+      },
+      "9": {
+        "acc": 0.536241610738255,
+        "f1": 0.475094083494278,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 300,
+            "accuracy": 0.41333333333333333,
+            "f1_macro": 0.2207909927961452
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 870,
+            "accuracy": 0.5310344827586206,
+            "f1_macro": 0.48343328002699887
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 320,
+            "accuracy": 0.665625,
+            "f1_macro": 0.5512304967643571
+          }
+        }
+      }
+    }
+  },
+  "rf_v2": {
+    "label": "RF v2 (engineered)",
+    "baseline": {
+      "acc": 0.6704697986577182,
+      "f1": 0.6708840586620334,
+      "per_film": {
+        "02 - Running at 13km⧸h - Side View.csv": {
+          "n": 300,
+          "accuracy": 0.63,
+          "f1_macro": 0.613874852796338
+        },
+        "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+          "n": 870,
+          "accuracy": 0.6862068965517242,
+          "f1_macro": 0.6838736006922209
+        },
+        "22 - Running Analysis with Physiotherapist.csv": {
+          "n": 320,
+          "accuracy": 0.665625,
+          "f1_macro": 0.6691631504922645
+        }
+      }
+    },
+    "filtered": {
+      "3": {
+        "acc": 0.6778523489932886,
+        "f1": 0.6781284546751051,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 300,
+            "accuracy": 0.63,
+            "f1_macro": 0.6132829525774562
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 870,
+            "accuracy": 0.6885057471264368,
+            "f1_macro": 0.686803231744321
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 320,
+            "accuracy": 0.69375,
+            "f1_macro": 0.6971103609034645
+          }
+        }
+      },
+      "5": {
+        "acc": 0.6664429530201342,
+        "f1": 0.6659046631168929,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 300,
+            "accuracy": 0.6333333333333333,
+            "f1_macro": 0.614434669273379
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 870,
+            "accuracy": 0.6827586206896552,
+            "f1_macro": 0.6807241149119926
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 320,
+            "accuracy": 0.653125,
+            "f1_macro": 0.6554436247035867
+          }
+        }
+      },
+      "7": {
+        "acc": 0.6295302013422819,
+        "f1": 0.6246663233856622,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 300,
+            "accuracy": 0.6066666666666667,
+            "f1_macro": 0.5654037844363816
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 870,
+            "accuracy": 0.6425287356321839,
+            "f1_macro": 0.6371388933184741
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 320,
+            "accuracy": 0.615625,
+            "f1_macro": 0.6187258943168978
+          }
+        }
+      },
+      "9": {
+        "acc": 0.5651006711409396,
+        "f1": 0.5457374829936731,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 300,
+            "accuracy": 0.5033333333333333,
+            "f1_macro": 0.3921731415687903
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 870,
+            "accuracy": 0.5735632183908046,
+            "f1_macro": 0.5539339096085879
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 320,
+            "accuracy": 0.6,
+            "f1_macro": 0.6023402523402523
+          }
+        }
+      }
+    }
+  },
+  "lstm_r1": {
+    "label": "LSTM run 1 (h=128)",
+    "baseline": {
+      "acc": 0.6712707182320442,
+      "f1": 0.6628488272996025,
+      "per_film": {
+        "02 - Running at 13km⧸h - Side View.csv": {
+          "n": 286,
+          "accuracy": 0.548951048951049,
+          "f1_macro": 0.5213368449962772
+        },
+        "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+          "n": 856,
+          "accuracy": 0.6810747663551402,
+          "f1_macro": 0.6732785889243891
+        },
+        "22 - Running Analysis with Physiotherapist.csv": {
+          "n": 306,
+          "accuracy": 0.7581699346405228,
+          "f1_macro": 0.7399485515074063
+        }
+      }
+    },
+    "filtered": {
+      "3": {
+        "acc": 0.669889502762431,
+        "f1": 0.6612569724587737,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 286,
+            "accuracy": 0.541958041958042,
+            "f1_macro": 0.5130409037774063
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 856,
+            "accuracy": 0.6810747663551402,
+            "f1_macro": 0.6732723167744371
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 306,
+            "accuracy": 0.7581699346405228,
+            "f1_macro": 0.7385360221961529
+          }
+        }
+      },
+      "5": {
+        "acc": 0.6505524861878453,
+        "f1": 0.6364121466342244,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 286,
+            "accuracy": 0.534965034965035,
+            "f1_macro": 0.4995451534167283
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 856,
+            "accuracy": 0.6670560747663551,
+            "f1_macro": 0.6559634023334092
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 306,
+            "accuracy": 0.7124183006535948,
+            "f1_macro": 0.6783133432952928
+          }
+        }
+      },
+      "7": {
+        "acc": 0.5656077348066298,
+        "f1": 0.5036892831041341,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 286,
+            "accuracy": 0.506993006993007,
+            "f1_macro": 0.45038694874387497
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 856,
+            "accuracy": 0.5654205607476636,
+            "f1_macro": 0.5002921136125851
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 306,
+            "accuracy": 0.6209150326797386,
+            "f1_macro": 0.5154729233546967
+          }
+        }
+      },
+      "9": {
+        "acc": 0.5524861878453039,
+        "f1": 0.47217674139584914,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 286,
+            "accuracy": 0.4825174825174825,
+            "f1_macro": 0.4090516361059151
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 856,
+            "accuracy": 0.5537383177570093,
+            "f1_macro": 0.45827886882904395
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 306,
+            "accuracy": 0.6143790849673203,
+            "f1_macro": 0.49912413008388246
+          }
+        }
+      }
+    }
+  },
+  "lstm_r2": {
+    "label": "LSTM run 2 (primary)",
+    "baseline": {
+      "acc": 0.6526243093922652,
+      "f1": 0.6449365959162847,
+      "per_film": {
+        "02 - Running at 13km⧸h - Side View.csv": {
+          "n": 286,
+          "accuracy": 0.506993006993007,
+          "f1_macro": 0.4953311319024032
+        },
+        "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+          "n": 856,
+          "accuracy": 0.669392523364486,
+          "f1_macro": 0.6614398704252576
+        },
+        "22 - Running Analysis with Physiotherapist.csv": {
+          "n": 306,
+          "accuracy": 0.7418300653594772,
+          "f1_macro": 0.724883801169634
+        }
+      }
+    },
+    "filtered": {
+      "3": {
+        "acc": 0.6512430939226519,
+        "f1": 0.6433506337116249,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 286,
+            "accuracy": 0.506993006993007,
+            "f1_macro": 0.4953311319024032
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 856,
+            "accuracy": 0.6682242990654206,
+            "f1_macro": 0.660109198435903
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 306,
+            "accuracy": 0.738562091503268,
+            "f1_macro": 0.7209064170804607
+          }
+        }
+      },
+      "5": {
+        "acc": 0.6215469613259669,
+        "f1": 0.6073682510315258,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 286,
+            "accuracy": 0.5034965034965035,
+            "f1_macro": 0.4891810018392297
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 856,
+            "accuracy": 0.6425233644859814,
+            "f1_macro": 0.6300717875141091
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 306,
+            "accuracy": 0.673202614379085,
+            "f1_macro": 0.6343714271685991
+          }
+        }
+      },
+      "7": {
+        "acc": 0.5649171270718232,
+        "f1": 0.5125699568803302,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 286,
+            "accuracy": 0.4965034965034965,
+            "f1_macro": 0.44789420221909665
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 856,
+            "accuracy": 0.572429906542056,
+            "f1_macro": 0.5233032203202875
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 306,
+            "accuracy": 0.6078431372549019,
+            "f1_macro": 0.520272549917303
+          }
+        }
+      },
+      "9": {
+        "acc": 0.5538674033149171,
+        "f1": 0.4616015641194026,
+        "per_film": {
+          "02 - Running at 13km⧸h - Side View.csv": {
+            "n": 286,
+            "accuracy": 0.5174825174825175,
+            "f1_macro": 0.41039292763430696
+          },
+          "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+            "n": 856,
+            "accuracy": 0.5514018691588785,
+            "f1_macro": 0.4627967540817872
+          },
+          "22 - Running Analysis with Physiotherapist.csv": {
+            "n": 306,
+            "accuracy": 0.5947712418300654,
+            "f1_macro": 0.4852528393142463
+          }
+        }
+      }
+    }
+  }
+}

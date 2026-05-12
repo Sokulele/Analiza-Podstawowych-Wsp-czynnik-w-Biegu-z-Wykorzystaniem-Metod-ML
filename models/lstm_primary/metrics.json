@@ -1,0 +1,264 @@
+{
+  "config": {
+    "window_size": 15,
+    "hidden_size": 64,
+    "num_layers": 2,
+    "dropout": 0.4,
+    "lr": 0.0003,
+    "batch_size": 64,
+    "weight_decay": 0.0001,
+    "epochs_run": 18,
+    "best_epoch": 3,
+    "patience": 15,
+    "seed": 42,
+    "n_features": 106,
+    "feature_set": "engineered (normalized + angles)",
+    "labels": [
+      "FLIGHT",
+      "LEFT_STANCE",
+      "RIGHT_STANCE"
+    ],
+    "n_params": 187779,
+    "augment_flip": false,
+    "aspect_fix": true
+  },
+  "n_train_windows": 9639,
+  "n_val_windows": 709,
+  "n_test_windows": 1448,
+  "val": {
+    "name": "VAL",
+    "n": 709,
+    "accuracy": 0.8504936530324401,
+    "f1_macro": 0.845319525409724,
+    "labels": [
+      "FLIGHT",
+      "LEFT_STANCE",
+      "RIGHT_STANCE"
+    ],
+    "confusion_matrix": [
+      [
+        158,
+        31,
+        35
+      ],
+      [
+        21,
+        218,
+        0
+      ],
+      [
+        19,
+        0,
+        227
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n      FLIGHT      0.798     0.705     0.749       224\n LEFT_STANCE      0.876     0.912     0.893       239\nRIGHT_STANCE      0.866     0.923     0.894       246\n\n    accuracy                          0.850       709\n   macro avg      0.847     0.847     0.845       709\nweighted avg      0.848     0.850     0.848       709\n"
+  },
+  "test": {
+    "name": "TEST",
+    "n": 1448,
+    "accuracy": 0.6823204419889503,
+    "f1_macro": 0.6812293146680096,
+    "labels": [
+      "FLIGHT",
+      "LEFT_STANCE",
+      "RIGHT_STANCE"
+    ],
+    "confusion_matrix": [
+      [
+        277,
+        123,
+        76
+      ],
+      [
+        86,
+        354,
+        57
+      ],
+      [
+        101,
+        17,
+        357
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n      FLIGHT      0.597     0.582     0.589       476\n LEFT_STANCE      0.717     0.712     0.714       497\nRIGHT_STANCE      0.729     0.752     0.740       475\n\n    accuracy                          0.682      1448\n   macro avg      0.681     0.682     0.681      1448\nweighted avg      0.681     0.682     0.682      1448\n"
+  },
+  "per_file_test": {
+    "02 - Running at 13km⧸h - Side View.csv": {
+      "n": 286,
+      "accuracy": 0.548951048951049,
+      "f1_macro": 0.5441639340462084,
+      "confusion_matrix": [
+        [
+          43,
+          28,
+          22
+        ],
+        [
+          33,
+          75,
+          5
+        ],
+        [
+          36,
+          5,
+          39
+        ]
+      ]
+    },
+    "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+      "n": 856,
+      "accuracy": 0.6927570093457944,
+      "f1_macro": 0.6905794703559781,
+      "confusion_matrix": [
+        [
+          188,
+          52,
+          49
+        ],
+        [
+          53,
+          173,
+          52
+        ],
+        [
+          45,
+          12,
+          232
+        ]
+      ]
+    },
+    "22 - Running Analysis with Physiotherapist.csv": {
+      "n": 306,
+      "accuracy": 0.7777777777777778,
+      "f1_macro": 0.7598229985733718,
+      "confusion_matrix": [
+        [
+          46,
+          43,
+          5
+        ],
+        [
+          0,
+          106,
+          0
+        ],
+        [
+          20,
+          0,
+          86
+        ]
+      ]
+    }
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.7328587715199452,
+      "val_loss": 0.4693954612623653,
+      "val_acc": 0.7898448519040903
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.42419511336364496,
+      "val_loss": 0.41538923133916006,
+      "val_acc": 0.849083215796897
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.3790246082457486,
+      "val_loss": 0.3896622506032037,
+      "val_acc": 0.8504936530324401
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.35947714953233073,
+      "val_loss": 0.39561679114407644,
+      "val_acc": 0.849083215796897
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.34136209829358866,
+      "val_loss": 0.43345970419801677,
+      "val_acc": 0.8377997179125529
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.3263768126435627,
+      "val_loss": 0.411547208160204,
+      "val_acc": 0.8293370944992948
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.31282724242731436,
+      "val_loss": 0.455496789496103,
+      "val_acc": 0.8279266572637518
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.29990892635275984,
+      "val_loss": 0.4192949158936865,
+      "val_acc": 0.8603667136812412
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.2950229161227776,
+      "val_loss": 0.4435678946618805,
+      "val_acc": 0.840620592383639
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.282449850430157,
+      "val_loss": 0.4657803440968308,
+      "val_acc": 0.8180535966149506
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.27457063358943196,
+      "val_loss": 0.4896008330272519,
+      "val_acc": 0.8236953455571228
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.2689461912343044,
+      "val_loss": 0.5039839953058025,
+      "val_acc": 0.8166431593794076
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.2591915744424656,
+      "val_loss": 0.5316269023630279,
+      "val_acc": 0.8053596614950634
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.253698564671128,
+      "val_loss": 0.4584210203127733,
+      "val_acc": 0.8265162200282088
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.24521432925533776,
+      "val_loss": 0.48368338477628353,
+      "val_acc": 0.8208744710860366
+    },
+    {
+      "epoch": 16,
+      "train_loss": 0.23742968219005509,
+      "val_loss": 0.4717386294739539,
+      "val_acc": 0.8236953455571228
+    },
+    {
+      "epoch": 17,
+      "train_loss": 0.2327859377032084,
+      "val_loss": 0.504130075277159,
+      "val_acc": 0.8152327221438646
+    },
+    {
+      "epoch": 18,
+      "train_loss": 0.22866222484419677,
+      "val_loss": 0.5969124781059781,
+      "val_acc": 0.7842031029619182
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "fps": 30.0,
+  "n_frames": 300,
+  "cadence": {
+    "cadence_spm": 144.0,
+    "n_steps_total": 24,
+    "n_steps_left": 14,
+    "n_steps_right": 10,
+    "duration_s": 10.0
+  },
+  "phase_durations": {
+    "gct_left": {
+      "n": 15,
+      "mean_s": 0.2467,
+      "std_s": 0.0884,
+      "min_s": 0.1,
+      "max_s": 0.5,
+      "mean_ms": 246.7,
+      "std_ms": 88.4
+    },
+    "gct_right": {
+      "n": 10,
+      "mean_s": 0.13,
+      "std_s": 0.0504,
+      "min_s": 0.0333,
+      "max_s": 0.2,
+      "mean_ms": 130.0,
+      "std_ms": 50.4
+    },
+    "flight": {
+      "n": 25,
+      "mean_s": 0.2,
+      "std_s": 0.1033,
+      "min_s": 0.0333,
+      "max_s": 0.5,
+      "mean_ms": 200.0,
+      "std_ms": 103.3
+    }
+  },
+  "cycle_time": {
+    "cycle_left": {
+      "n": 14,
+      "mean_s": 0.6524,
+      "std_s": 0.1489,
+      "min_s": 0.2,
+      "max_s": 0.9,
+      "mean_ms": 652.4,
+      "std_ms": 148.9
+    },
+    "cycle_right": {
+      "n": 9,
+      "mean_s": 0.9852,
+      "std_s": 0.4544,
+      "min_s": 0.6333,
+      "max_s": 2.0333,
+      "mean_ms": 985.2,
+      "std_ms": 454.4
+    },
+    "cycle_combined": {
+      "n": 23,
+      "mean_s": 0.7826,
+      "std_s": 0.3474,
+      "min_s": 0.2,
+      "max_s": 2.0333,
+      "mean_ms": 782.6,
+      "std_ms": 347.4
+    }
+  },
+  "duty_factor": {
+    "duty_factor_left": 0.378,
+    "duty_factor_right": 0.132
+  }
+}

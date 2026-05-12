@@ -1,0 +1,54 @@
+[
+  {
+    "model_id": "rf_v1",
+    "label": "RF v1 (raw)",
+    "n_features": 132,
+    "n_train": 9779,
+    "n_val": 737,
+    "n_test": 1490,
+    "val_accuracy": 0.819538670284939,
+    "val_f1_macro": 0.8160619237623822,
+    "test_accuracy": 0.6268456375838927,
+    "test_f1_macro": 0.6170398772763084,
+    "gap_val_test_pp": 19.269303270104633
+  },
+  {
+    "model_id": "rf_v2",
+    "label": "RF v2 (engineered)",
+    "n_features": 106,
+    "n_train": 9779,
+    "n_val": 737,
+    "n_test": 1490,
+    "val_accuracy": 0.7991858887381276,
+    "val_f1_macro": 0.7959750346274094,
+    "test_accuracy": 0.6704697986577182,
+    "test_f1_macro": 0.6708840586620334,
+    "gap_val_test_pp": 12.871609008040942
+  },
+  {
+    "model_id": "lstm_run1",
+    "label": "LSTM run 1 (h=128, overfit)",
+    "n_features": 106,
+    "n_train": 9639,
+    "n_val": 709,
+    "n_test": 1448,
+    "val_accuracy": 0.8645980253878702,
+    "val_f1_macro": 0.8610443512517474,
+    "test_accuracy": 0.6712707182320442,
+    "test_f1_macro": 0.6628488272996025,
+    "gap_val_test_pp": 19.332730715582603
+  },
+  {
+    "model_id": "lstm_run2",
+    "label": "LSTM run 2 (primary)",
+    "n_features": 106,
+    "n_train": 9639,
+    "n_val": 709,
+    "n_test": 1448,
+    "val_accuracy": 0.844851904090268,
+    "val_f1_macro": 0.8389225088319255,
+    "test_accuracy": 0.6526243093922652,
+    "test_f1_macro": 0.6449365959162847,
+    "gap_val_test_pp": 19.222759469800277
+  }
+]

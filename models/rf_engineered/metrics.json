@@ -1,0 +1,219 @@
+{
+  "config": {
+    "n_estimators": 300,
+    "max_depth": null,
+    "min_samples_leaf": 1,
+    "class_weight": "balanced",
+    "seed": 42,
+    "n_features": 106,
+    "feature_set": "engineered (normalized + angles)",
+    "augment_flip": false,
+    "include_velocity": false,
+    "aspect_fix": true
+  },
+  "classes": [
+    "FLIGHT",
+    "LEFT_STANCE",
+    "RIGHT_STANCE"
+  ],
+  "n_train": 9779,
+  "n_val": 737,
+  "n_test": 1490,
+  "val": {
+    "name": "VAL",
+    "n": 737,
+    "accuracy": 0.8046132971506106,
+    "f1_macro": 0.8026205236505666,
+    "labels": [
+      "FLIGHT",
+      "LEFT_STANCE",
+      "RIGHT_STANCE"
+    ],
+    "confusion_matrix": [
+      [
+        169,
+        32,
+        23
+      ],
+      [
+        42,
+        207,
+        11
+      ],
+      [
+        31,
+        5,
+        217
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n      FLIGHT      0.698     0.754     0.725       224\n LEFT_STANCE      0.848     0.796     0.821       260\nRIGHT_STANCE      0.865     0.858     0.861       253\n\n    accuracy                          0.805       737\n   macro avg      0.804     0.803     0.803       737\nweighted avg      0.808     0.805     0.806       737\n"
+  },
+  "test": {
+    "name": "TEST",
+    "n": 1490,
+    "accuracy": 0.6570469798657718,
+    "f1_macro": 0.6502859802307249,
+    "labels": [
+      "FLIGHT",
+      "LEFT_STANCE",
+      "RIGHT_STANCE"
+    ],
+    "confusion_matrix": [
+      [
+        245,
+        89,
+        142
+      ],
+      [
+        106,
+        325,
+        94
+      ],
+      [
+        50,
+        30,
+        409
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n      FLIGHT      0.611     0.515     0.559       476\n LEFT_STANCE      0.732     0.619     0.671       525\nRIGHT_STANCE      0.634     0.836     0.721       489\n\n    accuracy                          0.657      1490\n   macro avg      0.659     0.657     0.650      1490\nweighted avg      0.661     0.657     0.652      1490\n"
+  },
+  "per_file_test": {
+    "02 - Running at 13km⧸h - Side View.csv": {
+      "n": 300,
+      "accuracy": 0.6033333333333334,
+      "f1_macro": 0.6072355097161712
+    },
+    "20 - Running (0.8 to 3.5 m⧸s)__segment_1.csv": {
+      "n": 870,
+      "accuracy": 0.632183908045977,
+      "f1_macro": 0.6199483226161052
+    },
+    "22 - Running Analysis with Physiotherapist.csv": {
+      "n": 320,
+      "accuracy": 0.775,
+      "f1_macro": 0.7686159254458929
+    }
+  },
+  "top_features": [
+    [
+      "left_knee_angle",
+      0.03555385854239323
+    ],
+    [
+      "right_knee_angle",
+      0.03342521105370775
+    ],
+    [
+      "RIGHT_HEEL_y_norm",
+      0.03215314073935674
+    ],
+    [
+      "RIGHT_ANKLE_y_norm",
+      0.02768361197628213
+    ],
+    [
+      "LEFT_FOOT_INDEX_x_norm",
+      0.02465305632251708
+    ],
+    [
+      "RIGHT_FOOT_INDEX_x_norm",
+      0.02143039172081416
+    ],
+    [
+      "right_ankle_angle",
+      0.020860663237906276
+    ],
+    [
+      "LEFT_HEEL_y_norm",
+      0.020009603795793657
+    ],
+    [
+      "LEFT_ANKLE_y_norm",
+      0.017832792657341712
+    ],
+    [
+      "LEFT_KNEE_x_norm",
+      0.01699803148937911
+    ],
+    [
+      "RIGHT_FOOT_INDEX_y_norm",
+      0.016606161687952543
+    ],
+    [
+      "RIGHT_HEEL_x_norm",
+      0.016089144069404922
+    ],
+    [
+      "RIGHT_ANKLE_x_norm",
+      0.014548783839412396
+    ],
+    [
+      "LEFT_FOOT_INDEX_y_norm",
+      0.014287376825970834
+    ],
+    [
+      "RIGHT_KNEE_x_norm",
+      0.01399027556916462
+    ],
+    [
+      "right_hip_angle",
+      0.013372485423568751
+    ],
+    [
+      "RIGHT_ELBOW_x_norm",
+      0.012799400578582885
+    ],
+    [
+      "LEFT_INDEX_x_norm",
+      0.01240722878753481
+    ],
+    [
+      "LEFT_KNEE_z_norm",
+      0.012404209398860784
+    ],
+    [
+      "RIGHT_FOOT_INDEX_z_norm",
+      0.012144726957348853
+    ],
+    [
+      "LEFT_ANKLE_x_norm",
+      0.012051305096656988
+    ],
+    [
+      "RIGHT_PINKY_x_norm",
+      0.012022587395935097
+    ],
+    [
+      "RIGHT_WRIST_x_norm",
+      0.011800369118830284
+    ],
+    [
+      "RIGHT_INDEX_x_norm",
+      0.011628755715323251
+    ],
+    [
+      "RIGHT_INDEX_y_norm",
+      0.011517080446288314
+    ],
+    [
+      "RIGHT_WRIST_y_norm",
+      0.01132227570577531
+    ],
+    [
+      "LEFT_HEEL_x_norm",
+      0.010915505513183887
+    ],
+    [
+      "LEFT_ELBOW_x_norm",
+      0.010798114140550647
+    ],
+    [
+      "RIGHT_HEEL_z_norm",
+      0.01068675336340259
+    ],
+    [
+      "RIGHT_KNEE_y_norm",
+      0.010551649349994181
+    ]
+  ]
+}

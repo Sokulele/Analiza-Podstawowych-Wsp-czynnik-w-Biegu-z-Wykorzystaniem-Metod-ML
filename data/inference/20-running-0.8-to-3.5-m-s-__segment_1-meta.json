@@ -1,0 +1,14 @@
+{
+  "title": "20 -Running (0.8 to 3.5 m⧸s)__segment_1",
+  "video": "20 -Running (0.8 to 3.5 m⧸s)__segment_1.mp4",
+  "fps": 30.0,
+  "n_frames": 870,
+  "duration_s": 29.0,
+  "width": 640,
+  "height": 360,
+  "model_dir": "models\\lstm_run1_overfit",
+  "model_test_acc": 0.709,
+  "avg_confidence": 0.901,
+  "inference_time_s": 83.0,
+  "generated": "2026-05-09 09:45:16"
+}

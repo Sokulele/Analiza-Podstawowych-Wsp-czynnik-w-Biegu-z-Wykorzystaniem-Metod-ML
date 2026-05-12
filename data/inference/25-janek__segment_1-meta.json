@@ -1,0 +1,14 @@
+{
+  "title": "25 - janek__segment_1",
+  "video": "25 - janek__segment_1.mov",
+  "fps": 30.0,
+  "n_frames": 2400,
+  "duration_s": 80.0,
+  "width": 1080,
+  "height": 1920,
+  "model_dir": "models\\lstm_run1_overfit",
+  "model_test_acc": 0.709,
+  "avg_confidence": 0.882,
+  "inference_time_s": 242.2,
+  "generated": "2026-05-12 22:26:57"
+}
