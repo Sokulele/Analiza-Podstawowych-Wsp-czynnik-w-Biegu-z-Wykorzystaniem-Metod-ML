@@ -30,7 +30,7 @@ from pathlib import Path
 _HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(_HERE))
 
-from rules import generate_recommendations  # noqa: E402
+from rules import generate_recommendations, render_markdown  # noqa: E402
 
 try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -39,91 +39,6 @@ except AttributeError:
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
-
-
-_SEVERITY_EMOJI: dict[str, str] = {
-    "critical": "🔴",
-    "warning": "🟠",
-    "watch": "🟡",
-    "info": "ℹ️",
-}
-
-_SEVERITY_LABEL_PL: dict[str, str] = {
-    "critical": "Krytyczne",
-    "warning": "Ostrzeżenie",
-    "watch": "Do monitorowania",
-    "info": "Informacja",
-}
-
-
-def render_markdown(result: dict, meta: dict | None = None) -> str:
-    """Renderuje rekomendacje jako sekcję Markdown (do dołączenia do raportu)."""
-    recs = result["recommendations"]
-    summary = result["summary"]
-
-    lines: list[str] = []
-    lines.append("# Rekomendacje treningowe")
-    lines.append("")
-
-    if meta:
-        title = meta.get("title") or meta.get("video") or ""
-        if title:
-            lines.append(f"**Wideo**: {title}")
-        avg_conf = meta.get("avg_confidence")
-        if avg_conf is not None:
-            lines.append(f"**Pewność predykcji modelu**: {avg_conf:.2f}")
-        lines.append("")
-
-    # Podsumowanie liczbowe
-    lines.append("## Podsumowanie")
-    lines.append("")
-    lines.append(
-        f"- 🔴 Krytyczne: **{summary['critical']}**  "
-        f"🟠 Ostrzeżenia: **{summary['warning']}**  "
-        f"🟡 Do monitorowania: **{summary['watch']}**  "
-        f"ℹ️ Informacje: **{summary['info']}**"
-    )
-    lines.append(f"- Łącznie reguł zwracających wynik: {summary['total']}")
-    lines.append("")
-
-    if not recs:
-        lines.append("_Brak rekomendacji — żadna z reguł nie zwróciła wyniku dla tego biegacza._")
-        return "\n".join(lines) + "\n"
-
-    # Grupowanie po severity
-    grouped: dict[str, list[dict]] = {"critical": [], "warning": [], "watch": [], "info": []}
-    for r in recs:
-        grouped.setdefault(r["severity"], []).append(r)
-
-    for sev in ("critical", "warning", "watch", "info"):
-        if not grouped[sev]:
-            continue
-        emoji = _SEVERITY_EMOJI[sev]
-        label = _SEVERITY_LABEL_PL[sev]
-        lines.append(f"## {emoji} {label}")
-        lines.append("")
-        for r in grouped[sev]:
-            lines.append(f"### {r['title']}")
-            lines.append(f"*Kategoria: **{r['category']}** · Źródło: {r['citation']}*")
-            lines.append("")
-            lines.append(r["message"])
-            lines.append("")
-            if r.get("detail"):
-                lines.append(f"**Pomiar**: {r['detail']}")
-                lines.append("")
-            if r.get("suggestion"):
-                lines.append(f"**Sugestia**: {r['suggestion']}")
-                lines.append("")
-            lines.append("---")
-            lines.append("")
-
-    lines.append("")
-    lines.append(
-        "_Rekomendacje są generowane przez reguły z literatury biomechanicznej "
-        "(Heiderscheit 2011, Novacheck 1998, Souza 2016, Diaz 2019, Robinson 1987, Daoud 2012) — "
-        "nie zastępują konsultacji specjalisty. Pełne progi i źródła: `docs/reference-values.md`._"
-    )
-    return "\n".join(lines) + "\n"
 
 
 def _resolve_paths(args: argparse.Namespace) -> tuple[Path, Path, Path, Path | None]:

@@ -11,8 +11,9 @@ Algorytm:
 1. Wykrywanie segmentów STANCE/FLIGHT z sekwencji faz (run-length encoding)
 2. Statystyki per segment: mean ± std, min, max, n
 
-UWAGA: stride length **nie jest** liczone (wymaga prędkości bieżni — input użytkownika).
-W MVP pomijamy. Pozostałe metryki są niezależne od prędkości.
+Stride length jest liczone **tylko** gdy podana prędkość bieżni (`treadmill_speed_ms`):
+`stride = speed × cycle_time`. Bez tego inputu klucz `stride_length` jest pomijany,
+a pozostałe metryki są niezależne od prędkości.
 
 Uruchomienie standalone:
     .venv/Scripts/python.exe src/coefficients/temporal_metrics.py \\
@@ -173,6 +174,33 @@ def compute_cycle_time(phases: np.ndarray, fps: float) -> dict:
     }
 
 
+def compute_stride_length(cycle_time: dict, treadmill_speed_ms: float) -> dict:
+    """Stride length [m] = treadmill_speed × cycle_time.
+
+    Cycle = od kontaktu nogi do następnego kontaktu **tej samej** nogi (czyli pełny
+    cykl ruchu, 2 step length w klasycznej terminologii biomechanicznej).
+    """
+    out: dict = {"treadmill_speed_ms": round(float(treadmill_speed_ms), 3)}
+    for side_key, out_key in (
+        ("cycle_left", "stride_left"),
+        ("cycle_right", "stride_right"),
+        ("cycle_combined", "stride_combined"),
+    ):
+        ct = cycle_time.get(side_key, {})
+        mean_s = ct.get("mean_s")
+        std_s = ct.get("std_s")
+        n = ct.get("n", 0)
+        if mean_s is None or n == 0:
+            out[out_key] = {"n": 0, "mean_m": None, "std_m": None}
+            continue
+        out[out_key] = {
+            "n": int(n),
+            "mean_m": round(mean_s * treadmill_speed_ms, 3),
+            "std_m": round((std_s or 0.0) * treadmill_speed_ms, 3),
+        }
+    return out
+
+
 def compute_duty_factor(phase_durations: dict, cycle_time: dict) -> dict:
     """Duty factor = GCT / cycle_time, osobno L/R i kombinowany.
 
@@ -193,14 +221,25 @@ def compute_duty_factor(phase_durations: dict, cycle_time: dict) -> dict:
     }
 
 
-def compute_temporal_metrics(phases: np.ndarray, fps: float) -> dict:
-    """Wszystkie współczynniki temporalne w jednym dictie."""
+def compute_temporal_metrics(
+    phases: np.ndarray,
+    fps: float,
+    treadmill_speed_ms: float | None = None,
+) -> dict:
+    """Wszystkie współczynniki temporalne w jednym dictie.
+
+    Args:
+        phases: sekwencja etykiet faz (LEFT_STANCE / RIGHT_STANCE / FLIGHT / DOUBLE_SUPPORT)
+        fps: częstotliwość klatek wideo
+        treadmill_speed_ms: prędkość bieżni [m/s]; jeśli podana, dodawany jest klucz
+            `stride_length`. Wymagany input od użytkownika — nie da się wyliczyć z samego wideo.
+    """
     cadence = compute_cadence(phases, fps)
     phase_durations = compute_phase_durations(phases, fps)
     cycle_time = compute_cycle_time(phases, fps)
     duty_factor = compute_duty_factor(phase_durations, cycle_time)
 
-    return {
+    result = {
         "fps": round(fps, 2),
         "n_frames": int(len(phases)),
         "cadence": cadence,
@@ -208,6 +247,11 @@ def compute_temporal_metrics(phases: np.ndarray, fps: float) -> dict:
         "cycle_time": cycle_time,
         "duty_factor": duty_factor,
     }
+
+    if treadmill_speed_ms is not None and treadmill_speed_ms > 0:
+        result["stride_length"] = compute_stride_length(cycle_time, treadmill_speed_ms)
+
+    return result
 
 
 def print_temporal_report(metrics: dict) -> None:
@@ -234,6 +278,12 @@ def print_temporal_report(metrics: dict) -> None:
     df = metrics["duty_factor"]
     log.info(f"Duty factor L:   {df['duty_factor_left']}")
     log.info(f"Duty factor R:   {df['duty_factor_right']}")
+
+    sl = metrics.get("stride_length")
+    if sl:
+        combined = sl["stride_combined"]
+        log.info(f"Stride length:   {combined['mean_m']:.2f} ± {combined['std_m']:.2f} m "
+                 f"(speed {sl['treadmill_speed_ms']:.2f} m/s, n={combined['n']})")
     log.info("=" * 60)
 
 
@@ -243,6 +293,8 @@ def main() -> int:
                         help="CSV z kolumnami frame, timestamp, phase_predicted (z run_inference.py)")
     parser.add_argument("--fps", type=float, default=None,
                         help="FPS wideo (default: estymacja z timestamp[1]-timestamp[0])")
+    parser.add_argument("--treadmill-speed-ms", type=float, default=None,
+                        help="Prędkość bieżni [m/s]; jeśli podane, doda klucz stride_length do JSON")
     parser.add_argument("--output-json", type=Path, default=None,
                         help="Zapisz metryki do JSON (opcjonalnie)")
     args = parser.parse_args()
@@ -263,7 +315,7 @@ def main() -> int:
         fps = args.fps
     log.info(f"FPS: {fps:.2f} (estymacja z timestamp)")
 
-    metrics = compute_temporal_metrics(phases, fps)
+    metrics = compute_temporal_metrics(phases, fps, treadmill_speed_ms=args.treadmill_speed_ms)
     print_temporal_report(metrics)
 
     if args.output_json is not None:

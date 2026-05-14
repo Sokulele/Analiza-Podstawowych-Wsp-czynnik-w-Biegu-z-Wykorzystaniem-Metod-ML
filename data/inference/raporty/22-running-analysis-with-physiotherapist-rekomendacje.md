@@ -5,7 +5,7 @@
 
 ## Podsumowanie
 
-- 🔴 Krytyczne: **0**  🟠 Ostrzeżenia: **3**  🟡 Do monitorowania: **5**  ℹ️ Informacje: **2**
+- 🔴 Krytyczne: **0**  🟠 Ostrzeżenia: **4**  🟡 Do monitorowania: **5**  ℹ️ Informacje: **1**
 - Łącznie reguł zwracających wynik: 10
 
 ## 🟠 Ostrzeżenie
@@ -38,6 +38,17 @@ Wskaźnik symetrii Robinsona (SI = 200·|L−R|/(L+R)) powyżej 10% literatura t
 **Pomiar**: GCT (czas kontaktu) SI=22.8%; duty factor SI=21.4%; kąt kolana w fazie stance SI=35.0%
 
 **Sugestia**: Jeżeli asymetria utrzymuje się na innych nagraniach, konsultacja z fizjoterapeutą.
+
+---
+
+### Foot strike: niska wiarygodność (perspektywa kamery)
+*Kategoria: **foot_strike** · Źródło: Walidacja wizualna 2026-05-14 (Sesja C)*
+
+Kąt stopy w momencie kontaktu wykracza poza fizjologiczny zakres (|kąt| > 45°). Najczęstsza przyczyna: ujęcie inne niż standardowe z boku (pionowe wideo, kamera pod kątem, asymetria perspektywy między nogami). Predykcja foot strike pattern jest dla tej strony niewiarygodna.
+
+**Pomiar**: Strony z niską wiarygodnością: lewa (mean=-97.0°), prawa (mean=-98.8°)
+
+**Sugestia**: Do oceny wzorca lądowania użyj nagrania z boku (landscape, kamera na wysokości bieżni, prostopadle do toru biegu).
 
 ---
 
@@ -98,15 +109,6 @@ Wskaźnik symetrii Robinsona 5–10% to wartość 'do monitorowania' — drobne 
 Pochylenie tułowia w zakresie 5–15° to optymalne wykorzystanie grawitacji w biegu.
 
 **Pomiar**: pochylenie: 9.9°
-
----
-
-### Spójny wzorzec lądowania (forefoot strike)
-*Kategoria: **foot_strike** · Źródło: Daoud et al. 2012*
-
-Obie stopy lądują tym samym wzorcem (forefoot strike). Literatura nie wskazuje jednoznacznie 'najlepszego' wzorca foot strike u dorosłych biegaczy — istotniejsza jest stabilność wzorca i brak overstridingu.
-
-**Pomiar**: L=P=forefoot strike
 
 ---
 

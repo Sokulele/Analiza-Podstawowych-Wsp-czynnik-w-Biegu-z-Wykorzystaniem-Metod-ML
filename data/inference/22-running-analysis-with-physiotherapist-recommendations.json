@@ -31,6 +31,16 @@
       "suggestion": "Jeżeli asymetria utrzymuje się na innych nagraniach, konsultacja z fizjoterapeutą."
     },
     {
+      "rule_id": "foot_strike_low_confidence",
+      "severity": "warning",
+      "category": "foot_strike",
+      "title": "Foot strike: niska wiarygodność (perspektywa kamery)",
+      "message": "Kąt stopy w momencie kontaktu wykracza poza fizjologiczny zakres (|kąt| > 45°). Najczęstsza przyczyna: ujęcie inne niż standardowe z boku (pionowe wideo, kamera pod kątem, asymetria perspektywy między nogami). Predykcja foot strike pattern jest dla tej strony niewiarygodna.",
+      "citation": "Walidacja wizualna 2026-05-14 (Sesja C)",
+      "detail": "Strony z niską wiarygodnością: lewa (mean=-97.0°), prawa (mean=-98.8°)",
+      "suggestion": "Do oceny wzorca lądowania użyj nagrania z boku (landscape, kamera na wysokości bieżni, prostopadle do toru biegu)."
+    },
+    {
       "rule_id": "cadence_recreational",
       "severity": "watch",
       "category": "kadencja",
@@ -89,23 +99,13 @@
       "citation": "Novacheck 1998",
       "detail": "pochylenie: 9.9°",
       "suggestion": ""
-    },
-    {
-      "rule_id": "foot_strike_consistent",
-      "severity": "info",
-      "category": "foot_strike",
-      "title": "Spójny wzorzec lądowania (forefoot strike)",
-      "message": "Obie stopy lądują tym samym wzorcem (forefoot strike). Literatura nie wskazuje jednoznacznie 'najlepszego' wzorca foot strike u dorosłych biegaczy — istotniejsza jest stabilność wzorca i brak overstridingu.",
-      "citation": "Daoud et al. 2012",
-      "detail": "L=P=forefoot strike",
-      "suggestion": ""
     }
   ],
   "summary": {
     "total": 10,
     "critical": 0,
-    "warning": 3,
+    "warning": 4,
     "watch": 5,
-    "info": 2
+    "info": 1
   }
 }

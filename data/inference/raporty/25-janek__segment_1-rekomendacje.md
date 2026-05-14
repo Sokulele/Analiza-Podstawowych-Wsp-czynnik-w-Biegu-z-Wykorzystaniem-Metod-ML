@@ -5,10 +5,21 @@
 
 ## Podsumowanie
 
-- 🔴 Krytyczne: **2**  🟠 Ostrzeżenia: **3**  🟡 Do monitorowania: **3**  ℹ️ Informacje: **2**
-- Łącznie reguł zwracających wynik: 10
+- 🔴 Krytyczne: **3**  🟠 Ostrzeżenia: **3**  🟡 Do monitorowania: **3**  ℹ️ Informacje: **2**
+- Łącznie reguł zwracających wynik: 11
 
 ## 🔴 Krytyczne
+
+### Wiele sygnałów niskiej jakości predykcji (combinatorical)
+*Kategoria: **jakość_predykcji** · Źródło: (walidacja wewnętrzna — Janek edge case, 2026-05-12)*
+
+Bardzo wysoka asymetria (max SI = 60.0%) **w połączeniu** z niepewnością predykcji (avg_conf = 0.88) silnie sugeruje, że model myli granice STANCE per noga w części cykli — nawet jeśli liczby kroków L/R są zbalansowane. Współczynniki L/P (GCT L vs R, duty factor L/R, symetria) są w tej sytuacji niewiarygodne.
+
+**Pomiar**: max SI = 60.0%, avg_conf = 0.882, steps_SI = 1.0%
+
+**Sugestia**: Nagraj kolejne ujęcie z lepszym kadrem (cała sylwetka, brak okluzji bioder/stóp). Współczynniki agregaty (kadencja, GCT średni) pozostają wiarygodne, ale interpretacja L vs P jest podejrzana.
+
+---
 
 ### Kadencja bardzo niska
 *Kategoria: **kadencja** · Źródło: Heiderscheit et al. 2011; Novacheck 1998*

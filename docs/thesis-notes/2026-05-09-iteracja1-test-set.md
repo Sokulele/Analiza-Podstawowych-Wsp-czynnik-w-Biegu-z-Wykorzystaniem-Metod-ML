@@ -135,6 +135,25 @@ Z poprzedniej notatki (6 punktów) + nowe z iteracji 1:
 7. **Film 02 specyficzny** — model myli L↔R (54.5% acc), współczynniki niesensowne. Wymagana detekcja "low quality predictions" przed pokazaniem raportu użytkownikowi
 8. **Filmy mixed-tempo (20)** wymagają detekcji stabilnych segmentów. Globalna średnia jest meaningless dla walk→run
 9. **Foot strike kąty ekstremalne** (−46° dla 02 PRAWA, −58° dla 22 LEWA) — wzorzec się powtarza, prawdopodobnie systematyczny błąd metody (klatka entry-into-stance vs faktyczny moment kontaktu)
+   - **Po dalszej pracy (Sesja C, 2026-05-14)**: hipoteza "systematyczny błąd metody" **odwołana**.
+     Walidacja wizualna 18 klatek entry-into-STANCE (3 biegaczy × 3 klatki × 2 nogi) pokazała,
+     że kąt foot strike jest **wrażliwy na perspektywę kamery**, nie systematycznie zafałszowany:
+     - Janek (standardowe ujęcie z boku, landscape) → kąty −12° do +5° **zgadzają się
+       wizualnie** z midfoot strike ✓
+     - Adam (ujęcie z boku, ale lekko od dołu) → prawa noga OK (−12°), lewa przesadzona
+       perspektywą (−33° do −56°) — **artefakt asymetrii kamery**, nie biomechaniki
+     - Film 22 (pionowe wideo z fizjoterapii) → kąty −82° do −160° = **bzdura geometryczna**
+       (|kąt|>90° oznacza wektor heel→foot_index "w tył", niemożliwe fizjologicznie)
+   - **Wniosek**: foot strike pattern jest wiarygodny **wyłącznie przy standardowym ujęciu
+     z boku** (landscape, kamera na wysokości bieżni, prostopadle do toru biegu).
+   - **Mitygant w kodzie**: `compute_foot_strike_pattern` dodaje flagę `low_confidence: True`
+     gdy `|mean_angle| > 45°`. Reguła `foot_strike_low_confidence` (warning) ostrzega
+     użytkownika i blokuje reguły semantyczne (`consistent`/`inconsistent`), bo bazują
+     na klasyfikacji która przy tych kątach jest artefaktem perspektywy.
+   - **Limitation pozostaje** w nowej formie: "foot strike angle jest wrażliwy na
+     perspektywę kamery — wiarygodny przy standardowym ujęciu z boku, zawodny przy
+     pionowym lub ukośnym ujęciu. Przy nietypowym ujęciu system ostrzega, ale nie
+     produkuje wartościowych wskazań co do wzorca lądowania."
 10. **Reference values mają charakter ogólny** (literatura na biegaczy zdrowych) — indywidualne progi mogą się różnić
 
 ### Sekcja Future Work

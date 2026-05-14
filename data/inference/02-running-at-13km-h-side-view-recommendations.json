@@ -1,0 +1,161 @@
+{
+  "recommendations": [
+    {
+      "rule_id": "quality_low_confidence",
+      "severity": "critical",
+      "category": "jakość_predykcji",
+      "title": "Niska pewność predykcji modelu",
+      "message": "Średnia pewność predykcji LSTM (0.80) jest poniżej progu 0.85, który koreluje z bezsensownymi współczynnikami w naszych testach. Rekomendacje poniżej traktuj ostrożnie.",
+      "citation": "(walidacja wewnętrzna — Iteracja 1)",
+      "detail": "avg_confidence = 0.795",
+      "suggestion": "Nagraj kolejne ujęcie z lepszym oświetleniem / kadrem (cała sylwetka, brak zasłonięć)."
+    },
+    {
+      "rule_id": "quality_steps_asymmetry",
+      "severity": "critical",
+      "category": "jakość_predykcji",
+      "title": "Model myli kontakty L/P (steps asymmetry > 20%)",
+      "message": "Wykryto 14 kontaktów lewej stopy i 10 prawej. To >20% asymetria liczby kroków, która zwykle oznacza, że klasyfikator faz myli LEFT_STANCE z RIGHT_STANCE w części cykli. Współczynniki opierające się na podziale L/P (GCT L vs R, symetria) są w tej sytuacji niewiarygodne.",
+      "citation": "(walidacja wewnętrzna — Iteracja 1, film 02)",
+      "detail": "L=14, R=10 (SI_steps=33.3%)",
+      "suggestion": "Sprawdź jakość detekcji MediaPipe w tym ujęciu. Jeżeli sylwetka jest w pełni widoczna, może to być limitacja modelu dla tego konkretnego biegacza."
+    },
+    {
+      "rule_id": "quality_combo_high_si_low_conf",
+      "severity": "critical",
+      "category": "jakość_predykcji",
+      "title": "Wiele sygnałów niskiej jakości predykcji (combinatorical)",
+      "message": "Bardzo wysoka asymetria (max SI = 96.5%) **w połączeniu** z niepewnością predykcji (avg_conf = 0.80) silnie sugeruje, że model myli granice STANCE per noga w części cykli — nawet jeśli liczby kroków L/R są zbalansowane. Współczynniki L/P (GCT L vs R, duty factor L/R, symetria) są w tej sytuacji niewiarygodne.",
+      "citation": "(walidacja wewnętrzna — Janek edge case, 2026-05-12)",
+      "detail": "max SI = 96.5%, avg_conf = 0.795, steps_SI = 33.3%",
+      "suggestion": "Nagraj kolejne ujęcie z lepszym kadrem (cała sylwetka, brak okluzji bioder/stóp). Współczynniki agregaty (kadencja, GCT średni) pozostają wiarygodne, ale interpretacja L vs P jest podejrzana."
+    },
+    {
+      "rule_id": "cadence_very_low",
+      "severity": "critical",
+      "category": "kadencja",
+      "title": "Kadencja bardzo niska",
+      "message": "Kadencja poniżej 150 spm odbiega od typowego zakresu biegu (150–185 spm). Może oznaczać overstriding lub przejście w chód. Sprawdź, czy materiał wideo rzeczywiście pokazuje bieg ciągły.",
+      "citation": "Heiderscheit et al. 2011; Novacheck 1998",
+      "detail": "kadencja zmierzona: 144 spm, cel: 170–180 spm",
+      "suggestion": "Skróć krok i zwiększ częstość kontaktów (~+15–20 spm), tak aby zbliżyć się do 170 spm."
+    },
+    {
+      "rule_id": "quality_max_si_high",
+      "severity": "warning",
+      "category": "jakość_predykcji",
+      "title": "Bardzo wysoka maksymalna asymetria",
+      "message": "Max Symmetry Index = 96.5% (próg 'potencjalnego problemu' to 10%). W połączeniu z niską confidence lub asymetrią kroków, prawdopodobnie artefakt predykcji, nie biegacza.",
+      "citation": "Robinson et al. 1987",
+      "detail": "max SI = 96.5%",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "overstride_long_stride_combo",
+      "severity": "warning",
+      "category": "stride_length",
+      "title": "Overstride: długi krok + niska kadencja",
+      "message": "Stride > 2.2 m przy kadencji < 160 spm to wyraźny wzorzec overstridingu — stopa ląduje znacznie przed środkiem ciężkości, co generuje duże siły hamowania w kolanie i biodrze. Krótszy krok z wyższą kadencją zwykle wystarczy do korekcji.",
+      "citation": "Heiderscheit et al. 2011",
+      "detail": "stride 2.83 m, kadencja 144 spm",
+      "suggestion": "Zwiększ kadencję o 5–10% — automatycznie skróci stride przy tej samej prędkości bieżni."
+    },
+    {
+      "rule_id": "symmetry_significant",
+      "severity": "warning",
+      "category": "symetria",
+      "title": "Asymetria L/P powyżej 10% — rozważ konsultację",
+      "message": "Wskaźnik symetrii Robinsona (SI = 200·|L−R|/(L+R)) powyżej 10% literatura traktuje jako sygnał potencjalnego dysbalansu mięśniowego lub kompensacji po przebytej kontuzji. UWAGA: część asymetrii w danych monocularnych 2D może być artefaktem perspektywy (strona bliżej kamery wydaje się ruszać 'większą amplitudą').",
+      "citation": "Robinson et al. 1987; Souza 2016",
+      "detail": "GCT (czas kontaktu) SI=62.0%; czas cyklu SI=40.6%; duty factor SI=96.5%; kąt kolana w fazie stance SI=26.6%; kąt kostki w fazie stance SI=10.8%",
+      "suggestion": "Jeżeli asymetria utrzymuje się na innych nagraniach, konsultacja z fizjoterapeutą."
+    },
+    {
+      "rule_id": "foot_strike_inconsistent",
+      "severity": "warning",
+      "category": "foot_strike",
+      "title": "Różne wzorce lądowania L/P: midfoot strike vs forefoot strike",
+      "message": "Lewa stopa ląduje wzorcem 'midfoot strike', prawa wzorcem 'forefoot strike'. Różny wzorzec L/P sugeruje kompensację (np. po dawnej kontuzji), choć może też być artefaktem aspect ratio lub szumu keypointów stóp w MediaPipe.",
+      "citation": "Daoud et al. 2012; Souza 2016",
+      "detail": "L: midfoot strike, P: forefoot strike",
+      "suggestion": "Sprawdź wzrokowo kilka klatek initial contact. Jeśli wzorzec rzeczywisty, warto skonsultować ze specjalistą."
+    },
+    {
+      "rule_id": "gct_prawa_very_short",
+      "severity": "watch",
+      "category": "GCT",
+      "title": "GCT prawa: nietypowo krótki",
+      "message": "GCT prawa < 150 ms typowy dla sprinterów elity. Dla biegu rekreacyjnego to wartość poza typowym zakresem — może być artefaktem predykcji fazy (model może mylić L/R lub fragmentaryzować STANCE).",
+      "citation": "Souza 2016",
+      "detail": "GCT prawa: 130 ms",
+      "suggestion": "Zweryfikuj wzrokowo kilka cykli na materiale wideo."
+    },
+    {
+      "rule_id": "duty_prawa_sprint",
+      "severity": "watch",
+      "category": "duty_factor",
+      "title": "Duty factor prawa: bardzo niski",
+      "message": "DF prawa < 0.22 typowy dla sprintów na pełnej prędkości. Dla biegu rekreacyjnego to wartość poza typowym zakresem — może być artefaktem predykcji.",
+      "citation": "Souza 2016",
+      "detail": "DF prawa: 0.132",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "stride_long",
+      "severity": "watch",
+      "category": "stride_length",
+      "title": "Długi krok (stride 2.4–3.0 m)",
+      "message": "Stride 2.4–3.0 m typowy dla szybkiego biegu. Jeżeli kadencja jest niska, to może być sygnał overstridingu — patrz reguła łączona poniżej.",
+      "citation": "Heiderscheit et al. 2011; Novacheck 1998",
+      "detail": "stride: 2.83 m",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "knee_lewa_sitting",
+      "severity": "watch",
+      "category": "kolano@kontakt",
+      "title": "Kolano lewa przy kontakcie: zbyt ugięte ('siedzący' bieg)",
+      "message": "Kąt kolana < 155° przy kontakcie wskazuje na 'siedzący' wzorzec biegu — więcej pracy mięśni przy każdym kroku, mniejsze wykorzystanie energii elastycznej ścięgien. UWAGA: bardzo niskie wartości (<100°) zwykle oznaczają błąd predykcji klatki kontaktu.",
+      "citation": "Novacheck 1998",
+      "detail": "kąt kolana lewa: 149.8°",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "knee_prawa_sitting",
+      "severity": "watch",
+      "category": "kolano@kontakt",
+      "title": "Kolano prawa przy kontakcie: zbyt ugięte ('siedzący' bieg)",
+      "message": "Kąt kolana < 155° przy kontakcie wskazuje na 'siedzący' wzorzec biegu — więcej pracy mięśni przy każdym kroku, mniejsze wykorzystanie energii elastycznej ścięgien. UWAGA: bardzo niskie wartości (<100°) zwykle oznaczają błąd predykcji klatki kontaktu.",
+      "citation": "Novacheck 1998",
+      "detail": "kąt kolana prawa: 100.7°",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "vert_osc_recreational",
+      "severity": "watch",
+      "category": "vert_osc",
+      "title": "Oscylacja pionowa — poziom rekreacyjny",
+      "message": "Oscylacja w zakresie 0.16–0.24 torso (≈ 8–12 cm) jest typowa dla rekreacyjnych biegaczy. Stopniowe obniżenie poprawi ekonomię biegu.",
+      "citation": "Diaz et al. 2019",
+      "detail": "vert osc / torso: 0.170",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "torso_optimal",
+      "severity": "info",
+      "category": "tułów",
+      "title": "Pochylenie tułowia prawidłowe",
+      "message": "Pochylenie tułowia w zakresie 5–15° to optymalne wykorzystanie grawitacji w biegu.",
+      "citation": "Novacheck 1998",
+      "detail": "pochylenie: 5.7°",
+      "suggestion": ""
+    }
+  ],
+  "summary": {
+    "total": 15,
+    "critical": 4,
+    "warning": 4,
+    "watch": 6,
+    "info": 1
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "recommendations": [
+    {
+      "rule_id": "torso_too_vertical",
+      "severity": "warning",
+      "category": "tułów",
+      "title": "Tułów zbyt pionowy",
+      "message": "Pochylenie tułowia < 5° (lub ujemne) oznacza brak wykorzystania grawitacji do napędu. Lekkie pochylenie z kostek (5–15°) wykorzystuje siłę ciężkości i obniża obciążenie nóg. UWAGA: wartość ta bywa zaniżona przez ograniczenia MediaPipe 2D — zweryfikuj wzrokowo.",
+      "citation": "Novacheck 1998",
+      "detail": "pochylenie tułowia: 2.3° (cel: 5–15°)",
+      "suggestion": "Ćwicz pochylenie 'z kostek, nie z bioder' (forward lean from ankles)."
+    },
+    {
+      "rule_id": "symmetry_significant",
+      "severity": "warning",
+      "category": "symetria",
+      "title": "Asymetria L/P powyżej 10% — rozważ konsultację",
+      "message": "Wskaźnik symetrii Robinsona (SI = 200·|L−R|/(L+R)) powyżej 10% literatura traktuje jako sygnał potencjalnego dysbalansu mięśniowego lub kompensacji po przebytej kontuzji. UWAGA: część asymetrii w danych monocularnych 2D może być artefaktem perspektywy (strona bliżej kamery wydaje się ruszać 'większą amplitudą').",
+      "citation": "Robinson et al. 1987; Souza 2016",
+      "detail": "GCT (czas kontaktu) SI=18.7%; duty factor SI=18.7%",
+      "suggestion": "Jeżeli asymetria utrzymuje się na innych nagraniach, konsultacja z fizjoterapeutą."
+    },
+    {
+      "rule_id": "symmetry_mild",
+      "severity": "watch",
+      "category": "symetria",
+      "title": "Łagodna asymetria L/P (5–10%)",
+      "message": "Wskaźnik symetrii Robinsona 5–10% to wartość 'do monitorowania' — drobne różnice między nogami są powszechne u rekreacyjnych biegaczy, ale warto obserwować trend w czasie.",
+      "citation": "Robinson et al. 1987",
+      "detail": "kąt kostki w fazie stance SI=5.6%",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "cadence_optimal",
+      "severity": "info",
+      "category": "kadencja",
+      "title": "Kadencja w zalecanym zakresie",
+      "message": "Kadencja mieści się w zakresie zalecanym dla zaawansowanych biegaczy (170–185 spm).",
+      "citation": "Heiderscheit et al. 2011",
+      "detail": "kadencja: 173 spm",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "knee_lewa_optimal",
+      "severity": "info",
+      "category": "kolano@kontakt",
+      "title": "Kolano lewa przy kontakcie: prawidłowe",
+      "message": "Kąt kolana 160–175° w momencie kontaktu to optymalny zakres — lekko ugięte kolano absorbuje siłę uderzenia.",
+      "citation": "Heiderscheit et al. 2011",
+      "detail": "kąt kolana lewa: 161.8°",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "knee_prawa_optimal",
+      "severity": "info",
+      "category": "kolano@kontakt",
+      "title": "Kolano prawa przy kontakcie: prawidłowe",
+      "message": "Kąt kolana 160–175° w momencie kontaktu to optymalny zakres — lekko ugięte kolano absorbuje siłę uderzenia.",
+      "citation": "Heiderscheit et al. 2011",
+      "detail": "kąt kolana prawa: 162.0°",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "vert_osc_good",
+      "severity": "info",
+      "category": "vert_osc",
+      "title": "Oscylacja pionowa: ekonomiczny zakres",
+      "message": "Oscylacja 0.12–0.16 torso (≈ 6–8 cm) to wartość typowa dla dobrych biegaczy.",
+      "citation": "Diaz et al. 2019",
+      "detail": "vert osc / torso: 0.140",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "foot_strike_consistent",
+      "severity": "info",
+      "category": "foot_strike",
+      "title": "Spójny wzorzec lądowania (forefoot strike)",
+      "message": "Obie stopy lądują tym samym wzorcem (forefoot strike). Literatura nie wskazuje jednoznacznie 'najlepszego' wzorca foot strike u dorosłych biegaczy — istotniejsza jest stabilność wzorca i brak overstridingu.",
+      "citation": "Daoud et al. 2012",
+      "detail": "L=P=forefoot strike",
+      "suggestion": ""
+    }
+  ],
+  "summary": {
+    "total": 8,
+    "critical": 0,
+    "warning": 2,
+    "watch": 1,
+    "info": 5
+  }
+}

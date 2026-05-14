@@ -1,0 +1,14 @@
+{
+  "title": "24 - Adam bieg__segment_1",
+  "video": "24 - Adam bieg__segment_1.mov",
+  "fps": 29.99,
+  "n_frames": 2399,
+  "duration_s": 80.0,
+  "width": 1920,
+  "height": 1080,
+  "model_dir": "models\\lstm_run1_overfit",
+  "model_test_acc": 0.709,
+  "avg_confidence": 0.909,
+  "inference_time_s": 210.9,
+  "generated": "2026-05-13 08:51:39"
+}

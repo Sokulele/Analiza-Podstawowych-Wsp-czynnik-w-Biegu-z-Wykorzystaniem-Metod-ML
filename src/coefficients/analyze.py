@@ -38,8 +38,10 @@ import pandas as pd
 
 _HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(_HERE))
+sys.path.insert(0, str(_HERE.parent / "recommendations"))
 
 from report_generator import generate_report  # noqa: E402
+from rules import generate_recommendations, render_markdown  # noqa: E402
 from run_inference import extract_keypoints_from_video, predict_phases  # noqa: E402
 from spatial_metrics import compute_spatial_metrics  # noqa: E402
 from symmetry import compute_symmetry  # noqa: E402
@@ -69,6 +71,8 @@ def analyze_video(
     model_dir: Path = Path("models/lstm_run1_overfit"),
     skip_inference: bool = False,
     model_complexity: int = 2,
+    with_recommendations: bool = True,
+    treadmill_speed_ms: float | None = None,
 ) -> dict:
     """Pełna analiza wideo. Zwraca dict z ścieżkami wszystkich artefaktów."""
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -82,6 +86,8 @@ def analyze_video(
     symmetry_json = output_dir / f"{slug}-symmetry.json"
     meta_json = output_dir / f"{slug}-meta.json"
     report_md = raporty_dir / f"{slug}.md"
+    recommendations_json = output_dir / f"{slug}-recommendations.json"
+    recommendations_md = raporty_dir / f"{slug}-rekomendacje.md"
 
     # 1. Inferencja (lub reuse)
     if skip_inference and phases_csv.exists():
@@ -91,16 +97,26 @@ def analyze_video(
         if meta_json.exists():
             meta = json.loads(meta_json.read_text(encoding="utf-8"))
         else:
-            # Estymacja FPS z timestampu
+            # Estymacja FPS z timestampu; ratujemy też avg_confidence jeśli jest w CSV
             dt = df_phases["timestamp"].iloc[1] - df_phases["timestamp"].iloc[0]
             fps = 1.0 / dt if dt > 0 else 30.0
+            avg_conf = None
+            if "confidence" in df_phases.columns:
+                conf_arr = df_phases["confidence"].to_numpy()
+                if (conf_arr > 0).any():
+                    avg_conf = round(float(conf_arr[conf_arr > 0].mean()), 3)
             meta = {
+                "title": video_path.stem,
                 "video": video_path.name,
                 "fps": round(fps, 2),
                 "n_frames": len(df_phases),
                 "duration_s": round(len(df_phases) / fps, 2),
                 "model_dir": str(model_dir),
+                "avg_confidence": avg_conf,
+                "reconstructed_from_csv": True,
             }
+            meta_json.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
+            log.info(f"Odtworzono meta.json z CSV: {meta_json}")
     else:
         log.info("=" * 60)
         log.info(f"Inferencja: {video_path}")
@@ -154,7 +170,11 @@ def analyze_video(
     log.info("Obliczam temporal metrics...")
     fps = float(meta.get("fps", 30.0))
     phases_arr = df_phases["phase_predicted"].to_numpy()
-    temporal = compute_temporal_metrics(phases_arr, fps)
+    if treadmill_speed_ms is not None:
+        log.info(f"Stride length z prędkością bieżni {treadmill_speed_ms:.2f} m/s")
+        meta["treadmill_speed_ms"] = round(float(treadmill_speed_ms), 3)
+        meta_json.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
+    temporal = compute_temporal_metrics(phases_arr, fps, treadmill_speed_ms=treadmill_speed_ms)
     temporal_json.write_text(json.dumps(temporal, indent=2, ensure_ascii=False), encoding="utf-8")
 
     # 3. Spatial — wymaga keypointów w df
@@ -175,7 +195,7 @@ def analyze_video(
     report_md.write_text(report, encoding="utf-8")
     log.info(f"✅ Raport: {report_md}")
 
-    return {
+    paths: dict = {
         "video": str(video_path),
         "phases_csv": str(phases_csv),
         "temporal_json": str(temporal_json),
@@ -184,6 +204,26 @@ def analyze_video(
         "meta_json": str(meta_json),
         "report_md": str(report_md),
     }
+
+    # 6. Rekomendacje (Etap 7)
+    if with_recommendations:
+        log.info("Generuję rekomendacje...")
+        rec_result = generate_recommendations(meta, temporal, spatial, symmetry)
+        recommendations_json.write_text(
+            json.dumps(rec_result, indent=2, ensure_ascii=False), encoding="utf-8",
+        )
+        recommendations_md.write_text(render_markdown(rec_result, meta), encoding="utf-8")
+        s = rec_result["summary"]
+        log.info(
+            f"✅ Rekomendacje: 🔴{s['critical']} 🟠{s['warning']} 🟡{s['watch']} ℹ️{s['info']} "
+            f"(łącznie {s['total']})"
+        )
+        log.info(f"   JSON: {recommendations_json}")
+        log.info(f"   MD:   {recommendations_md}")
+        paths["recommendations_json"] = str(recommendations_json)
+        paths["recommendations_md"] = str(recommendations_md)
+
+    return paths
 
 
 def main() -> int:
@@ -194,11 +234,17 @@ def main() -> int:
     parser.add_argument("--skip-inference", action="store_true",
                         help="Reuse istniejące phases CSV (skip MediaPipe + LSTM)")
     parser.add_argument("--model-complexity", type=int, default=2)
+    parser.add_argument("--no-recommendations", action="store_true",
+                        help="Pomiń krok 6 — generowanie rekomendacji Etapu 7")
+    parser.add_argument("--treadmill-speed-ms", type=float, default=None,
+                        help="Prędkość bieżni [m/s]; jeśli podana, oblicza stride length")
     args = parser.parse_args()
 
     paths = analyze_video(
         args.video, args.output_dir, args.model_dir,
         skip_inference=args.skip_inference, model_complexity=args.model_complexity,
+        with_recommendations=not args.no_recommendations,
+        treadmill_speed_ms=args.treadmill_speed_ms,
     )
     log.info("=" * 60)
     log.info("Artefakty:")

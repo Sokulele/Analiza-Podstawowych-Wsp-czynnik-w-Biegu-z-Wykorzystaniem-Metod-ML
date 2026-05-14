@@ -1,5 +1,9 @@
 # Notatki do pracy magisterskiej
 
+**Tytuł pracy (FINALNY)**: *Analiza podstawowych współczynników biegu przy pomocy uczenia maszynowego*
+
+**Aktualna wytyczna do pisania**: [2026-05-14 — Temat pracy (FINALNY) + struktura 8 rozdziałów (~60 stron)](2026-05-14-temat-pracy-finalny.md)
+
 Folder na myśli, obserwacje i surowe fragmenty, które będą materiałem źródłowym do pisania pracy.
 
 **Konwencja**: jeden plik = jedno zagadnienie / jedna sesja eksperymentów. Nazwa: `YYYY-MM-DD-temat.md`.
@@ -16,6 +20,14 @@ Folder na myśli, obserwacje i surowe fragmenty, które będą materiałem źró
 - [2026-05-09 — Etap 6 MVP: pipeline obliczania współczynników biegu](2026-05-09-coefficients-mvp.md)
 - [2026-05-09 — Iteracja 1: pipeline na test set + raporty z porównaniem do referencji](2026-05-09-iteracja1-test-set.md)
 - [2026-05-12 — Etap 7: moduł rekomendacji biegowych (reguły z literatury)](2026-05-12-etap7-rekomendacje.md)
+- [2026-05-13 — Integracja Etapu 7 z `analyze.py` (Sesja A — pipeline E2E)](2026-05-13-integracja-etap7-analyze.md)
+- [2026-05-13 — Sesja B (część 1): stride length + combinatorical low-quality detection](2026-05-13-sesja-b-stride-combinatorical.md)
+- [2026-05-14 — Sesja C: walidacja foot strike pattern (rewizja limitation #9)](2026-05-14-sesja-c-foot-strike-walidacja.md)
+- [2026-05-14 — Research podobnych prac naukowych: jak formułują problem badawczy](2026-05-14-research-podobnych-prac.md)
+- [2026-05-14 — Problem badawczy pracy magisterskiej (Propozycja A — historyczna, ML-centric)](2026-05-14-problem-badawczy-propozycja-a.md)
+- [2026-05-14 — **Temat pracy (FINALNY)** + struktura 8 rozdziałów (~60 stron)](2026-05-14-temat-pracy-finalny.md)
+- [2026-05-14 — Wyjaśnienia pojęć i decyzji projektowych do pisania pracy (rosnący dokument)](2026-05-14-wyjasnienia-pojec-do-pisania.md)
+- [2026-05-14 — Setup LaTeX dla pracy + 7 technik optymalizacji kosztów Claude](2026-05-14-setup-latex-i-koszty.md)
 
 ## Folder `figures/`
 

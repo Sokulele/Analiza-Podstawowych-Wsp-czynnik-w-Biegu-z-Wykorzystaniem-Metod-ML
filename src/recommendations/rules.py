@@ -48,6 +48,12 @@ _SEVERITY_EMOJI: dict[str, str] = {
     "watch": "🟡",
     "info": "ℹ️",
 }
+_SEVERITY_LABEL_PL: dict[str, str] = {
+    "critical": "Krytyczne",
+    "warning": "Ostrzeżenie",
+    "watch": "Do monitorowania",
+    "info": "Informacja",
+}
 
 
 @dataclass
@@ -573,7 +579,46 @@ def check_foot_strike(spatial: dict, symmetry: dict) -> list[Recommendation]:
     jest spójność L/P i brak overstridingu (już sprawdzonego w check_knee_at_contact).
     """
     out: list[Recommendation] = []
+    fs_spatial = spatial.get("foot_strike", {})
     fs_sym = symmetry.get("foot_strike", {})
+
+    # Detekcja low_confidence: flaga z compute_foot_strike_pattern (nowe spatial.json)
+    # lub fallback po |mean|>45° (legacy spatial.json sprzed Sesji C).
+    # Próg 45° kalibrowany na podstawie walidacji wizualnej 2026-05-14 (Sesja C):
+    # Janek (poprawne ujęcie z boku) ma |kąt|<12°, Adam (jedna noga z asymetrii perspektywy)
+    # 33-56°, 22 (pionowe wideo) 81-160°. Próg 45° oddziela "OK z marginesem" od "artefakt".
+    low_conf_sides: list[str] = []
+    for side_key, side_label in (("left_foot", "lewa"), ("right_foot", "prawa")):
+        side_data = fs_spatial.get(side_key, {})
+        flag = side_data.get("low_confidence")
+        if flag is None:
+            mean = side_data.get("contact_angle_deg", {}).get("mean")
+            flag = mean is not None and abs(mean) > 45.0
+        if flag:
+            mean = side_data.get("contact_angle_deg", {}).get("mean")
+            low_conf_sides.append(f"{side_label} (mean={mean:+.1f}°)")
+
+    if low_conf_sides:
+        out.append(Recommendation(
+            rule_id="foot_strike_low_confidence",
+            severity="warning",
+            category="foot_strike",
+            title="Foot strike: niska wiarygodność (perspektywa kamery)",
+            message=(
+                "Kąt stopy w momencie kontaktu wykracza poza fizjologiczny zakres "
+                "(|kąt| > 45°). Najczęstsza przyczyna: ujęcie inne niż standardowe z boku "
+                "(pionowe wideo, kamera pod kątem, asymetria perspektywy między nogami). "
+                "Predykcja foot strike pattern jest dla tej strony niewiarygodna."
+            ),
+            citation="Walidacja wizualna 2026-05-14 (Sesja C)",
+            detail="Strony z niską wiarygodnością: " + ", ".join(low_conf_sides),
+            suggestion="Do oceny wzorca lądowania użyj nagrania z boku (landscape, "
+                       "kamera na wysokości bieżni, prostopadle do toru biegu).",
+        ))
+        # Nie odpalamy reguł semantycznych poniżej — opierają się na klasyfikacji,
+        # która przy |kąt|>45° jest artefaktem perspektywy, nie biomechaniki.
+        return out
+
     if not fs_sym:
         return out
 
@@ -617,10 +662,13 @@ def check_foot_strike(spatial: dict, symmetry: dict) -> list[Recommendation]:
 def check_data_quality(meta: dict, temporal: dict, symmetry: dict) -> list[Recommendation]:
     """Reguły walidacji jakości predykcji — wstawiane jako pierwsze ostrzeżenia.
 
-    Trzy proxy 'low quality predictions' (z notatki 2026-05-09-iteracja1-test-set.md):
-    - avg_confidence < 0.85
+    Cztery proxy 'low quality predictions':
+    - avg_confidence < 0.85 (z notatki 2026-05-09-iteracja1-test-set.md)
     - asymetria liczby kroków L/R > 20%
     - max SI > 30%
+    - **combinatorical (z edge case Janka, 2026-05-12)**: max_SI > 50% AND avg_conf < 0.90 →
+      critical. Pojedyncze proxy zawiodły dla Janka (conf 0.882 > 0.85, steps 98/99 zbalansowane),
+      ale GCT/DF asymetria 60% była ewidentnym błędem predykcji granicy STANCE per noga.
     """
     out: list[Recommendation] = []
 
@@ -647,6 +695,7 @@ def check_data_quality(meta: dict, temporal: dict, symmetry: dict) -> list[Recom
         ))
 
     # L/R steps asymmetry > 20%
+    steps_si = None
     if n_left is not None and n_right is not None and (n_left + n_right) > 0:
         steps_si = 200 * abs(n_left - n_right) / (n_left + n_right)
         if steps_si > 20:
@@ -679,6 +728,144 @@ def check_data_quality(meta: dict, temporal: dict, symmetry: dict) -> list[Recom
             ),
             citation="Robinson et al. 1987",
             detail=f"max SI = {max_si:.1f}%",
+        ))
+
+    # Combinatorical low-quality check — edge case Janka (2026-05-12)
+    # Pojedyncze proxy zawiodły: conf 0.882 (>0.85), steps 98/99 balanced (steps_SI ~1%),
+    # ale max_SI 60% był ewidentnym błędem. Łączny warunek wychwytuje "ciche" błędy.
+    if avg_conf is not None and max_si is not None and max_si > 50 and avg_conf < 0.90:
+        out.append(Recommendation(
+            rule_id="quality_combo_high_si_low_conf",
+            severity="critical",
+            category="jakość_predykcji",
+            title="Wiele sygnałów niskiej jakości predykcji (combinatorical)",
+            message=(
+                f"Bardzo wysoka asymetria (max SI = {max_si:.1f}%) **w połączeniu** z niepewnością "
+                f"predykcji (avg_conf = {avg_conf:.2f}) silnie sugeruje, że model myli granice STANCE "
+                "per noga w części cykli — nawet jeśli liczby kroków L/R są zbalansowane. Współczynniki "
+                "L/P (GCT L vs R, duty factor L/R, symetria) są w tej sytuacji niewiarygodne."
+            ),
+            citation="(walidacja wewnętrzna — Janek edge case, 2026-05-12)",
+            detail=f"max SI = {max_si:.1f}%, avg_conf = {avg_conf:.3f}"
+                   + (f", steps_SI = {steps_si:.1f}%" if steps_si is not None else ""),
+            suggestion="Nagraj kolejne ujęcie z lepszym kadrem (cała sylwetka, brak okluzji bioder/stóp). "
+                       "Współczynniki agregaty (kadencja, GCT średni) pozostają wiarygodne, ale interpretacja "
+                       "L vs P jest podejrzana.",
+        ))
+
+    return out
+
+
+def check_stride_length(temporal: dict) -> list[Recommendation]:
+    """Reguły na stride length (Heiderscheit 2011, Novacheck 1998).
+
+    Stride = pełen cykl ruchu (kontakt L → kolejny kontakt L), liczony jako
+    `treadmill_speed × cycle_time_combined`. Reguła pojawia się tylko gdy temporal
+    zawiera klucz `stride_length` (czyli użytkownik podał `--treadmill-speed-ms`).
+
+    Klasyczne progi (rekreacyjny biegacz ok. 170 cm wzrostu):
+    - <1.2 m: bardzo krótki krok (powolny jogging / shuffle)
+    - 1.2–1.5 m: krótki (wolne tempo)
+    - 1.5–2.4 m: typowy rekreacyjny
+    - 2.4–3.0 m: długi (szybki bieg)
+    - >3.0 m: bardzo długi (zwykle sprint)
+
+    Reguła łączona overstride v2: stride > 2.2 m AND cadence < 160 — wyraźny sygnał,
+    że długi krok wynika z niskiej kadencji, nie z prędkości (klasyczny overstride
+    z literatury Heiderscheit'a).
+    """
+    out: list[Recommendation] = []
+    sl = temporal.get("stride_length")
+    if not sl:
+        return out
+    combined = sl.get("stride_combined", {})
+    stride_m = combined.get("mean_m")
+    speed = sl.get("treadmill_speed_ms")
+    cad = temporal.get("cadence", {}).get("cadence_spm")
+    if stride_m is None:
+        return out
+
+    if stride_m < 1.2:
+        out.append(Recommendation(
+            rule_id="stride_very_short",
+            severity="warning",
+            category="stride_length",
+            title="Bardzo krótki krok (stride < 1.2 m)",
+            message=(
+                "Stride poniżej 1.2 m przy biegu sugeruje powolny jogging na granicy chodu albo "
+                "bardzo małą prędkość bieżni. Sprawdź, czy podana prędkość bieżni jest poprawna."
+            ),
+            citation="Novacheck 1998",
+            detail=f"stride: {stride_m:.2f} m, speed: {speed:.2f} m/s",
+        ))
+    elif stride_m < 1.5:
+        out.append(Recommendation(
+            rule_id="stride_short",
+            severity="watch",
+            category="stride_length",
+            title="Krótki krok (stride < 1.5 m)",
+            message=(
+                "Stride 1.2–1.5 m typowy dla wolnego joggingu. To samo w sobie nie jest problemem, "
+                "ale przy ambicji zwiększenia prędkości warto popracować nad wydłużeniem kroku."
+            ),
+            citation="Novacheck 1998",
+            detail=f"stride: {stride_m:.2f} m",
+        ))
+    elif stride_m <= 2.4:
+        out.append(Recommendation(
+            rule_id="stride_typical",
+            severity="info",
+            category="stride_length",
+            title="Stride w typowym zakresie rekreacyjnym",
+            message=(
+                "Stride 1.5–2.4 m to typowy zakres dla biegu rekreacyjnego. Rzeczywista 'optymalna' "
+                "wartość zależy od wzrostu biegacza (typowo 1.0–1.5× wzrost)."
+            ),
+            citation="Novacheck 1998",
+            detail=f"stride: {stride_m:.2f} m",
+        ))
+    elif stride_m <= 3.0:
+        out.append(Recommendation(
+            rule_id="stride_long",
+            severity="watch",
+            category="stride_length",
+            title="Długi krok (stride 2.4–3.0 m)",
+            message=(
+                "Stride 2.4–3.0 m typowy dla szybkiego biegu. Jeżeli kadencja jest niska, to może być "
+                "sygnał overstridingu — patrz reguła łączona poniżej."
+            ),
+            citation="Heiderscheit et al. 2011; Novacheck 1998",
+            detail=f"stride: {stride_m:.2f} m",
+        ))
+    else:
+        out.append(Recommendation(
+            rule_id="stride_very_long",
+            severity="watch",
+            category="stride_length",
+            title="Bardzo długi krok (stride > 3.0 m)",
+            message=(
+                "Stride powyżej 3.0 m typowy dla sprintów. Dla biegu rekreacyjnego to wartość poza "
+                "typowym zakresem — zweryfikuj podaną prędkość bieżni lub jakość predykcji cycle_time."
+            ),
+            citation="Novacheck 1998",
+            detail=f"stride: {stride_m:.2f} m, speed: {speed:.2f} m/s",
+        ))
+
+    # Reguła łączona overstride v2 (silniejszy sygnał niż samo cad<160+GCT>270 z check_gct)
+    if cad is not None and stride_m > 2.2 and cad < 160:
+        out.append(Recommendation(
+            rule_id="overstride_long_stride_combo",
+            severity="warning",
+            category="stride_length",
+            title="Overstride: długi krok + niska kadencja",
+            message=(
+                "Stride > 2.2 m przy kadencji < 160 spm to wyraźny wzorzec overstridingu — stopa "
+                "ląduje znacznie przed środkiem ciężkości, co generuje duże siły hamowania w kolanie "
+                "i biodrze. Krótszy krok z wyższą kadencją zwykle wystarczy do korekcji."
+            ),
+            citation="Heiderscheit et al. 2011",
+            detail=f"stride {stride_m:.2f} m, kadencja {cad:.0f} spm",
+            suggestion="Zwiększ kadencję o 5–10% — automatycznie skróci stride przy tej samej prędkości bieżni.",
         ))
 
     return out
@@ -714,6 +901,7 @@ def generate_recommendations(
     all_recs.extend(check_gct(temporal))
     all_recs.extend(check_flight(temporal))
     all_recs.extend(check_duty_factor(temporal))
+    all_recs.extend(check_stride_length(temporal))
     all_recs.extend(check_torso_lean(spatial))
     all_recs.extend(check_knee_at_contact(spatial))
     all_recs.extend(check_vertical_oscillation(spatial))
@@ -735,6 +923,80 @@ def generate_recommendations(
         "recommendations": [asdict(r) for r in all_recs],
         "summary": summary,
     }
+
+
+# -----------------------------------------------------------------------------
+# Renderer Markdown
+# -----------------------------------------------------------------------------
+
+def render_markdown(result: dict, meta: dict | None = None) -> str:
+    """Renderuje rekomendacje jako sekcję Markdown (do dołączenia do raportu)."""
+    recs = result["recommendations"]
+    summary = result["summary"]
+
+    lines: list[str] = []
+    lines.append("# Rekomendacje treningowe")
+    lines.append("")
+
+    if meta:
+        title = meta.get("title") or meta.get("video") or ""
+        if title:
+            lines.append(f"**Wideo**: {title}")
+        avg_conf = meta.get("avg_confidence")
+        if avg_conf is not None:
+            lines.append(f"**Pewność predykcji modelu**: {avg_conf:.2f}")
+        lines.append("")
+
+    # Podsumowanie liczbowe
+    lines.append("## Podsumowanie")
+    lines.append("")
+    lines.append(
+        f"- 🔴 Krytyczne: **{summary['critical']}**  "
+        f"🟠 Ostrzeżenia: **{summary['warning']}**  "
+        f"🟡 Do monitorowania: **{summary['watch']}**  "
+        f"ℹ️ Informacje: **{summary['info']}**"
+    )
+    lines.append(f"- Łącznie reguł zwracających wynik: {summary['total']}")
+    lines.append("")
+
+    if not recs:
+        lines.append("_Brak rekomendacji — żadna z reguł nie zwróciła wyniku dla tego biegacza._")
+        return "\n".join(lines) + "\n"
+
+    # Grupowanie po severity
+    grouped: dict[str, list[dict]] = {"critical": [], "warning": [], "watch": [], "info": []}
+    for r in recs:
+        grouped.setdefault(r["severity"], []).append(r)
+
+    for sev in ("critical", "warning", "watch", "info"):
+        if not grouped[sev]:
+            continue
+        emoji = _SEVERITY_EMOJI[sev]
+        label = _SEVERITY_LABEL_PL[sev]
+        lines.append(f"## {emoji} {label}")
+        lines.append("")
+        for r in grouped[sev]:
+            lines.append(f"### {r['title']}")
+            lines.append(f"*Kategoria: **{r['category']}** · Źródło: {r['citation']}*")
+            lines.append("")
+            lines.append(r["message"])
+            lines.append("")
+            if r.get("detail"):
+                lines.append(f"**Pomiar**: {r['detail']}")
+                lines.append("")
+            if r.get("suggestion"):
+                lines.append(f"**Sugestia**: {r['suggestion']}")
+                lines.append("")
+            lines.append("---")
+            lines.append("")
+
+    lines.append("")
+    lines.append(
+        "_Rekomendacje są generowane przez reguły z literatury biomechanicznej "
+        "(Heiderscheit 2011, Novacheck 1998, Souza 2016, Diaz 2019, Robinson 1987, Daoud 2012) — "
+        "nie zastępują konsultacji specjalisty. Pełne progi i źródła: `docs/reference-values.md`._"
+    )
+    return "\n".join(lines) + "\n"
 
 
 if __name__ == "__main__":

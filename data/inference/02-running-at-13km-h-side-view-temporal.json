@@ -69,5 +69,23 @@
   "duty_factor": {
     "duty_factor_left": 0.378,
     "duty_factor_right": 0.132
+  },
+  "stride_length": {
+    "treadmill_speed_ms": 3.611,
+    "stride_left": {
+      "n": 14,
+      "mean_m": 2.356,
+      "std_m": 0.538
+    },
+    "stride_right": {
+      "n": 9,
+      "mean_m": 3.558,
+      "std_m": 1.641
+    },
+    "stride_combined": {
+      "n": 23,
+      "mean_m": 2.826,
+      "std_m": 1.254
+    }
   }
 }

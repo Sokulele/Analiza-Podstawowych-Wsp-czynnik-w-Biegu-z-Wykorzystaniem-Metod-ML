@@ -881,3 +881,347 @@ Notatka thesis `2026-05-12-etap7-rekomendacje.md`:
 - Wersjonowanie `models/` i `data/inference/`
 - Walidacja 3D motion capture
 - Iteracja 2 (po Etapie 7 — naturalna kontynuacja)
+
+---
+
+## 2026-05-13 — Sesja A: Integracja Etapu 7 z `analyze.py` ✅
+
+### Zrobione
+
+- **Refaktor `render_markdown`**: przeniesiony z `recommend.py` do `rules.py` (wariant A2 z briefu —
+  czystsza separacja: `rules.py` = silnik + renderer, `recommend.py` = czyste CLI). `_SEVERITY_LABEL_PL`
+  też w `rules.py`. `recommend.py` importuje `render_markdown` z `rules.py` (nadal działa standalone).
+- **Krok 6 w `analyze.py`**: po wygenerowaniu raportu MD orchestrator wywołuje
+  `generate_recommendations(meta, temporal, spatial, symmetry)` i zapisuje:
+  - `{slug}-recommendations.json` (obok pozostałych JSON-ów)
+  - `raporty/{slug}-rekomendacje.md` (sekcja MD do dołączenia / osobny raport)
+- **CLI flag `--no-recommendations`** (domyślnie krok 6 wykonuje się ZAWSZE). Wpisy `recommendations_json`
+  i `recommendations_md` doszły do dict zwracanego z `analyze_video`.
+- **Rekonstrukcja meta.json**: gdy `--skip-inference` i `meta.json` nie istnieje, orchestrator
+  odtwarza meta z CSV (estymacja FPS z timestampu, `avg_confidence` z kolumny `confidence`)
+  i ZAPISUJE plik. Rozwiązuje TODO "Adam meta.json dalej nie wygenerowany" z poprzedniej sesji.
+
+### Weryfikacja
+
+1. **22 (`--skip-inference`)**: reused phases CSV, wygenerowany `22-...-recommendations.json` +
+   `raporty/22-...-rekomendacje.md`. **Diff bit-by-bit ze standalone'm `recommend.py`** = puste
+   (identyczne). Pipeline nie zmienia wyniku, tylko go automatyzuje. Liczby reguł 0/3/5/2 = 10 zgodne
+   z poprzednią sesją.
+2. **Adam (`--skip-inference` z innym slugiem)**: brakujący `phases.csv` (nowa nazwa
+   `24-adam-bieg__segment_1` zamiast `24-adam`) spowodował pełną inferencję MediaPipe (3 min).
+   Wygenerowano komplet artefaktów + recommendations 0/2/1/5. Stary slug `24-adam-*.csv/json`
+   zachowany.
+
+### Stan kodu po sesji
+
+```
+src/recommendations/
+├── __init__.py        (bez zmian)
+├── rules.py           (480 → 540 linii; +render_markdown + _SEVERITY_LABEL_PL)
+└── recommend.py       (212 → 105 linii; +import render_markdown z rules)
+
+src/coefficients/analyze.py  (212 → 240 linii)
+  + sys.path.insert(0, str(_HERE.parent / "recommendations"))
+  + from rules import generate_recommendations, render_markdown
+  + parametr with_recommendations: bool = True
+  + ścieżki recommendations_json, recommendations_md
+  + rekonstrukcja meta.json z CSV gdy brak pliku + skip-inference
+  + krok 6 z logiem podsumowania severity
+  + CLI flag --no-recommendations
+```
+
+### Do zrobienia w następnej sesji
+
+**Sesja B — Iteracja 2** (z briefu poprzedniej sesji, niezmieniona):
+1. **Stride length** z `--treadmill-speed-ms` (stride = speed × cycle_time)
+2. **Combinatorical low quality detection** — Janek edge case (`conf<0.85 OR steps_SI>20% OR (max_SI>50% AND conf<0.90)`)
+3. **Stable segment detection** dla mixed-tempo (film 20)
+4. **Generator PDF** z wykresami matplotlib
+
+**Sesja C** (po B) — walidacja foot strike (rewizja limitation #9).
+
+### Drobne obserwacje
+
+- Adam (świeża inferencja, slug `24-adam-bieg__segment_1`) wygenerował 8 reguł (0/2/1/5) — 5 info,
+  podczas gdy poprzednia sesja (stary slug `24-adam`) podawała 3 info. Różnica wynika z fresh
+  MediaPipe (lekka inna numeryka spatial → inne reguły *_optimal triggerują się/nie). Nie blokuje,
+  ale warto kiedyś ujednolicić slug strategy (czy normalizować nazwy bez `bieg__segment_X`?).
+- Krok 6 to ~2 ms (pure Python na gotowych JSON-ach) — koszt zaniedbywalny względem MediaPipe (~209 s).
+
+---
+
+## 2026-05-13 — Sesja B (część 1): Stride length + combinatorical low quality ✅
+
+### Zrobione
+
+**Stride length** (`--treadmill-speed-ms` jako wymagany input użytkownika):
+- `temporal_metrics.py` — nowa funkcja `compute_stride_length(cycle_time, treadmill_speed_ms)`
+  zwraca `mean_m / std_m / n` per noga + combined. Wzór: `stride = speed × cycle_time`.
+- Parametr `treadmill_speed_ms: float | None = None` w `compute_temporal_metrics()`. Gdy `None`,
+  klucz `stride_length` w wyniku nie istnieje (graceful skip).
+- CLI flag `--treadmill-speed-ms` w `analyze.py` i w standalone `temporal_metrics.py`.
+- W meta.json zapisywany `treadmill_speed_ms` (do reprodukowalności).
+- `print_temporal_report()` dologuje stride length gdy jest.
+
+**Reguła `check_stride_length`** w `rules.py` (Heiderscheit 2011 + Novacheck 1998):
+- < 1.2 m → warning (bardzo krótki, weryfikuj prędkość)
+- 1.2–1.5 m → watch (powolny jogging)
+- 1.5–2.4 m → info (typowy rekreacyjny)
+- 2.4–3.0 m → watch (długi — szybki bieg)
+- > 3.0 m → watch (sprint / błąd predykcji cycle)
+- **Reguła łączona `overstride_long_stride_combo`** (warning): stride > 2.2 m AND cadence < 160
+  — silniejszy sygnał overstridingu niż samo `overstriding_combo` z `check_gct` (które patrzy na GCT).
+  Dwa łączące się sygnały overstridingu z różnych metryk = wzmocnienie konkluzji.
+
+**Combinatorical low quality detection** w `check_data_quality`:
+- Nowa reguła `quality_combo_high_si_low_conf` (critical): `max_SI > 50% AND avg_conf < 0.90`
+- Dokładnie odzwierciedla edge case Janka z poprzedniej sesji — pojedyncze proxy
+  (`conf<0.85`, `steps_SI>20%`, `max_SI>30%`) były niewystarczające: Janek miał
+  conf 0.882 (>0.85), steps 98/99 zbalansowane, ale max SI 60% = ewidentny błąd predykcji
+  granic STANCE per noga. Combinatorical łapie ten "cichy" błąd.
+- Detail pokazuje wszystkie 3 wartości (`max SI`, `avg_conf`, `steps_SI`) dla pełnej diagnostyki.
+
+### Weryfikacja
+
+| Test | Wynik oczekiwany | Wynik faktyczny |
+|---|---|---|
+| **02 (problem case) z speed 13 km/h** | stride długi + combinatorical (steps_SI ~57%) | ✅ stride 2.83 m → stride_long + overstride_combo (warning); combinatorical fire (critical) |
+| **22 (test set, dobry materiał)** | bez regresji, 0 critical | ✅ 0/3/5/2 = 10 reguł, identyczne jak przed dodaniem nowych reguł (max_SI 35%, conf 0.89 → combinatorical NIE fire) |
+| **25 Janek (edge case)** | combinatorical fire jako critical #1 | ✅ 3 critical (poprzednio 2), combinatorical pojawił się pierwszy w liście |
+
+Stride length matematycznie zgadza się ręcznie (3.611 m/s × 0.783 s = 2.826 m, mean_combined wyszło 2.826 m).
+
+### Stan kodu po sesji
+
+```
+src/coefficients/temporal_metrics.py  (278 → 320 linii)
+  + compute_stride_length()
+  + parametr treadmill_speed_ms w compute_temporal_metrics
+  + CLI flag --treadmill-speed-ms
+
+src/coefficients/analyze.py
+  + parametr treadmill_speed_ms w analyze_video()
+  + zapis do meta dict + meta_json
+  + CLI flag --treadmill-speed-ms
+
+src/recommendations/rules.py  (~540 → ~660 linii)
+  + check_stride_length() (5 progów + reguła łączona)
+  + wpięcie do orchestratora
+  + rozszerzenie check_data_quality o combinatorical (max_SI>50 AND conf<0.90)
+```
+
+### Co JESZCZE w Sesji B (z briefu)
+
+Stable segment detection + PDF generator. Według ustaleń z dzisiejszej sesji obie pozycje
+**odłożone** — są kosmetyczne, nie blokują pracy magisterskiej. Wracamy do nich tylko
+jeśli pojawi się potrzeba.
+
+### Do zrobienia w następnej sesji
+
+**Sesja C** — walidacja foot strike (rewizja limitation #9): wybranie 3-5 klatek entry-into-STANCE
+per film (Adam/22/Janek), render PNG, manualna inspekcja, porównanie z `compute_foot_strike_pattern`.
+
+---
+
+## 2026-05-14 — Sesja C: walidacja foot strike pattern ✅
+
+### Zrobione
+
+- **Nowy skrypt** `src/visualization/render_foot_strike_entries.py`: dla danego biegacza
+  wybiera N (domyślnie 3) klatek entry-into-LEFT_STANCE i N entry-into-RIGHT_STANCE
+  równomiernie rozłożonych w filmie, liczy kąt foot strike na każdej klatce (identyczna
+  konwencja co `compute_foot_strike_pattern`) i renderuje PNG ze szkieletem MediaPipe
+  + paskiem info (klatka + strona + kąt + klasyfikacja, kolor paska wg klasyfikacji).
+- **18 PNG** wygenerowanych (3 biegaczy × 2 nogi × 3 klatki) w
+  `data/visualizations/foot_strike_validation/{22,24-adam,25-janek}/`.
+- **Walidacja wizualna** użytkownika:
+  - **Janek**: kąty −12° do +5° **zgadzają się** wizualnie z midfoot strike. Metoda działa.
+  - **Adam**: prawa noga OK (−12°), lewa przesadzona perspektywą (−33° do −56°). Asymetria
+    to **artefakt kamery od dołu**, nie biomechaniki.
+  - **22**: kąty −82° do −160° to **artefakt pionowego wideo**, geometrycznie nonsens.
+- **Decyzja**: hipoteza "systematyczny błąd metody" z limitation #9 **odwołana**.
+  Zastąpiona "foot strike jest wrażliwy na perspektywę — wiarygodny przy ujęciu z boku".
+
+### Implementacja mityganta
+
+- `spatial_metrics.py`: `compute_foot_strike_pattern` dorzuca klucz `low_confidence: True`
+  per noga, gdy `|mean_angle| > 45°`. Próg wybrany na podstawie walidacji (Janek ≤12°,
+  Adam border 33°, 22 ≥82°).
+- `rules.py`: nowa reguła `foot_strike_low_confidence` (warning, citation "Walidacja
+  wizualna 2026-05-14 (Sesja C)"). Sprawdza flagę `low_confidence` lub fallback
+  `abs(mean)>45°` dla legacy spatial.json. Gdy fire — **blokuje** reguły semantyczne
+  (`consistent`/`inconsistent`), bo przy tych kątach klasyfikacja jest artefaktem.
+
+### Weryfikacja (smoke test)
+
+| Biegacz | Przed Sesją C | Po Sesji C | Komentarz |
+|---|---|---|---|
+| 22 | 0/3/5/2 = 10 | **0/4/5/1** = 10 | `foot_strike_consistent` (info) → `foot_strike_low_confidence` (warning) ✅ |
+| Adam | 0/2/1/5 = 8 | 0/2/1/5 = 8 | bez zmian (poniżej progu 45°) ✅ |
+| Janek | 3/3/3/2 = 11 | 3/3/3/2 = 11 | bez zmian (poniżej progu 45°) ✅ |
+
+Nowa reguła nie produkuje false positives — łapie tylko 22 (pionowe wideo).
+
+### Notatka thesis
+
+`docs/thesis-notes/2026-05-14-sesja-c-foot-strike-walidacja.md` — pełna sesja
+(metodyka, predykcja referencyjna, walidacja wizualna per biegacz, reformulacja
+limitation #9, implementacja, weryfikacja, otwarte pytania).
+Limitation #9 w `2026-05-09-iteracja1-test-set.md` dopisana sekcją "Po dalszej pracy"
+(zgodnie z konwencją CLAUDE.md: nie nadpisywać notatek, dopisywać).
+
+### Do zrobienia w następnej sesji
+
+Plan kolejnych sesji (z briefu pre-C, wciąż aktualny):
+1. **Stable segment detection** + **PDF generator** — odłożone z Sesji B, kosmetyka.
+2. **Walidacja Etapu 7 na własnym filmie biegowym** użytkownika.
+3. **Pisanie pracy magisterskiej** — rozdziały 6 i 7 mają komplet materiału po A+B+C.
+
+Wszystkie pozycje **warunkowe** — Sesja C zamyka ostatnią nierozwiązaną kwestię
+metody. Decyzja o priorytecie należy do użytkownika.
+
+### Otwarte sprawy (zaktualizowane)
+
+- Limitation #9 **rozwiązana** (z mitygantem w kodzie).
+- Limitation #1 (combinatorical quality) **częściowo rozwiązana** w Sesji B.
+- Limitation #8 (stable segment detection) **nierozwiązana** — odłożona w Sesji B.
+- Bug `postprocess_median.predict_lstm` — niezmieniony.
+- Slug strategy + non-determinizm MediaPipe — niezmienione (do Limitations pracy).
+
+---
+
+## 2026-05-14 — Sesja C część 2: Research literatury + wybór problemu badawczego ✅
+
+### Kontekst
+
+Po Sesji C część 1 (walidacja foot strike) i napisaniu README projektu, user zadał
+pytanie strategiczne: praca magisterska musi mieć **problem badawczy** (nie tylko opis
+systemu). Sesja C część 2 wykonała research literatury i wybór formuły problemu badawczego.
+
+### Zrobione
+
+1. **Odblokowanie WebSearch + WebFetch** dla 10 domen naukowych (PMC, Frontiers, MDPI,
+   ScienceDirect, IEEE, arXiv, Springer, PLOS, github.com, nature.com).
+2. **Research 7 peer-reviewed prac** (WebSearch + WebFetch, paralel): Stenum 2021 (PLOS Comp Bio),
+   Ali 2024 (PMC BioMed Inform), Frontiers Phys 2025 mini review, Hannigan 2024 (Front Sport),
+   Ripic 2023 (Front Rehab), Bouchabou 2024 (PMC Heliyon narrative review), HGcnMLP 2023
+   (Front Bioeng). Każda z cytatem problemu badawczego z abstraktu + linkiem weryfikowalnym.
+3. **Identyfikacja 4 wzorców sformułowań** problemu badawczego w domenie:
+   - Szablon A "lack of validation"
+   - Szablon B "cost/accessibility gap"
+   - Szablon C "specific gap in conditions/methodology"
+   - Szablon D "detection accuracy motivating automation"
+4. **Identyfikacja 5 gap'ów w literaturze**, które ta praca wypełnia:
+   - Running-specific (vs chód kliniczny)
+   - Systematyczne porównanie 4 klasyfikatorów na małym datasecie
+   - Aspect ratio fix jako pre-processing
+   - System rekomendacji rule-based z citation z literatury
+   - Auto-detekcja niskiej wiarygodności predykcji
+5. **Wybór Propozycji A** (z 3 zaproponowanych) jako problemu badawczego pracy.
+6. **Notatka thesis** `2026-05-14-research-podobnych-prac.md` — research + wzorce + gap.
+7. **Notatka thesis** `2026-05-14-problem-badawczy-propozycja-a.md` — tytuł roboczy,
+   3 pytania badawcze (P1/P2/P3), 6 hipotez (wszystkie potwierdzone istniejącymi danymi),
+   struktura 10 rozdziałów, lista cytatów do State of the Art, mapping case studies na P3.
+
+### Wybrany tytuł roboczy
+
+> *"Klasyfikacja faz biegu z monocular 2D wideo: porównanie podejść uczenia maszynowego
+> i analiza wrażliwości metryk biomechanicznych na warunki akwizycji"*
+
+### 3 pytania badawcze
+
+| Pytanie | Hipotezy | Materiał empiryczny |
+|---|---|---|
+| **P1** porównanie 4 klasyfikatorów | H1: LSTM>RF +5pp; H2: engineered RF ≥ raw RF +10pp | comparison_table.md, 4 wytrenowane modele |
+| **P2** aspect ratio fix ablation | H3: aspect fix +5pp, kluczowe dla portrait | per_file_test.md, backupy pre_aspect_fix |
+| **P3** wrażliwość metryk na warunki akwizycji | H4: foot strike wrażliwy na perspektywę; H5: FPS<15 = 15% błąd; H6: auto-detekcja low_confidence | Case 1 Sesja C (foot strike), Case 2 film 22, Case 3 film 16 |
+
+**Wszystkie 6 hipotez potwierdzone istniejącymi danymi** — praca może być pisana
+bez nowych eksperymentów.
+
+### Do zrobienia w następnej sesji
+
+**Sesja D** — pisanie pracy magisterskiej. Rozdziały 4 (Eksperyment 1), 5 (Eksperyment 2),
+6 (Współczynniki), 7 (Rekomendacje), 8 (Eksperyment 3) mają komplet materiału. Wymaga
+decyzji formalnej z promotorem (tytuł, scope, pozycjonowanie, deadline).
+
+### Drobne obserwacje
+
+- WebSearch działa z Polski (poprzedni komunikat agentów "only available in the US"
+  okazał się niepoprawny po nadaniu uprawnień).
+- WebFetch ma limit per-domena — `mdpi.com` zwraca 403, `nature.com`/`springer.com` wymagają
+  IDP auth; PMC/PLOS/Frontiers/GitHub są open access i działają.
+- Plik `README.md` projektu napisany przed researchem — pozycjonuje pracę jako "system",
+  nie "research". Warto rozważyć update po finalizacji tytułu z promotorem.
+
+---
+
+## 2026-05-14 — Sesja C część 3: Finalizacja tytułu pracy ✅
+
+### Kontekst
+
+Po Sesji C część 2 (research literatury + wybór Propozycji A z roboczym tytułem ML-centric)
+user przekazał **formalny tytuł** uzgodniony z promotorem:
+
+> **"Analiza podstawowych współczynników biegu przy pomocy uczenia maszynowego"**
+
+Tytuł jest **biomechanics-centric** (główny obiekt: współczynniki biegu, ML jako narzędzie),
+nie ML-centric (klasyfikator jako główny obiekt). Wymagana reformulacja problemu badawczego.
+
+### Zrobione
+
+1. **3 pytania badawcze przeformułowane** pod nowy framing:
+   - **P1**: Jak zaprojektować pipeline ML wyliczający 12 współczynników z monocular 2D wideo?
+   - **P2**: Który klasyfikator faz najlepiej przekłada się na precyzję metryk temporalnych?
+   - **P3**: Które współczynniki są wrażliwe na warunki akwizycji + jak detekować auto?
+2. **7 hipotez** (H1-H7) **wszystkie potwierdzone** istniejącymi danymi (bez nowych eksperymentów).
+3. **Struktura 8 rozdziałów** (~60 stron, limit user):
+   - 1. Wstęp (5)
+   - 2. State of the Art (8)
+   - 3. Materiały i metody (8)
+   - 4. Klasyfikator faz — wybór modelu + aspect fix (10)
+   - 5. Współczynniki biegu — pipeline obliczania (12, centralny rozdział)
+   - 6. System rekomendacji (8, **Wariant 1 — pełny rozdział** wybrany)
+   - 7. Wrażliwość na warunki akwizycji (6)
+   - 8. Dyskusja i wnioski (5)
+4. **Notatka thesis** `2026-05-14-temat-pracy-finalny.md` — finalna wytyczna do pisania:
+   tytuł, 3 pytania, 7 hipotez, struktura 8 rozdziałów, cytaty z research (15-25 ref),
+   limitations gotowe punkty.
+5. **Update notatki Propozycji A** — dopis "Po dalszej pracy" wskazujący że jest
+   wersją historyczną (ML-centric).
+6. **Update README thesis-notes** — tytuł pracy na początku, link do finalnej notatki.
+
+### Kluczowe decyzje user
+
+- **Tytuł finalny** — bez zmian, *"Analiza podstawowych współczynników biegu
+  przy pomocy uczenia maszynowego"*.
+- **Zakres współczynników** — wszystkie 12 (5 temporalnych + 7 przestrzennych),
+  uczciwie zaznaczone że pierwotny plan był węższy (rozkręciliśmy się w trakcie pracy).
+- **Rekomendacje** — pełny rozdział (Wariant 1, ~8 stron). Materiał już istnieje
+  (Sesje A/B/C, 13+ reguł z citation, walidacja na 3 biegaczach).
+- **Limit stron** — ~60 max, fokus na esencję, nie szczegóły.
+
+### Status do pisania
+
+**Wszystkie 5 rozdziałów eksperymentalno-merytorycznych ma komplet materiału**:
+- Rozdz. 4 (Klasyfikator + aspect fix) — 4 modele, comparison_table, backupy
+- Rozdz. 5 (Współczynniki — centralny) — pełny pipeline, walidacja na 3 biegaczach
+- Rozdz. 6 (Rekomendacje) — 13+ reguł, walidacja, notatki Sesji A/B/C
+- Rozdz. 7 (Wrażliwość) — 3 case studies (Sesja C foot strike, film 22 aspect, film 16 FPS)
+- Rozdz. 2 (SOTA) — 7 cytatów z researchu + 6 biomechanicznych z `rules.py`
+
+**Praca może być pisana bez dodatkowych eksperymentów.**
+
+### Do zrobienia w następnej sesji
+
+**Sesja D** — pisanie pracy magisterskiej. Wytyczna: `2026-05-14-temat-pracy-finalny.md`.
+
+### Drobne obserwacje
+
+- Notatki thesis mają teraz **3 generacje** dla problemu badawczego: research 7 prac →
+  Propozycja A (ML-centric, historyczna) → finalny tytuł (biomechanics-centric).
+  To czysty cykl ewolucji decyzji metodologicznej, sam w sobie wartościowy materiał
+  do sekcji "Metodologia projektowania pracy" (jeśli promotor uzna za potrzebne).
+- README projektu napisany przed finalizacją tytułu — warto rozważyć update tak żeby
+  pozycjonowanie zgadzało się z tytułem (akcent na współczynniki, nie na system).
+

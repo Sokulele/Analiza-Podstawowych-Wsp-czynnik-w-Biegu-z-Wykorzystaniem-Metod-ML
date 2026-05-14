@@ -212,12 +212,20 @@ def compute_foot_strike_pattern(df: pd.DataFrame, phases: np.ndarray) -> dict:
         else:
             dominant = "midfoot strike"
 
+        # Flaga low_confidence: |mean| > 45° wskazuje na artefakt perspektywy kamery
+        # (foot strike pattern jest wiarygodny wyłącznie przy ujęciu z boku w landscape).
+        # Walidacja wizualna 2026-05-14 (Sesja C): Janek (|kąt|<12°) ✓, Adam (jedna noga <20°,
+        # druga 33-56° = artefakt asymetrii kamery), 22 (pionowe wideo, |kąt|>90° = bzdura).
+        mean_angle = stats.get("mean") if stats else None
+        low_confidence = bool(mean_angle is not None and abs(mean_angle) > 45.0)
+
         out[f"{side.lower()}_foot"] = {
             "contact_angle_deg": stats,
             "n_heel": n_heel,
             "n_mid": n_mid,
             "n_forefoot": n_forefoot,
             "dominant": dominant,
+            "low_confidence": low_confidence,
         }
     return out
 

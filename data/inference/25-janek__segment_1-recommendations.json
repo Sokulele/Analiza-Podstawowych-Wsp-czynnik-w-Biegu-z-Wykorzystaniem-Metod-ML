@@ -1,6 +1,16 @@
 {
   "recommendations": [
     {
+      "rule_id": "quality_combo_high_si_low_conf",
+      "severity": "critical",
+      "category": "jakość_predykcji",
+      "title": "Wiele sygnałów niskiej jakości predykcji (combinatorical)",
+      "message": "Bardzo wysoka asymetria (max SI = 60.0%) **w połączeniu** z niepewnością predykcji (avg_conf = 0.88) silnie sugeruje, że model myli granice STANCE per noga w części cykli — nawet jeśli liczby kroków L/R są zbalansowane. Współczynniki L/P (GCT L vs R, duty factor L/R, symetria) są w tej sytuacji niewiarygodne.",
+      "citation": "(walidacja wewnętrzna — Janek edge case, 2026-05-12)",
+      "detail": "max SI = 60.0%, avg_conf = 0.882, steps_SI = 1.0%",
+      "suggestion": "Nagraj kolejne ujęcie z lepszym kadrem (cała sylwetka, brak okluzji bioder/stóp). Współczynniki agregaty (kadencja, GCT średni) pozostają wiarygodne, ale interpretacja L vs P jest podejrzana."
+    },
+    {
       "rule_id": "cadence_very_low",
       "severity": "critical",
       "category": "kadencja",
@@ -102,8 +112,8 @@
     }
   ],
   "summary": {
-    "total": 10,
-    "critical": 2,
+    "total": 11,
+    "critical": 3,
     "warning": 3,
     "watch": 3,
     "info": 2

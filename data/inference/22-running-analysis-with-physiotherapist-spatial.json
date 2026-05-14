@@ -256,7 +256,8 @@
       "n_heel": 0,
       "n_mid": 0,
       "n_forefoot": 15,
-      "dominant": "forefoot strike"
+      "dominant": "forefoot strike",
+      "low_confidence": true
     },
     "right_foot": {
       "contact_angle_deg": {
@@ -269,7 +270,8 @@
       "n_heel": 0,
       "n_mid": 0,
       "n_forefoot": 14,
-      "dominant": "forefoot strike"
+      "dominant": "forefoot strike",
+      "low_confidence": true
     }
   }
 }

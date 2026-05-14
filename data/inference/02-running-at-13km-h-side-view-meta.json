@@ -10,5 +10,6 @@
   "model_test_acc": 0.709,
   "avg_confidence": 0.795,
   "inference_time_s": 28.3,
-  "generated": "2026-05-09 09:43:41"
+  "generated": "2026-05-09 09:43:41",
+  "treadmill_speed_ms": 3.611
 }
