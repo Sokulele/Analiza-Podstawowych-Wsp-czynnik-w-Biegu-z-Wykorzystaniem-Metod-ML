@@ -1,0 +1,65 @@
+\chapter{Klasyfikator faz biegu --- wybór modelu i pre-processing}
+\label{ch:klasyfikator}
+
+% TODO: Materiał — comparison_summary.json, per_file_test.md, error_breakdown.md,
+% confusion_matrices_test.png, learning_curves_lstm.png, feature_importances_rf.png.
+
+\section{Porównanie czterech modeli}
+\label{sec:porownanie-modeli}
+
+% TODO: Tabela "PRZED aspect fix" (z comparison_summary.json):
+% | Model | Test acc | F1 macro |
+% | RF v1 (raw, 132 features) | 62.7% | 0.617 |
+% | RF v2 (engineered, 106) | 67.0% | 0.671 |
+% | LSTM run 1 (h=128, overfit) | 67.1% | 0.663 |
+% | LSTM run 2 (h=64, primary) | 65.3% | 0.645 |
+% UCZCIWA WZMIANKA: liczby PRZED aspect fix. Po aspect fix LSTM r1 = 70.9% (sekcja 4.4).
+
+\section{Confusion matrices i analiza błędów}
+\label{sec:confusion-matrices}
+
+% TODO: confusion_matrices_test.png + error_breakdown.md.
+% Tabela error breakdown:
+% | Model | L↔R errors | FLIGHT↔STANCE errors | % L↔R w błędach |
+% | RF v1 | 153 | 403 | 27.5% |
+% | RF v2 | 88 | 403 | 17.9% |
+% | LSTM r1 | 79 | 397 | 16.6% |
+% | LSTM r2 | 79 | 424 | 15.7% |
+% Wniosek: LSTM mocno redukuje L↔R confusion vs RF — najgorszy typ błędu (rujnuje symetrię).
+
+\section{Feature importance dla Random Forest}
+\label{sec:feature-importance}
+
+% TODO: feature_importances_rf.png.
+% Top features dla RF v1 vs RF v2 — pokazać że engineered features (kąty, prędkości)
+% są bardziej informatywne niż raw keypointy.
+
+\section{Ablation: aspect ratio fix}
+\label{sec:aspect-ratio-fix}
+
+% TODO: Ablation study PRZED/PO aspect fix dla LSTM.
+% Tabela:
+% | Model | przed fix | po fix | różnica |
+% | LSTM run 1 | 67.1% | 70.9% | +3.8 pp |
+% | LSTM run 2 | 65.3% | ~68% | ~+3 pp |
+% Per-film breakdown (per_file_test.md):
+% - Film 22 (pionowy): 75.8% → 85.9% (+10.1 pp) - kluczowy edge case
+% - Inne filmy (landscape): ±2 pp
+% Wniosek: aspect fix kluczowy dla nietypowych orientacji, neutralny dla standardowych.
+
+\section{Wpływ accuracy klasyfikatora na precyzję metryk temporalnych}
+\label{sec:wplyw-na-metryki}
+
+% TODO: Jak różnica 5 pp accuracy LSTM vs RF przekłada się na precyzję obliczeń?
+% Granice faz → kadencja, GCT, czas lotu, stride length.
+% Argumentacja: LSTM dokładniejszy → granice precyzyjniejsze → metryki bliższe ground truth.
+% Konkretna analiza: per_file_test.md → 22, 02, 20.
+
+\section{Wnioski metodologiczne}
+\label{sec:wnioski-klasyfikator}
+
+% TODO: Kiedy LSTM, kiedy RF wystarczy.
+% - LSTM r1 + aspect fix = primary model (70.9%, ~$15 GPU time)
+% - RF v2 = solid baseline (67%, sekundy CPU)
+% - LSTM r2 = alternatywa stabilniejsza ale niższa accuracy
+% Argument za LSTM dla produkcji: kontekst czasowy zmniejsza L↔R confusion 3x vs RF v1.

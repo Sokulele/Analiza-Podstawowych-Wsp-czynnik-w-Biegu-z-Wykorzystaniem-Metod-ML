@@ -356,3 +356,225 @@ W trakcie pisania pracy:
 - dobre praktyki: **cytuj artefakt** przy konkretnej liczbie, np. *"...accuracy 70.9%
   (LSTM run 1 + aspect fix, źródło: model `models/lstm_run1_overfit/metrics.json`)"*
 
+---
+
+## [2026-05-23] Pojęcia z rozdziału 3 — sesja pisania
+
+### Estymowana głębia z (MediaPipe)
+
+MediaPipe podaje dla każdego keypointu wartość `z` — przybliżoną głębię (odległość od kamery) **względem punktu centralnego bioder**. To NIE jest pomiar czujnikiem głębi (jak Kinect czy Intel RealSense). Sieć neuronowa wnioskuje `z` z wskazówek wizualnych:
+- **Relatywne rozmiary kończyn** — bliższe części ciała wyglądają większe na obrazie
+- **Efekty perspektywy** — kończyna skierowana ku kamerze ulega skróceniu (foreshortening)
+- **Wzorce zasłonięć** — jeśli jedno ramię zasłania drugie, to jest bliżej kamery
+- **Wyuczone proporcje anatomiczne** — sieć wie jakie powinny być proporcje ciała
+
+Sieć trenowana jest na zbiorach z adnotacjami 2D (zdjęcia z ręcznymi keypointami) **i** danymi 3D z motion capture (Vicon/Qualisys). Dlatego potrafi "domyślić się" głębi, choć widzi tylko 2D obraz.
+
+**W tej pracy:** korzystam głównie z `x` i `y`. Wartość `z` jest za mało wiarygodna do precyzyjnych obliczeń kątów stawów w 3D.
+
+### Visibility (wskaźnik pewności detekcji)
+
+`visibility ∈ [0, 1]` — prawdopodobieństwo, że dany keypoint jest **widoczny w kadrze i nie jest zasłonięty** przez inne części ciała. Sieć neuronowa ocenia:
+- Czy okolica keypointu jest przesłonięta przez inne kończyny
+- Czy keypoint wykracza poza kadr (obcięty przez krawędź obrazu)
+- Czy cechy wizualne w otoczeniu keypointu są spójne z oczekiwaną pozą
+
+Wartość generowana jest przez **warstwę sigmoidalną** na wyjściu modelu — sigmoid zamienia dowolną liczbę na zakres (0, 1), interpretowany jako prawdopodobieństwo.
+
+**Przydatne:** visibility < 0.5 na kluczowych keypointach → materiał może być kiepski do analizy. Używam tego jako flaga jakości.
+
+### Inferencja (inference)
+
+**Inferencja** = uruchomienie wytrenowanego modelu na nowych danych w celu uzyskania predykcji. W odróżnieniu od **treningu** (uczenia modelu na danych treningowych), inferencja to "produkcyjne" użycie modelu.
+
+Przykład: MediaPipe Pose uruchamiam na klatkach wideo → model wykonuje inferencję → wynik to 33 keypointów na każdą klatkę. Sam model jest już wytrenowany przez Google — ja tylko go używam.
+
+W kontekście mojego klasyfikatora faz: trening = uczę model na 10 filmach, inferencja = puszczam wytrenowany model na nowym filmiku użytkownika.
+
+### Jitter (szum w trajektoriach keypointów)
+
+Keypoint (np. kolano) powinien poruszać się gładko z klatki na klatkę, bo ciało nie teleportuje się. Ale MediaPipe przetwarza każdą klatkę w dużej mierze niezależnie — predykcja sieci neuronowej nigdy nie jest identyczna. Dlatego pozycja keypointu **oscyluje o kilka pikseli** nawet gdy biegacz utrzymuje stałą pozę.
+
+To **szum / jitter** — szybkie, losowe fluktuacje sygnału. Nie odzwierciedlają rzeczywistego ruchu ciała — to artefakt detekcji.
+
+**Problem:** gdybym obliczał kąty stawów czy czas kontaktu na zaszumionych danych, wyniki byłyby przekłamane. Dlatego PRZED obliczeniami wygładzam sygnał.
+
+### Filtr Savitzky-Golay — jak działa
+
+Krok po kroku:
+1. Weź **okno** 11 kolejnych klatek (np. klatki 5–15)
+2. Do tych 11 punktów **dopasuj wielomian** 3. stopnia metodą najmniejszych kwadratów
+3. Wygładzona wartość to **wartość wielomianu w środkowym punkcie** okna (klatka 10)
+4. **Przesuń okno** o jedną klatkę (teraz klatki 6–16) i powtórz
+
+**Dwa parametry:**
+- **Długość okna w = 11** — ile klatek bierze pod uwagę. Większe okno = silniejsze wygładzenie, ale ryzyko rozmycia szybkich ruchów. Przy 30 FPS okno 11 klatek ≈ 0.37 sekundy.
+- **Rząd wielomianu p = 3** — stopień wielomianu. Wielomian 3. stopnia potrafi odwzorować krzywiznę (szczyty i doliny). Prosta średnia ruchoma = wielomian stopnia 0 → spłaszcza ekstrema. To ważne, bo momenty kontaktu stopy z podłożem to właśnie szczyty/doliny w sygnale.
+
+**Czemu nie prosta średnia ruchoma?** Średnia ruchoma obcina szczyty sygnału — jeśli pięta uderza o ziemię (ostry szczyt w trajektorii Y_heel), średnia ruchoma "spłaszczy" ten moment i zafałszuje czas kontaktu. Savitzky-Golay zachowuje kształt szczytu, bo wielomian 3. stopnia potrafi go odwzorować.
+
+### Sygnał kinematyczny
+
+**Kinematyka** = opis ruchu ciała w przestrzeni i czasie (pozycja, prędkość, przyspieszenie). **Sygnał kinematyczny** to ciąg wartości opisujących taki ruch — np. współrzędna Y kolana z klatki na klatkę.
+
+Współrzędne `x, y, z` keypointów to sygnały kinematyczne — opisują fizyczny ruch.
+Wartość `visibility` to **NIE** sygnał kinematyczny — to miara pewności algorytmu detekcji, nie ruch ciała. Dlatego visibility nie wygładzam.
+
+### Interpolacja liniowa (uzupełnianie braków)
+
+Jeśli MediaPipe nie wykrył pozy w klatkach 50–52, ale wykrył w klatce 49 (kolano na pozycji Y=0.65) i w klatce 53 (kolano na Y=0.73):
+
+```
+Klatka:  49   50    51    52    53
+Surowe:  0.65  NaN   NaN   NaN  0.73
+Po interp: 0.65  0.67  0.69  0.71  0.73
+```
+
+Rysuje **prostą linię** między ostatnią znaną a następną znaną wartością i rozkłada brakujące punkty równomiernie na tej linii. To proste przybliżenie — zakłada liniowy ruch w krótkim oknie brakujących danych.
+
+Konieczne, bo filtr Savitzky-Golay wymaga ciągłego sygnału (bez NaN).
+
+### Metryka jittera — jak mierzyłem skuteczność wygładzania
+
+**Jitter** = odchylenie standardowe drugiej różnicy sygnału.
+
+**Druga różnica** ciągu x₀, x₁, ..., xₙ to:
+```
+d²ᵢ = xᵢ₊₂ - 2·xᵢ₊₁ + xᵢ
+```
+
+To **przybliżenie przyspieszenia** sygnału (jak pochodna drugiego rzędu).
+
+**Interpretacja:**
+- Gładka trajektoria → przyspieszenie zmienia się wolno → std(d²) mała
+- Zaszumiona trajektoria → przyspieszenie skacze losowo → std(d²) duża
+
+**Redukcja procentowa:**
+```
+redukcja = (jitter_raw - jitter_smooth) / jitter_raw × 100%
+```
+
+Jeśli jitter_raw = 0.005 a jitter_smooth = 0.001, to redukcja = 80% — filtr usunął 80% szumu.
+
+Metryke obliczam na współrzędnych x i y **12 kluczowych keypointów** (ramiona, biodra, kolana, kostki, pięty, czubki stóp) — te są najważniejsze dla biomechaniki biegu.
+
+**Źródło:** miara stosowana w literaturze dot. filtracji sygnałów biomechanicznych (Crenna et al. 2021, "Filtering Biomechanical Signals in Movement Analysis").
+
+### Standard COCO (Common Objects in Context)
+
+COCO to duży benchmark (zbiór danych + format adnotacji) stworzony przez Microsoft w 2014 roku (Lin et al.). Definiuje m.in. **17 keypointów ciała** jako standard: nos, 2 oczy, 2 uszy, 2 ramiona, 2 łokcie, 2 nadgarstki, 2 biodra, 2 kolana, 2 kostki.
+
+Większość modeli detekcji pozy jest trenowana na zbiorze COCO — dlatego 17 keypointów stało się "standardem". OpenPose rozszerzył go do 25 (dodając szyję, środek bioder, i 6 punktów stóp). MediaPipe do 33 (dodając dłonie, szczegóły twarzy, i foot_index).
+
+**W mojej pracy:** COCO (17 keypointów) nie wystarczał — nie ma żadnych keypointów stopy poniżej kostki, a do foot strike pattern potrzebuję pięty i czubka stopy.
+
+### Maksima i minima przy kontakcie stopy — skąd się biorą
+
+W MediaPipe oś Y rośnie w dół (0 = góra kadru, 1 = dół kadru). Kiedy pięta uderza o bieżnię, keypoint HEEL osiąga **maksimum Y** — jest najniżej w kadrze. Kiedy stopa odrywa się od ziemi, Y_heel **spada**. W fazie lotu stopa jest najwyżej → **minimum Y**. Potem znowu ląduje → kolejne maximum.
+
+Trajektoria Y_heel wygląda jak fala: szczyt (lądowanie) → dolina (lot) → szczyt (lądowanie). Algorytm auto-etykietowania (`find_peaks` z SciPy) wykrywa te szczyty i na tej podstawie oznacza fazy biegu. Filtr Savitzky-Golay musi zachowywać te szczyty/doliny — gdyby je spłaszczył, algorytm etykietowania źle by oznaczył momenty kontaktu.
+
+### Prosta średnia ruchoma — jak działa i czemu nie wystarcza
+
+Weź okno N kolejnych wartości, oblicz ich średnią arytmetyczną — to wygładzona wartość dla środkowego punktu. Przesuń okno o 1 i powtórz.
+
+Przykład (okno = 5):
+```
+Surowe:      3, 7, 4, 8, 5, 9, 6
+Okno [3,7,4,8,5] → średnia = 5.4 (wygładzona wartość dla "4")
+Okno [7,4,8,5,9] → średnia = 6.6 (wygładzona wartość dla "8")
+```
+
+**Problem:** ostry szczyt (pięta uderza o bieżnię → Y skacze do 0.95 na jedną klatkę) zostaje "rozmyty" — uśredniony z sąsiadami, więc w wygładzonym sygnale szczyt jest niższy i szerszy. To przekłamuje moment kontaktu. Savitzky-Golay dopasowuje wielomian, który potrafi śledzić kształt szczytu.
+
+Matematycznie: średnia ruchoma = Savitzky-Golay z wielomianem stopnia 0 (stała). Wielomian stopnia 3 potrafi odwzorować krzywą z jednym szczytem/doliną w obrębie okna.
+
+### Wygładzanie oddzielnie dla x, y, z i każdego keypointu
+
+Każdy keypoint (np. LEFT_KNEE) ma 3 współrzędne zmieniające się w czasie — 3 osobne ciągi liczbowe:
+- `LEFT_KNEE_x`: [0.45, 0.46, 0.44, 0.47, ...] — pozycja pozioma
+- `LEFT_KNEE_y`: [0.62, 0.63, 0.61, 0.64, ...] — pozycja pionowa
+- `LEFT_KNEE_z`: [-0.12, -0.11, -0.13, ...] — głębia
+
+Każdy ciąg wygładzam **osobno** — filtr przechodzi po ciągu x, potem po y, potem po z. Nie mieszam ich, bo ruch poziomy nie ma nic wspólnego z ruchem pionowym. Tak samo nie mieszam keypointów — trajektoria kolana to osobny sygnał niż trajektoria kostki.
+
+33 keypointy × 3 współrzędne = **99 osobnych operacji wygładzania**.
+
+Visibility (4. wartość) NIE jest wygładzany — to pewność detekcji, nie ruch ciała.
+
+### Interpolacja liniowa — szczegółowo ze wzorem
+
+Jeśli w klatce 49 kolano jest na Y=0.65, a w klatce 53 na Y=0.73, i klatki 50-52 nie mają danych:
+
+```
+Różnica wartości: 0.73 - 0.65 = 0.08
+Różnica klatek:   53 - 49 = 4
+Krok na klatkę:   0.08 / 4 = 0.02
+
+Klatka 49: 0.65 (znana)
+Klatka 50: 0.65 + 1×0.02 = 0.67
+Klatka 51: 0.65 + 2×0.02 = 0.69
+Klatka 52: 0.65 + 3×0.02 = 0.71
+Klatka 53: 0.73 (znana)
+```
+
+**Wzór ogólny:** dla brakującej klatki k między znaną a i znaną b:
+
+`x_k = x_a + (k - a) / (b - a) × (x_b - x_a)`
+
+Zakłada liniowy ruch w brakujących klatkach. Przy 1-3 brakujących klatkach z rzędu (co zdarza się najczęściej) jest wystarczająco dokładne — ciało nie zmienia gwałtownie kierunku w 0.1 sekundy.
+
+### Auto-etykietowanie faz biegu (peak-based)
+
+**Problem:** mam ~12 000 klatek wideo i potrzebuję dla każdej etykiety: LEFT_STANCE, RIGHT_STANCE albo FLIGHT. Ręczne etykietowanie to setki godzin, więc opracowałem algorytm automatyczny.
+
+**Dlaczego nie proste progowanie Y pięty?**
+Pierwsze podejście: jeśli pięta jest nisko (y > próg) → STANCE, inaczej → FLIGHT. Nie zadziałało bo:
+- Faza lotu trwa 2-3 klatki przy 30 FPS — łatwo ją przegapić lub zaklasyfikować błędnie
+- Kamera boczna powoduje asymetrię L/R: stopa bliższa kamery ma inną wartość y niż dalsza
+- Próg 0.02 dawał >70% FLIGHT (za ciasny), a luźniejszy nie łapał krótkich lotów
+
+**Algorytm peak-based — krok po kroku:**
+
+1. **Sygnał kontaktu:** Dla każdej stopy biorę `max(heel_y, foot_index_y)`. Maximum dlatego, że heel strike = pięta nisko (heel_y duże), a toe-off = palce nisko (foot_index_y duże). Maximum "łączy" oba momenty w jeden ciągły sygnał kontaktu.
+
+2. **Detekcja foot strikes:** Szukam lokalnych maksimów (peaków) w sygnale kontaktu za pomocą `scipy.signal.find_peaks()`. Peak = moment gdy stopa jest najniżej = uderzenie o podłoże. Dwa parametry:
+   - `distance` = min. odległość między peakami (12 klatek przy 30 FPS, wynika z max kadencji 150 kontaktów/min jednej stopy)
+   - `prominence` = 0.03 (jak bardzo peak wystaje nad otoczenie; odrzuca szum, zachowuje prawdziwe kontakty)
+
+3. **Alternacja L-R:** W prawidłowym biegu stopy lądują naprzemiennie. Jeśli algorytm wykryje dwa peaki lewej stopy z rzędu (L-L), zachowuję ten z wyższą prominencją. Wynik: ścisła sekwencja L-R-L-R.
+
+4. **Podział STANCE/FLIGHT:** Region wokół każdego peaku dzielę na strefę centralną (STANCE) i marginesy brzegowe (FLIGHT). Parametr `flight_fraction = 0.4` oznacza, że ~40% klatek między kontaktami to FLIGHT. Margines `m = max(1, floor(długość_regionu × 0.4 / 2))`.
+
+5. **Kierunek biegu:** Porównuję średnią pozycję X nosa ze średnią X bioder. Jeśli nos jest na lewo od bioder → biegacz biegnie w lewo → zamieniam LEFT↔RIGHT, żeby etykiety były anatomicznie poprawne.
+
+6. **Filtr medianowy (kernel=3):** Na koniec filtruję sekwencję etykiet — eliminuje pojedyncze klatki z błędną etykietą. W praktyce zmienia niemal zero klatek, bo peak-based jest już czysty.
+
+**Gdzie w pracy:** Sekcja 3.3 (Materiały i metody)
+
+### Prominencja peaku (scipy.signal.find_peaks)
+
+**Prominencja** mierzy, jak bardzo dany peak "wystaje" ponad swoje otoczenie. Nie chodzi o bezwzględną wysokość peaku, lecz o różnicę między wierzchołkiem a najwyższym punktem "doliny" po obu stronach.
+
+Przykład: jeśli sygnał kontaktu stopy waha się między 0.7 a 0.9, a peak ma wartość 0.92, to prominencja ≈ 0.92 - 0.7 = 0.22 (wystarczająco powyżej progu 0.03). Drobna oscylacja szumu z 0.71 na 0.72 ma prominencję ~0.01 — odrzucona.
+
+Prominencja jest lepsza niż bezwzględna wysokość, bo działa niezależnie od tego, jak wysoko lub nisko stopa jest w kadrze (eliminuje problem asymetrii kamery).
+
+### Foot strike vs toe-off
+
+Dwa kluczowe momenty cyklu biegowego:
+- **Foot strike (initial contact):** moment uderzenia stopy o podłoże. W sygnale kontaktu widoczny jako peak (lokalne maksimum y stopy).
+- **Toe-off:** moment oderwania palców od podłoża. Kończy fazę stance, zaczyna fazę flight.
+
+Cykl jednej nogi: foot strike → mid-stance → toe-off → swing (noga w powietrzu) → foot strike.
+Cykl biegu: LEFT foot strike → LEFT stance → FLIGHT → RIGHT foot strike → RIGHT stance → FLIGHT → powtórz.
+
+### Filtr medianowy na sekwencji etykiet
+
+Filtr medianowy na sygnale ciągłym (np. trajektorii keypointów) wygładza wartości liczbowe. Na sekwencji **kategorycznych etykiet** (STANCE/FLIGHT) działa inaczej: zamieniam etykiety na liczby (LEFT_STANCE=0, RIGHT_STANCE=1, FLIGHT=2), stosuję filtr medianowy, i zamieniam z powrotem.
+
+Efekt: jeśli mam sekwencję ...STANCE, STANCE, FLIGHT, STANCE, STANCE..., to ta pojedyncza klatka FLIGHT jest otoczona przez STANCE i filtr medianowy ją "naprawi" na STANCE. Eliminuje 1-2 klatkowe "migotania".
+
+Kernel=3 oznacza okno 3 klatek (bieżąca + 1 przed + 1 po). Mediana z 3 wartości = wartość środkowa. Jeśli 2 z 3 to STANCE, mediana = STANCE.
+
+

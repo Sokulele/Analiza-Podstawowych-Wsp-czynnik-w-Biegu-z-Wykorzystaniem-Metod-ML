@@ -1,0 +1,296 @@
+{
+  "source_file": "Wklejony kod markdown(1).md",
+  "source_sha256": "b45d445d9baa9936ae0921955ff8799e47acebea7c0758133108a15a8485a986",
+  "split_strategy": "Jeden plik Markdown na każdy nagłówek poziomu ## z history.md + krótka rozdzielnia 00_ROZDZIELNIA.md.",
+  "section_count": 19,
+  "files": [
+    {
+      "index": 1,
+      "file": "01_2026-04-15-etap-2-ekstrakcja-keypointow.md",
+      "title": "2026-04-15 — Etap 2: Ekstrakcja keypointów ✅",
+      "description": "Ekstrakcja keypointów, środowisko, MediaPipe, jakość filmów 01/09/16",
+      "keywords": [
+        "keypoints",
+        "MediaPipe",
+        "extract_keypoints",
+        "jakość wideo",
+        "film 09",
+        "film 16"
+      ],
+      "chars": 2841,
+      "sha256": "4a9e9e01af4d1ad023b434b2a33b5af0c617b6ad2c491e88d086d8db463c8ab5"
+    },
+    {
+      "index": 2,
+      "file": "02_2026-04-16-etap-3-auto-etykietowanie-test-na-filmie-02.md",
+      "title": "2026-04-16 — Etap 3: Auto-etykietowanie (test na filmie 02)",
+      "description": "Pierwszy test auto-etykietowania na filmie 02 i wybór algorytmu peak-based",
+      "keywords": [
+        "auto_label",
+        "phase",
+        "peak-based",
+        "film 02",
+        "GCT",
+        "FLIGHT"
+      ],
+      "chars": 3378,
+      "sha256": "f47f010d4f7297abfd4bca390a8b0b4c636442bc4d3346c9debcd1f1a4258de6"
+    },
+    {
+      "index": 3,
+      "file": "03_2026-04-20-etap-3-dokonczony-audyt-datasetu-auto-etykietowanie-wszystkich-filmow.md",
+      "title": "2026-04-20 — Etap 3 dokończony: audyt datasetu + auto-etykietowanie wszystkich filmów",
+      "description": "Dokończenie auto-etykietowania, audyt datasetu, segmentacja filmu 09, finalny dataset 13 filmów",
+      "keywords": [
+        "dataset",
+        "film 09",
+        "film 16",
+        "etykiety",
+        "training set",
+        "split"
+      ],
+      "chars": 4515,
+      "sha256": "500c03d7c319bc9507e4f73e5cedb015d9ceef953d4166f92c5d7441b0f33f84"
+    },
+    {
+      "index": 4,
+      "file": "04_2026-04-24-etap-5-czesc-1-split-datasetu-random-forest-baseline.md",
+      "title": "2026-04-24 — Etap 5 (część 1): Split datasetu + Random Forest baseline",
+      "description": "Split train/val/test i pierwszy baseline Random Forest na surowych keypointach",
+      "keywords": [
+        "Random Forest",
+        "RF baseline",
+        "split_data",
+        "metrics",
+        "confusion matrix"
+      ],
+      "chars": 3084,
+      "sha256": "b3b69310ec56d155a4cdc5382059635f10968f00723ce6566a2343826af34962"
+    },
+    {
+      "index": 5,
+      "file": "05_2026-04-24-etap-5-czesc-2-rf-z-cechami-inzynierowanymi-folder-notatek-magisterskich.md",
+      "title": "2026-04-24 — Etap 5, część 2: RF z cechami inżynierowanymi + folder notatek magisterskich",
+      "description": "RF v2 z cechami inżynierowanymi, normalizacja względem biegacza, wnioski do pracy",
+      "keywords": [
+        "engineered features",
+        "normalizacja",
+        "kąty stawów",
+        "RF v2",
+        "aspect ratio"
+      ],
+      "chars": 3286,
+      "sha256": "8063e3159e257e094e7a0332cd3fb10239262a0be2bbbfe634b07a7341a40873"
+    },
+    {
+      "index": 6,
+      "file": "06_2026-04-26-etap-5-czesc-3-bilstm-model-docelowy.md",
+      "title": "2026-04-26 — Etap 5, część 3: BiLSTM (model docelowy)",
+      "description": "BiLSTM, dwa runy, wybór LSTM run 2 jako primary przed późniejszymi zmianami",
+      "keywords": [
+        "BiLSTM",
+        "LSTM",
+        "run 1",
+        "run 2",
+        "primary",
+        "PyTorch"
+      ],
+      "chars": 3825,
+      "sha256": "fc8f22d1915fa190643da98e9ad0fedab902a443081aa631dc4443de45892d8f"
+    },
+    {
+      "index": 7,
+      "file": "07_2026-04-26-etap-5-4-analiza-porownawcza-4-modeli.md",
+      "title": "2026-04-26 — Etap 5.4: analiza porównawcza 4 modeli",
+      "description": "Analiza porównawcza 4 modeli i artefakty do rozdziału 5.4",
+      "keywords": [
+        "compare_models",
+        "rozdział 5.4",
+        "macierze pomyłek",
+        "feature importances",
+        "learning curves"
+      ],
+      "chars": 3614,
+      "sha256": "ac643f5e4fa028f67ebce80b425c229481e468ffb43df269191d9f38c7e0f66c"
+    },
+    {
+      "index": 8,
+      "file": "08_2026-05-08-rozszerzenie-datasetu-o-2-biegaczy-23-24-retrening-4-modeli.md",
+      "title": "2026-05-08 — Rozszerzenie datasetu o 2 biegaczy (23, 24) + retrening 4 modeli",
+      "description": "Rozszerzenie datasetu o Pawła i Adama, retrening modeli, wpływ większego train setu",
+      "keywords": [
+        "Pawel",
+        "Adam",
+        "dataset extension",
+        "retraining",
+        "5.5"
+      ],
+      "chars": 4325,
+      "sha256": "60e34a143b62d4db920b73d5ebddb8ff5868501a0ca02b78d21290704441acd2"
+    },
+    {
+      "index": 9,
+      "file": "09_2026-05-08-plan-poprawy-accuracy-lstm-r1-aspect-fix-to-70-9-test-acc-prog-70-przekroczony.md",
+      "title": "2026-05-08 — Plan poprawy accuracy: LSTM r1 + aspect fix → **70.9% test acc** (próg 70% przekroczony)",
+      "description": "Plan poprawy accuracy, testy augmentacji/median/velocity/ensemble/aspect fix, osiągnięcie 70.9%",
+      "keywords": [
+        "accuracy",
+        "aspect fix",
+        "augmentacja",
+        "velocity",
+        "ensemble",
+        "70.9"
+      ],
+      "chars": 6200,
+      "sha256": "22193976bc7b169b471a3b079dec48293e3e1643892579083c884a90309e9d05"
+    },
+    {
+      "index": 10,
+      "file": "10_2026-05-09-etap-6-mvp-pipeline-wspo-czynnikow-biegu-test-na-adamie.md",
+      "title": "2026-05-09 — Etap 6 MVP: pipeline współczynników biegu (test na Adamie)",
+      "description": "Etap 6 MVP: pipeline współczynników biegu i test end-to-end na Adamie",
+      "keywords": [
+        "coefficients",
+        "MVP",
+        "temporal_metrics",
+        "spatial_metrics",
+        "symmetry",
+        "Adam"
+      ],
+      "chars": 5348,
+      "sha256": "f51adf8c153359254138b17152201212252d9bf58e1245b23d28970e08df7db9"
+    },
+    {
+      "index": 11,
+      "file": "11_2026-05-09-iteracja-1-pipeline-na-test-set-raporty-z-porownaniem-do-referencji.md",
+      "title": "2026-05-09 — Iteracja 1: pipeline na test set + raporty z porównaniem do referencji",
+      "description": "Iteracja 1: test pipeline na test set, raporty Markdown, jakość downstream metryk",
+      "keywords": [
+        "raporty",
+        "reference_values",
+        "analyze.py",
+        "low quality",
+        "test set"
+      ],
+      "chars": 4623,
+      "sha256": "96a8c43abe08508b8888da0774b6f0a15b3e58356d1d1d762888e12fe5c29237"
+    },
+    {
+      "index": 12,
+      "file": "12_2026-05-12-etap-7-modu-rekomendacji-biegowych.md",
+      "title": "2026-05-12 — Etap 7: moduł rekomendacji biegowych ✅",
+      "description": "Etap 7: moduł rekomendacji biegowych oparty o reguły literaturowe",
+      "keywords": [
+        "recommendations",
+        "rules.py",
+        "Heiderscheit",
+        "Novacheck",
+        "Daoud",
+        "Janek"
+      ],
+      "chars": 4022,
+      "sha256": "0d9ef310d48f0f92c8be48c74fe130d69e11a913e3d497f4e81b10348769491b"
+    },
+    {
+      "index": 13,
+      "file": "13_2026-05-13-sesja-a-integracja-etapu-7-z-analyze-py.md",
+      "title": "2026-05-13 — Sesja A: Integracja Etapu 7 z `analyze.py` ✅",
+      "description": "Integracja rekomendacji z analyze.py, raport końcowy i quality gate",
+      "keywords": [
+        "integracja",
+        "analyze.py",
+        "quality gate",
+        "raport",
+        "recommendations"
+      ],
+      "chars": 3416,
+      "sha256": "3eb8272b3621c4d9a744533b95baabbcf3a68027b129038c47d98a563815ba84"
+    },
+    {
+      "index": 14,
+      "file": "14_2026-05-13-sesja-b-czesc-1-stride-length-combinatorical-low-quality.md",
+      "title": "2026-05-13 — Sesja B (część 1): Stride length + combinatorical low quality ✅",
+      "description": "Stride length, combinatorial low quality detection i parametry prędkości bieżni",
+      "keywords": [
+        "stride length",
+        "treadmill speed",
+        "low quality",
+        "stable segments"
+      ],
+      "chars": 3651,
+      "sha256": "6d4c6353992ec9a9faf59529c86c2d816adcef087b92aa2726201d4995d19792"
+    },
+    {
+      "index": 15,
+      "file": "15_2026-05-14-sesja-c-walidacja-foot-strike-pattern.md",
+      "title": "2026-05-14 — Sesja C: walidacja foot strike pattern ✅",
+      "description": "Walidacja foot strike pattern, poprawki algorytmu i wyniki",
+      "keywords": [
+        "foot strike",
+        "heel",
+        "midfoot",
+        "forefoot",
+        "walidacja"
+      ],
+      "chars": 3438,
+      "sha256": "095b736812538d722066f4c993673263d6cca4a53367d67bc4e1deabd303c80f"
+    },
+    {
+      "index": 16,
+      "file": "16_2026-05-14-sesja-c-czesc-2-research-literatury-wybor-problemu-badawczego.md",
+      "title": "2026-05-14 — Sesja C część 2: Research literatury + wybór problemu badawczego ✅",
+      "description": "Research literatury i wybór problemu badawczego pracy magisterskiej",
+      "keywords": [
+        "literatura",
+        "problem badawczy",
+        "research gap",
+        "praca magisterska"
+      ],
+      "chars": 3563,
+      "sha256": "783d66538aeb36c1b331705e4b5e51126a2178cee2f93a6c2b9f41267f9ea7e9"
+    },
+    {
+      "index": 17,
+      "file": "17_2026-05-14-sesja-c-czesc-3-finalizacja-tytu-u-pracy.md",
+      "title": "2026-05-14 — Sesja C część 3: Finalizacja tytułu pracy ✅",
+      "description": "Finalizacja tytułu pracy, zakresu i narracji badawczej",
+      "keywords": [
+        "tytuł pracy",
+        "zakres",
+        "narracja",
+        "magisterka"
+      ],
+      "chars": 3506,
+      "sha256": "411b6f466b9a392d069acd3d0f4be4657e89005fe6982b7e0a12a33ffeb51f95"
+    },
+    {
+      "index": 18,
+      "file": "18_2026-05-23-sesja-d-setup-latex-bibliografii-plan-pisania.md",
+      "title": "2026-05-23 — Sesja D: setup LaTeX bibliografii + plan pisania ✅",
+      "description": "Setup LaTeX bibliografii, struktura pracy i plan pisania",
+      "keywords": [
+        "LaTeX",
+        "bibliografia",
+        "bibliography.tex",
+        "plan pisania",
+        "rozdziały"
+      ],
+      "chars": 2163,
+      "sha256": "7d21236f66e8707de52bc23d5fc524defcbec49a02e6d1e3c408d3dfaa75d300"
+    },
+    {
+      "index": 19,
+      "file": "19_2026-05-23-sesja-e-pisanie-rozdzia-u-3-sekcje-3-1-3-3.md",
+      "title": "2026-05-23 — Sesja E: Pisanie rozdziału 3 (sekcje 3.1–3.3) ✅",
+      "description": "Pisanie rozdziału 3: sekcje 3.1–3.3, metodologia i treść pracy",
+      "keywords": [
+        "rozdział 3",
+        "metodologia",
+        "sekcje 3.1-3.3",
+        "pisanie"
+      ],
+      "chars": 2879,
+      "sha256": "aa7955ab60866bc0bf27a22ac23c1c85d9c9be82115c41760348e7b515787f58"
+    }
+  ]
+}

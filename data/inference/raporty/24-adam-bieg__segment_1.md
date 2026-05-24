@@ -7,7 +7,7 @@
 - **Rozdzielczość**: 1920×1080
 - **Model klasyfikatora**: `models\lstm_run1_overfit` (test acc 0.709)
 - **Średnia confidence predykcji**: 0.909
-- **Wygenerowano**: 2026-05-13 08:51:39
+- **Wygenerowano**: 2026-05-15 08:36:14
 
 ## Temporal — wskaźniki czasowe
 
