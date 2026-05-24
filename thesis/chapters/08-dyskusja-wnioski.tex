@@ -1,0 +1,72 @@
+\chapter{Dyskusja i wnioski}
+\label{ch:dyskusja-wnioski}
+
+% TODO: Materiał: wszystkie wcześniejsze rozdziały + History.md.
+
+\section{Odpowiedź na pytania badawcze}
+\label{sec:odpowiedz-pytania}
+
+% TODO: Krótkie podsumowanie odpowiedzi na P1, P2, P3.
+%
+% P1 (czy pipeline ML wylicza 12 współczynników): TAK, system działa E2E.
+% Z jednego nagrania wideo monocular 2D oblicza wszystkie 12 metryk z dokładnością
+% walidowaną względem reference values literatury. Ograniczenie: stride length wymaga
+% inputu prędkości bieżni.
+%
+% P2 (który klasyfikator najlepiej dla precyzji metryk temporalnych):
+% LSTM run 1 + aspect ratio fix (70.9% test acc). LSTM redukuje L↔R confusion 3× vs RF v1
+% — to najgorszy typ błędu (rujnuje symetrię). RF v2 (67%) jako solid baseline.
+%
+% P3 (wrażliwość na warunki akwizycji):
+% Foot strike pattern i symetria L/P wrażliwe na orientację (Studium 1).
+% Metryki temporalne wrażliwe na FPS<15 (Studium 3). Aspect ratio fix poprawia
+% klasyfikację o ~3-10 pp dla nietypowych orientacji (Studium 2).
+% Auto-detekcja low_confidence możliwa przez analizę zakresu wartości (próg |kąt|>45°).
+
+\section{Wkład pracy}
+\label{sec:wklad-pracy}
+
+% TODO: 5 gap'ów z literatury (2026-05-14-research-podobnych-prac.md):
+% 1. Running-specific analiza (vs chód kliniczny w Stenum/Ripic/Ali/HGcnMLP)
+% 2. Systematyczne porównanie 4 modeli ML na małym datasecie
+% 3. Aspect ratio fix jako pre-processing dla heterogenicznych orientacji
+% 4. System 13+ reguł rule-based z citation z literatury biomechanicznej
+% 5. Auto-detekcja niskiej wiarygodności predykcji (Sesja C foot strike, combinatorical quality)
+
+\section{Ograniczenia}
+\label{sec:ograniczenia-pracy}
+
+% TODO: 6 punktów (z 2026-05-14-temat-pracy-finalny.md sekcja Limitations):
+% 1. Small dataset (16 filmów) - typowe w dziedzinie (HGcnMLP 27, Ripic 17), ale ogranicza generalizację
+% 2. Brak ground truth 3D MoCap - nie można podać MAE w metrach/sekundach
+% 3. Monocular 2D limitations (out-of-plane, perspective, environmental dependence)
+% 4. Non-determinizm MediaPipe (XNNPACK delegate)
+% 5. Reference values ogólne (zdrowi biegacze z literatury)
+% 6. Splity per-film, nie per-runner (Sage Canaday w train+val) - drobne data leakage
+
+\section{Implikacje praktyczne}
+\label{sec:implikacje}
+
+% TODO: Kiedy używać systemu, kiedy nie:
+% - Standardowe ujęcie z boku (landscape, prostopadle do bieżni) → wszystkie metryki wiarygodne
+% - Pionowe wideo → foot strike unreliable, system ostrzega automatycznie
+% - FPS<15 → metryki temporalne niedokładne, system mógłby flagować w przyszłości
+% - 3D MoCap pozostaje gold standard, ten system jest praktycznym kompromisem dla aplikacji konsumenckich
+
+\section{Praca przyszła}
+\label{sec:praca-przyszla}
+
+% TODO:
+% - Walidacja vs 3D MoCap (Vicon/Qualisys) na większej grupie biegaczy
+% - Stable segment detection dla wideo mixed-tempo (odłożone z Sesji B)
+% - PDF generator z wykresami matplotlib (odłożone z Sesji B)
+% - Walidacja kliniczna na populacjach z patologią (ACL, runner's knee)
+% - Auto-detekcja FPS jako warning dla użytkownika
+% - Walidacja na biegach terenowych (nie bieżni mechanicznej)
+% - Rozszerzenie reguły asymetrii perspektywy (|mean_L - mean_R| > 20°)
+
+\section{Wnioski końcowe}
+\label{sec:wnioski-koncowe}
+
+% TODO: 3-4 zdania syntezy. System działa, ma walidację, ma limitations omówione.
+% Główna wartość naukowa: 5 gap'ów wypełnionych, każdy z empirycznym potwierdzeniem.

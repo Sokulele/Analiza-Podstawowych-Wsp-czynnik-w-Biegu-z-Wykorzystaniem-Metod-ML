@@ -1,0 +1,201 @@
+\chapter{Materiały i metody}
+\label{ch:materialy-metody}
+
+% TODO: Najłatwiejszy rozdział do napisania — wszystkie liczby/decyzje są obiektywne.
+% Rekomendacja: pisać jako PIERWSZY, daje "rozruch" pisania.
+% Materiał: CLAUDE.md, History.md (etapy 1-7), src/, data/, docs/reference-values.md.
+
+\section{Dataset}
+\label{sec:dataset}
+
+Zbiór danych wykorzystany w~niniejszej pracy składa się z~15 nagrań wideo przedstawiających bieg na bieżni mechanicznej w~ujęciu z~boku. Materiał pochodzi z~dwóch źródeł: publicznie dostępnych nagrań opublikowanych w~serwisie YouTube (13~nagrań, w~tym segmenty dłuższych filmów) oraz nagrań własnych zarejestrowanych na potrzeby projektu z~udziałem trzech członków klubu biegowego \textit{Zabiegani na Szamę} --- Pawła, Adama i~Janka --- którym dziękuje za pomoc i udział w~badaniu. Nagrania Pawła (film~11) i~Adama (film~12) włączyłem do zbioru treningowego, natomiast materiał Janka posłużył wyłącznie do walidacji pełnego pipeline'u na wytrenowanym modelu (sekcja~\ref{sec:obliczanie-wspolczynnikow}). Nagrania obejmują łącznie około 12~biegaczy o~zróżnicowanym poziomie zaawansowania --- od rekreacyjnych joggerów po zawodowego ultramaratończyka.
+
+\subsection{Kryteria doboru nagrań}
+\label{sec:dataset-kryteria}
+
+Minimalne kryteria włączenia nagrania do zbioru były następujące:
+
+\begin{itemize}
+    \item ujęcie z~boku (sagittalne) --- kamera ustawiona w~przybliżeniu prostopadle do~kierunku biegu,
+    \item bieżnia mechaniczna --- stałe tło umożliwiające stabilną detekcję pozy,
+    \item sylwetka biegacza widoczna w~kadrze w~stopniu wystarczającym do detekcji keypointów,
+    \item co najmniej 10~sekund ciągłego biegu bez zasłonięcia sylwetki,
+    \item jakość obrazu wystarczająca do poprawnej detekcji keypointów przez MediaPipe Pose.
+\end{itemize}
+
+Do zbioru celowo włączyłem nagrania odbiegające od warunków idealnych --- m.in.\ wideo w~orientacji pionowej (film~10), nagrania w~trybie slow-motion o~efektywnym FPS poniżej 15 (filmy~4, 7, 8) czy bieg boso (film~8) --- w~celu oceny odporności pipeline'u na zróżnicowane warunki akwizycji (rozdział~\ref{ch:wrazliwosc}).
+
+\subsection{Charakterystyka zbioru}
+\label{sec:dataset-charakterystyka}
+
+Tabela~\ref{tab:dataset} przedstawia parametry techniczne wszystkich nagrań w~zbiorze danych. Materiał charakteryzuje się znacznym zróżnicowaniem pod względem rozdzielczości (od $320 \times 360$ do $1920 \times 1080$~pikseli), liczby klatek na sekundę (od~9{,}46 do~30~) oraz proporcji obrazu (ujęcia poziome i~pionowe). Część nagrań zarejestrowana została w~trybie slow-motion (filmy~4, 7, 8, 13), co skutkuje niższym efektywnym FPS w~metadanych pliku wideo.
+
+\begin{table}[htbp]
+\centering
+\caption{Parametry techniczne nagrań w~zbiorze danych}
+\label{tab:dataset}
+\small
+\begin{tabular}{clrrrl}
+\hline
+\textbf{Nr} & \textbf{Opis} & \textbf{FPS} & \textbf{Rozdzielczość} & \textbf{Klatki} & \textbf{Uwagi} \\
+\hline
+1  & Bieg w~obuwiu              & 29{,}97 & $480 \times 360$   & 949  & --- \\
+2  & Bieg 13\,km/h              & 30{,}00 & $360 \times 450$   & 300  & --- \\
+3  & Bieg 15\,km/h              & 30{,}00 & $360 \times 450$   & 300  & --- \\
+4  & Bieg 15\,km/h              &  9{,}46 & $360 \times 450$   & 560  & slow-motion \\
+5a & Bieg rekreacyjny (seg.\ 1) & 29{,}97 & $320 \times 360$   & 660  & --- \\
+5b & Bieg rekreacyjny (seg.\ 2) & 29{,}97 & $320 \times 360$   & 300  & --- \\
+6a & Bieg maratoński (seg.\ 1)  & 29{,}97 & $512 \times 360$   & 892  & --- \\
+6b & Bieg maratoński (seg.\ 2)  & 29{,}97 & $512 \times 360$   & 438  & --- \\
+7  & Bieg 4\,m/s                & 13{,}33 & $360 \times 450$   & 800  & slow-motion \\
+8  & Bieg boso 16\,km/h         & 11{,}25 & $364 \times 360$   & 900  & slow-motion \\
+9  & Bieg zmiennym tempem       & 30{,}00 & $640 \times 360$   & 870  & --- \\
+10 & Bieg, kamera pionowa       & 29{,}97 & $608 \times 1080$  & 320  & wideo pionowe \\
+11 & Paweł --- bieg             & 29{,}97 & $1280 \times 720$  & 1649 & nagranie własne \\
+12 & Adam --- bieg              & 29{,}99 & $1920 \times 1080$ & 2399 & nagranie własne \\
+13 & Bieg 4\,m/s                & 15{,}00 & $600 \times 800$   & 750  & slow-motion \\
+\hline
+\multicolumn{4}{l}{\textit{Razem:}} & \textit{12\,087} & \\
+\hline
+\end{tabular}
+\end{table}
+
+Cztery nagrania w~zbiorze (filmy~4, 7, 8, 13) zarejestrowane zostały w~trybie slow-motion, co przekłada się na niski FPS w~metadanych pliku wideo (od~9{,}46 do~15~FPS). Pomimo pozornie niskiej płynności, nagrania te są pełnowartościowym materiałem treningowym --- ruch biegacza jest rozciągnięty w~czasie, dzięki czemu jeden cykl biegowy obejmuje kilkadziesiąt klatek zamiast kilkunastu. Klasyfikator uczy się rozpoznawać pozycję ciała na podstawie geometrii keypointów, nie na podstawie czasu między klatkami, dlatego większa ilość klatek na cykl stanowi dodatkowy atut.
+
+Łącznie 15~nagrań obejmuje 12\,087~klatek, z~których 12\,007 posiada etykiety faz biegu. Zbiór podzieliłem na część treningową (10~filmów, 9\,779~klatek), walidacyjną (2~filmy, 738~klatek) i~testową (3~filmy, 1\,490~klatek). Szczegółowy opis podziału i~jego uzasadnienie przedstawiłem w~sekcji~\ref{sec:splity}.
+
+\section{Pipeline ekstrakcji keypointów}
+\label{sec:pipeline-extraction}
+
+Ekstrakcja punktów charakterystycznych ciała (keypointów) z~nagrań wideo stanowi pierwszy etap pipeline'u analitycznego. Proces przebiega w~trzech krokach: dekodowanie klatek wideo, detekcja pozy przez sieć neuronową oraz wygładzanie uzyskanych trajektorii keypointów.
+
+\subsection{Detekcja pozy --- MediaPipe Pose}
+\label{sec:mediapipe}
+
+Do detekcji pozy zastosowałem bibliotekę MediaPipe Pose w~wersji 0.10.14 (legacy Solutions API) \cite{bazarevsky2020blazepose}. Model wykrywa 33~keypointy w~każdej klatce wideo: 1~punkt centralny (nos) oraz 16~par punktów symetrycznych L/P obejmujących twarz, tułów, kończyny górne i~dolne --- w~tym pięty (\texttt{HEEL}) i~czubki stóp (\texttt{FOOT\_INDEX}). Każdy keypoint opisany jest czterema wartościami:
+
+\begin{itemize}
+    \item $x, y \in [0, 1]$ --- znormalizowane współrzędne w~płaszczyźnie obrazu (0{,}0 = lewy górny róg, 1{,}1 = prawy górny),
+    \item $z$ --- estymowana głębia, tj.\ przybliżona odległość keypointu od~kamery względem punktu centralnego bioder. Wartość ta nie jest mierzona czujnikiem głębi, lecz wnioskowana przez sieć neuronową na podstawie wskazówek wizualnych: relatywnych rozmiarów kończyn (bliższe wydają się większe), efektów perspektywy (skrócenie kończyn skierowanych ku/od kamery), wzorców zasłonięć oraz wyuczonych proporcji anatomicznych ciała. Sieć trenowana jest na zbiorach zawierających zarówno adnotacje 2D, jak i~dane referencyjne z~systemów motion capture 3D. W~tej pracy korzystałem głównie ze~współrzędnych $x$ i~$y$,
+    \item $visibility \in [0, 1]$ --- wskaźnik pewności detekcji, określający prawdopodobieństwo, że dany keypoint jest widoczny w~kadrze i~nie jest zasłonięty przez inne części ciała. Sieć neuronowa uczy się przewidywać tę wartość na podstawie tego, czy okolica keypointu jest przesłonięta przez inne kończyny lub wykracza poza kadr, oraz czy cechy wizualne w~otoczeniu keypointu są spójne z~oczekiwaną konfiguracją pozy. Wartość generowana jest przez warstwę sigmoidalną na wyjściu modelu.
+\end{itemize}
+
+Zastosowałem najwyższy poziom złożoności modelu (\texttt{model\_complexity=2}), który zapewnia najdokładniejszą lokalizację keypointów kosztem dłuższego czasu przetwarzania (inferencji). Tryb wideo (\texttt{static\_image\_mode=False}) umożliwia wykorzystanie śledzenia między klatkami, co poprawia stabilność trajektorii.
+
+MediaPipe Pose wybrałem spośród trzech rozważanych standardów detekcji pozy:
+
+\begin{itemize}
+    \item \textbf{COCO} \cite{lin2014coco} --- benchmark referencyjny definiujący 17~keypointów ciała (nos, oczy, uszy, ramiona, łokcie, nadgarstki, biodra, kolana, kostki). Nie zawiera żadnych keypointów stopy poniżej kostki,
+    \item \textbf{OpenPose BODY\_25} \cite{cao2021openpose} --- rozszerzenie standardu COCO do 25~keypointów, dodające m.in.\ pięty (\texttt{HEEL}), paluch (\texttt{BIG\_TOE}) i~mały palec (\texttt{SMALL\_TOE}) dla każdej stopy,
+    \item \textbf{MediaPipe BlazePose} \cite{bazarevsky2020blazepose} --- 33~keypointy, w~tym pięty (\texttt{HEEL}) oraz \texttt{FOOT\_INDEX} (punkt odpowiadający przedniej części stopy).
+\end{itemize}
+
+Choć OpenPose również oferuje keypointy stopy, wybrałem MediaPipe z~dwóch powodów. Po~pierwsze, punkt \texttt{FOOT\_INDEX} lepiej reprezentuje przednią krawędź kontaktu stopy z~podłożem niż \texttt{BIG\_TOE}, co jest istotne przy wyznaczaniu kąta lądowania stopy (sekcja~\ref{sec:obliczanie-wspolczynnikow}). Po~drugie, MediaPipe jest zoptymalizowany pod detekcję pojedynczej osoby i~nie wymaga karty graficznej --- wystarczy standardowy procesor, co upraszcza wdrożenie pipeline'u.
+
+Z~33 wykrywanych keypointów w~dalszej analizie wykorzystywałem przede wszystkim 13~punktów istotnych dla biomechaniki biegu: nos, ramiona (2), biodra (2), kolana (2), kostki (2), pięty (2) i~czubki stóp (2). Pozostałe keypointy (twarz, dłonie, łokcie, nadgarstki) rejestrowałem, lecz nie wnosiły informacji do klasyfikacji faz ani obliczania współczynników.
+
+\subsection{Wygładzanie trajektorii --- filtr Savitzky-Golay}
+\label{sec:savgol}
+
+\subsubsection{Problem szumu w~trajektoriach keypointów}
+
+Każda współrzędna keypointu wyznaczonego przez MediaPipe Pose tworzy ciąg wartości zmieniających się w~czasie, czyli trajektorię opisującą ruch danego punktu ciała, np.~kolana lub pięty, z~klatki na klatkę. MediaPipe przetwarza każdą klatkę wideo w~znacznej mierze niezależnie: chociaż tryb wideo wykorzystuje mechanizm śledzenia pozy między kolejnymi klatkami, pozycja każdego keypointu jest ostatecznie wynikiem predykcji sieci neuronowej dla danej klatki. Ponieważ predykcja ta nie jest idealnie powtarzalna, pozycja keypointu może oscylować o~kilka pikseli między kolejnymi klatkami nawet wtedy, gdy rzeczywisty ruch ciała jest płynny. Zjawisko to określam jako szum lub \textit{jitter}, czyli drobne, przypadkowe odchylenia wykrytej pozycji keypointu od jego rzeczywistego położenia.
+
+Obliczanie współczynników biomechanicznych, takich jak kąty stawów czy czas kontaktu stopy, bezpośrednio na surowych, zaszumionych trajektoriach prowadziłoby do błędów wynikających z~obecności jittera. Konieczne jest zatem wygładzenie sygnału, czyli ograniczenie losowych fluktuacji przy jednoczesnym zachowaniu rzeczywistego przebiegu ruchu \cite{crenna2021filtering}.
+
+\subsubsection{Zasada działania filtru Savitzky-Golay}
+
+Do wygładzania zastosowałem filtr Savitzky-Golay \cite{savitzky1964}. Dla każdego punktu w~trajektorii filtr bierze okno $w$ sąsiednich próbek, np.~$w = 11$ kolejnych klatek, i~dopasowuje do nich wielomian o~zadanym rzędzie $p$ metodą najmniejszych kwadratów. Wartość wygładzona odpowiada wartości tego wielomianu w~środkowym punkcie okna. Następnie okno przesuwa się o~jedną klatkę i~procedura powtarza się dla kolejnej próbki sygnału.
+
+Zachowanie filtru kontrolują dwa główne parametry:
+
+\begin{itemize}
+    \item \textbf{Długość okna} $w = 11$ --- liczba kolejnych klatek branych pod uwagę przy każdym dopasowaniu. Większe okno powoduje silniejsze wygładzenie sygnału, ponieważ więcej próbek uczestniczy w~lokalnym dopasowaniu wielomianu, ale jednocześnie zwiększa ryzyko rozmycia szybkich zmian trajektorii. Przy 30~FPS okno 11~klatek obejmuje około 0{,}37~s sygnału, przy czym względem analizowanej klatki uwzględnianych jest po pięć klatek wstecz i~pięć klatek w~przód, co odpowiada około 0{,}17~s z~każdej strony. Parametr ten dobrałem jako kompromis między redukcją jittera a~zachowaniem lokalnych ekstremów istotnych dla detekcji faz biegu.
+    
+    \item \textbf{Rząd wielomianu} $p = 3$ --- stopień wielomianu dopasowywanego w~każdym oknie. Wielomian 3.~stopnia potrafi odwzorować lokalną krzywiznę sygnału, w~tym jego lokalne maksima i~minima. Jest to przewaga nad prostą średnią ruchomą, która ma tendencję do spłaszczania ekstremów. Zachowanie lokalnych ekstremów jest istotne, ponieważ momenty kontaktu stopy z~podłożem mogą objawiać się jako charakterystyczne maksima lub minima w~trajektoriach keypointów stopy.
+\end{itemize}
+
+Wygładzanie stosowałem oddzielnie dla współrzędnych $x$, $y$ i~$z$ każdego z~33~keypointów. Wartości $visibility$ nie wygładzałem, ponieważ jest to miara pewności detekcji generowana przez sieć neuronową, a~nie sygnał opisujący fizyczny ruch ciała.
+
+\subsubsection{Uzupełnianie brakujących detekcji}
+
+W~pojedynczych klatkach MediaPipe może nie wykryć pozy, np.~z~powodu rozmycia ruchu, chwilowego zasłonięcia części ciała lub niejednoznacznego ułożenia sylwetki. Filtr Savitzky-Golay wymaga ciągłego sygnału, dlatego przed jego zastosowaniem konieczne było uzupełnienie brakujących wartości.
+
+Luki w~trajektoriach uzupełniałem interpolacją liniową. Jeżeli keypoint miał znaną pozycję w~klatce $a$ oraz w~klatce $b$, a~brakowało danych w~klatkach pomiędzy nimi, to brakujące wartości wyznaczałem jako punkty leżące na odcinku łączącym pozycję z~klatki $a$ z~pozycją z~klatki $b$. Interpolację stosowałem dla luk wewnętrznych, tj.~takich, dla których istniała znana pozycja keypointu zarówno przed, jak i~po brakującym fragmencie.
+
+\subsubsection{Ocena skuteczności wygładzania}
+
+Skuteczność filtracji oceniałem za pomocą metryki \textit{jittera}, definiowanej jako odchylenie standardowe drugiej różnicy sygnału. Druga różnica ciągu $x_0, x_1, \ldots, x_n$ dana jest wzorem:
+\[
+d^2_i = x_{i+2} - 2 \cdot x_{i+1} + x_i
+\]
+i~stanowi dyskretne przybliżenie lokalnej zmiany prędkości sygnału, czyli jego przyspieszenia. Dla gładkiej trajektorii wartości drugiej różnicy zmieniają się w~sposób uporządkowany, dlatego ich odchylenie standardowe jest relatywnie małe. Dla sygnału zaszumionego druga różnica przyjmuje bardziej nieregularne wartości, co prowadzi do wzrostu $\mathrm{std}(d^2)$.
+
+Metrykę tę obliczałem dla współrzędnych $x$ i~$y$ dwunastu kluczowych keypointów: ramion, bioder, kolan, kostek, pięt oraz czubków stóp. Porównanie wartości metryki przed i~po filtracji pozwalało ilościowo ocenić, w~jakim stopniu filtr Savitzky-Golay ograniczył wysokoczęstotliwościowe fluktuacje trajektorii. Procentową redukcję jittera wyznaczałem ze wzoru:
+\[
+\text{redukcja} =
+\frac{
+\text{jitter}_{\text{raw}} - \text{jitter}_{\text{smooth}}
+}{
+\text{jitter}_{\text{raw}}
+}
+\cdot 100\%.
+\]
+Metryka ta stanowi prostą miarę poziomu wysokoczęstotliwościowych fluktuacji sygnału i~pozwala porównać trajektorie przed oraz po zastosowaniu filtracji.
+
+
+\subsection{Format wyjściowy}
+\label{sec:extraction-output}
+
+Wynikiem ekstrakcji jest jeden plik CSV na nagranie, zawierający kolumny: numer klatki, znacznik czasowy (obliczony z~FPS), flaga detekcji pozy oraz $33 \times 4 = 132$ kolumny z~wygładzonymi keypointami (\texttt{\{nazwa\}\_x}, \texttt{\{nazwa\}\_y}, \texttt{\{nazwa\}\_z}, \texttt{\{nazwa\}\_visibility}).
+
+\section{Auto-etykietowanie faz biegu}
+\label{sec:auto-labeling}
+
+% TODO: Algorytm peak-based z .claude/rules/labeling.md
+% - max(heel_y, foot_index_y) per stopa
+% - scipy.signal.find_peaks (distance=12, prominence=0.03)
+% - alternacja L-R, podział STANCE/FLIGHT (flight_fraction=0.4)
+% - filtr medianowy kernel=3
+% Argument: dlaczego peak-based, nie progowanie Y (notatka 2026-04-16).
+
+\section{Architektury klasyfikatorów}
+\label{sec:architektury}
+
+% TODO: 4 modele:
+% - RF v1 (raw, 132 features) - baseline
+% - RF v2 (engineered, 106 features) - kąty, prędkości, akceleracje
+% - LSTM run 1 (BiLSTM, h=128, dropout=0.3, window=15) - overfit but high acc
+% - LSTM run 2 (BiLSTM, h=64, dropout=0.4) - primary stable
+% Plus aspect ratio fix (pre-processing dla LSTM).
+% Liczby features: 132 i 106 z comparison_summary.json. ZWERYFIKOWANE.
+
+\section{Obliczanie współczynników biomechanicznych}
+\label{sec:obliczanie-wspolczynnikow}
+
+% TODO: 5 temporalnych + 7 przestrzennych (z reference-values.md).
+% Formuły z .claude/rules/coefficients.md.
+% Agregacje: mean, std per cykl, osobno L/P.
+
+\section{Silnik reguł rekomendacji}
+\label{sec:silnik-regul}
+
+% TODO: 13+ reguł z citation (Heiderscheit, Souza, Novacheck, Diaz, Robinson, Daoud).
+% Severity: critical/warning/watch/info.
+% Reguły łączone (combinatorical: overstriding, stride_long, quality).
+
+\section{Splity train/val/test}
+\label{sec:splity}
+
+% TODO: data/splits.json.
+% Train: 10 filmów, val: 2 filmy, test: 3 filmy (02, 20, 22).
+% UCZCIWA WZMIANKA: split per-film, NIE per-runner.
+% Sage Canaday (film 09) ma segmenty w train i val - drobne ograniczenie metodologiczne.
+
+\section{Metryki ewaluacji}
+\label{sec:metryki}
+
+% TODO: accuracy, F1 macro, confusion matrix.
+% Per-klasa: precision, recall (FLIGHT, LEFT_STANCE, RIGHT_STANCE).
+% Per-film breakdown w per_file_test.md.
+% Error breakdown: L↔R vs FLIGHT↔STANCE confusion.

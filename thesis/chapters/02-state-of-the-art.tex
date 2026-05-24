@@ -1,0 +1,53 @@
+\chapter{Stan wiedzy}
+\label{ch:sota}
+
+% TODO: Materiał: docs/thesis-notes/2026-05-14-research-podobnych-prac.md
+% 7 prac peer-reviewed z cytatami + 4 wzorce sformułowań + 5 gap'ów w literaturze.
+
+\section{Pose estimation z monocular 2D wideo}
+\label{sec:sota-pose}
+
+% TODO: OpenPose (Cao 2018), MediaPipe BlazePose (Bazarevsky 2020), AlphaPose, HRNet.
+% Diagram 33 keypointów MediaPipe — z 2026-05-14-wyjasnienia-pojec-do-pisania.md
+% (sekcja "Dlaczego MediaPipe Pose ma akurat 33 keypointy").
+% Cytat-szablon dla monocular 2D — ten sam plik (sekcja "Monocular 2D wideo").
+
+\section{Współczynniki biomechaniczne biegu}
+\label{sec:sota-wspolczynniki}
+
+% TODO: Klasyczne metryki z literatury — citation:
+% - Heiderscheit 2011 (kadencja, knee@contact, overstriding)
+% - Souza 2016 (GCT, foot strike pattern)
+% - Novacheck 1998 (czas lotu, torso lean, stride length)
+% - Diaz 2019 (vertical oscillation)
+% - Robinson 1987 (Symmetry Index)
+% - Daoud 2012 (foot strike injury risk)
+
+\section{Klasyfikatory faz biegu i chodu}
+\label{sec:sota-klasyfikatory}
+
+% TODO: Przegląd metod klasyfikacji faz gait/running:
+% - klasyczne ML (Random Forest, SVM) na keypointach
+% - deep learning (LSTM, BiLSTM, 1D-CNN, Transformer)
+% - Stenum 2021 (OpenPose vs MoCap, klasyk walidacji)
+% - Ali 2024 (MediaPipe + LSTM-CNN dla DMD gait)
+
+\section{Walidacja 2D pose vs 3D motion capture}
+\label{sec:sota-walidacja}
+
+% TODO: Stenum 2021, Ripic 2023, HGcnMLP 2023, Frontiers Phys 2025 review.
+% Cytaty z 2026-05-14-research-podobnych-prac.md.
+% Akcent na limitations monocular 2D zidentyfikowane w literaturze:
+% - out-of-plane motions
+% - perspective dependence
+% - field of view position effect (Stenum 2021)
+
+\section{Identyfikacja luki w literaturze}
+\label{sec:sota-luka}
+
+% TODO: 5 gap'ów z 2026-05-14-research-podobnych-prac.md:
+% 1. Running-specific (vs chód kliniczny)
+% 2. Systematyczne porównanie 4 klasyfikatorów na małym datasecie
+% 3. Aspect ratio fix jako pre-processing
+% 4. System rekomendacji rule-based z citation z literatury
+% 5. Auto-detekcja niskiej wiarygodności predykcji

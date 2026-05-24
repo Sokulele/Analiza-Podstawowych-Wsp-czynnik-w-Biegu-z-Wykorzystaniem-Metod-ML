@@ -1,0 +1,65 @@
+\chapter{Współczynniki biegu --- pipeline obliczania}
+\label{ch:wspolczynniki}
+
+% TODO: CENTRALNY ROZDZIAŁ wg tytułu pracy.
+% Materiał: src/coefficients/, docs/reference-values.md,
+% data/inference/raporty/ (3 biegacze: Adam, 22, Janek),
+% docs/thesis-notes/2026-05-09-coefficients-mvp.md,
+% docs/thesis-notes/2026-05-09-iteracja1-test-set.md.
+
+\section{Wprowadzenie: rozszerzenie zakresu z 5 do 12 współczynników}
+\label{sec:rozszerzenie-zakresu}
+
+% TODO: Geneza ewolucji zakresu (z 2026-05-14-temat-pracy-finalny.md).
+% Pierwotny plan: 4-5 podstawowych (kadencja, GCT, stride length, foot strike).
+% Rozszerzenie w trakcie: +7 współczynników z naturalnej kompozycji pipeline.
+
+\section{Współczynniki temporalne (z sekwencji faz)}
+\label{sec:wspolczynniki-temporalne}
+
+% TODO: 5 metryk z .claude/rules/coefficients.md:
+% - Kadencja [kroki/min]
+% - Czas kontaktu GCT [ms] - osobno L i P
+% - Czas lotu [ms]
+% - Czas cyklu [ms]
+% - Duty factor [0-1]
+% - Stride length [m] - WYMAGA --treadmill-speed-ms
+% Formuły + reference values (Heiderscheit, Souza, Novacheck).
+
+\section{Współczynniki przestrzenne (z geometrii keypointów)}
+\label{sec:wspolczynniki-przestrzenne}
+
+% TODO: 7 metryk:
+% - Kąty stawów (kolano, biodro, kostka) per faza, L/P
+% - Pochylenie tułowia
+% - Vertical oscillation (raw + per torso length)
+% - Overstriding (dystans X ankle-hip w kontakcie)
+% - Foot strike pattern (heel/midfoot/forefoot, kąt heel→foot_index)
+% - Kąt kolana w kontakcie
+% - Symmetry Index (Robinson 1987) - L/P
+
+\section{Walidacja przez porównanie z reference values}
+\label{sec:walidacja-reference}
+
+% TODO: docs/reference-values.md.
+% Czemu nie 3D MoCap: brak ground truth, monocular 2D nie kalibrowane do metrów.
+% Praktyczna walidacja: czy wyliczone wartości mieszczą się w zakresie literatury.
+
+\section{Studium przypadków: trzech biegaczy}
+\label{sec:case-studies-biegacze}
+
+% TODO: data/inference/raporty/
+% - 24-adam-bieg__segment_1 (train, "ideal case")
+% - 22-running-analysis-with-physiotherapist (test, dobry)
+% - 25-janek__segment_1 (edge case)
+% Tabela porównawcza: kadencja, GCT L/R, foot strike, symetria, recommendations count.
+
+\section{Ograniczenia obliczeń}
+\label{sec:ograniczenia-obliczen}
+
+% TODO:
+% - Brak kalibracji piksel→metr (vertical oscillation w jednostkach znormalizowanych)
+% - Monocular 2D - artefakty perspektywy (out-of-plane)
+% - Non-determinizm MediaPipe (XNNPACK delegate)
+% - Stride length wymaga inputu od użytkownika
+% - Bez 3D MoCap nie można podać MAE w metrach

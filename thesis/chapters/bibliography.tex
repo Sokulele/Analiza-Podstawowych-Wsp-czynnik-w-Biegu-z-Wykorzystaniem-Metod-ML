@@ -1,0 +1,231 @@
+% ============================================================================
+% BIBLIOGRAFIA
+% ============================================================================
+% Template SGGW używa ręcznego \thebibliography (nie BibTeX/biblatex).
+% Wpisy uporządkowane tematycznie: biomechanika biegu / pose estimation / ML / metodologia.
+%
+% Status: 27 wpisów (sesja 2026-05-23). Zweryfikowane 3x (agenci) + ręcznie (user).
+% Diaz 2019 usunięty — niepotwierdzony. OpenPose rok zmieniony na 2021 (tom 43, nr 1).
+% Materiał źródłowy: docs/thesis-notes/2026-05-14-research-podobnych-prac.md
+%                    docs/reference-values.md (cytaty biomechaniczne w rules.py)
+
+\begin{thebibliography}{99}
+
+% ============================================================================
+% Pose estimation z monocular 2D wideo
+% ============================================================================
+
+\bibitem{bazarevsky2020blazepose}
+V.\ Bazarevsky, I.\ Grishchenko, K.\ Raveendran, T.\ Zhu, F.\ Zhang, M.\ Grundmann,
+\textit{BlazePose: On-device Real-time Body Pose Tracking},
+CVPR Workshop on Computer Vision for Augmented and Virtual Reality, arXiv:2006.10204, 2020.
+
+\bibitem{cao2021openpose}
+Z.\ Cao, G.\ Hidalgo, T.\ Simon, S.E.\ Wei, Y.\ Sheikh,
+\textit{OpenPose: Realtime Multi-Person 2D Pose Estimation Using Part Affinity Fields},
+IEEE Transactions on Pattern Analysis and Machine Intelligence, 43(1): 172--186, 2021.
+\url{https://doi.org/10.1109/TPAMI.2019.2929257}
+
+\bibitem{lin2014coco}
+T.Y.\ Lin et al.,
+\textit{Microsoft COCO: Common Objects in Context},
+European Conference on Computer Vision (ECCV), pp.\ 740--755, 2014.
+\url{https://doi.org/10.1007/978-3-319-10602-1_48}
+
+% ============================================================================
+% Walidacja 2D pose vs 3D motion capture (gait/running)
+% ============================================================================
+
+\bibitem{stenum2021}
+J.\ Stenum, C.\ Rossi, R.T.\ Roemmich,
+\textit{Two-dimensional video-based analysis of human gait using pose estimation},
+PLOS Computational Biology, 17(4): e1008935, 2021.
+\url{https://doi.org/10.1371/journal.pcbi.1008935}
+
+\bibitem{ali2024dmd}
+M.M.\ Ali, M.M.\ Hassan, M.\ Zaki,
+\textit{Human Pose Estimation for Clinical Analysis of Gait Pathologies},
+Bioinformatics and Biology Insights, 2024.
+\url{https://doi.org/10.1177/11779322241231108}
+
+\bibitem{menychtas2023}
+D.\ Menychtas, N.\ Petrou, I.\ Kansizoglou, E.\ Giannakou, A.\ Grekidis, A.\ Gasteratos,
+V.\ Gourgoulis, E.\ Douda, I.\ Smilios, M.\ Michalopoulou, G.C.\ Sirakoulis, N.\ Aggeloulis,
+\textit{Gait analysis comparison between manual marking, 2D pose estimation algorithms, and 3D marker-based system},
+Frontiers in Rehabilitation Sciences, 4: 1238134, 2023.
+\url{https://doi.org/10.3389/fresc.2023.1238134}
+
+\bibitem{hgcnmlp2024}
+R.\ Hu, Y.\ Diao, Y.\ Wang, G.\ Li, R.\ He, Y.\ Ning, N.\ Lou, G.\ Li, G.\ Zhao,
+\textit{Effective evaluation of HGcnMLP method for markerless 3D pose estimation of musculoskeletal diseases patients based on smartphone monocular video},
+Frontiers in Bioengineering and Biotechnology, 11: 1335251, 2024.
+% Uwaga: volume 11 (2023), ale publikacja online 9 stycznia 2024
+\url{https://doi.org/10.3389/fbioe.2023.1335251}
+
+\bibitem{frontiers2025review}
+S.\ Edriss, C.\ Romagnoli, L.\ Caprioli, V.\ Bonaiuto, E.\ Padua, G.\ Annino,
+\textit{Commercial vision sensors and AI-based pose estimation frameworks for markerless motion analysis in sports and exercises: a mini review},
+Frontiers in Physiology, 16: 1649330, 2025.
+\url{https://doi.org/10.3389/fphys.2025.1649330}
+
+\bibitem{roggio2024review}
+F.\ Roggio, B.\ Trovato, M.\ Sortino, G.\ Musumeci,
+\textit{A comprehensive analysis of the machine learning pose estimation models used in human movement and posture analyses: A narrative review},
+Heliyon, 10(21): e39977, 2024.
+\url{https://doi.org/10.1016/j.heliyon.2024.e39977}
+
+\bibitem{vincent2024footstrike}
+H.K.\ Vincent, K.\ Coffey, A.\ Villasuso, K.R.\ Vincent, S.\ Sharififar, L.\ Pezzullo, R.M.\ Nixon,
+\textit{Accuracy of self-reported foot strike pattern detection among endurance runners},
+Frontiers in Sports and Active Living, 6: 1491486, 2024.
+\url{https://doi.org/10.3389/fspor.2024.1491486}
+
+% ============================================================================
+% Biomechanika biegu — reference values dla reguł rekomendacji
+% ============================================================================
+
+\bibitem{heiderscheit2011}
+B.C.\ Heiderscheit, E.S.\ Chumanov, M.P.\ Michalski, C.M.\ Wille, M.B.\ Ryan,
+\textit{Effects of step rate manipulation on joint mechanics during running},
+Medicine \& Science in Sports \& Exercise, 43(2): 296--302, 2011.
+\url{https://doi.org/10.1249/MSS.0b013e3181ebedf4}
+
+\bibitem{novacheck1998}
+T.F.\ Novacheck,
+\textit{The biomechanics of running},
+Gait \& Posture, 7(1): 77--95, 1998.
+\url{https://doi.org/10.1016/S0966-6362(97)00038-6}
+
+\bibitem{souza2016}
+R.B.\ Souza,
+\textit{An Evidence-Based Videotaped Running Biomechanics Analysis},
+Physical Medicine and Rehabilitation Clinics of North America, 27(1): 217--236, 2016.
+\url{https://doi.org/10.1016/j.pmr.2015.08.006}
+
+% Diaz 2019 (vertical oscillation) — usunięty: nie udało się potwierdzić istnienia pracy.
+% Jeśli znajdziesz pełne dane bibliograficzne, dodaj wpis z powrotem.
+
+\bibitem{robinson1987}
+R.O.\ Robinson, W.\ Herzog, B.M.\ Nigg,
+\textit{Use of force platform variables to quantify the effects of chiropractic manipulation on gait symmetry},
+Journal of Manipulative and Physiological Therapeutics, 10(4): 172--176, 1987.
+
+\bibitem{daoud2012}
+A.I.\ Daoud et al.,
+\textit{Foot strike and injury rates in endurance runners: a retrospective study},
+Medicine \& Science in Sports \& Exercise, 44(7): 1325--1334, 2012.
+\url{https://doi.org/10.1249/MSS.0b013e3182465115}
+
+% ============================================================================
+% Uczenie maszynowe / klasyfikatory faz biegu
+% ============================================================================
+
+\bibitem{jeon2024bilstm}
+H.\ Jeon, D.\ Lee,
+\textit{Bi-Directional Long Short-Term Memory-Based Gait Phase Recognition Method Robust to Directional Variations in Subject's Gait Progression Using Wearable Inertial Sensor},
+Sensors, 24(4): 1276, 2024.
+\url{https://doi.org/10.3390/s24041276}
+
+\bibitem{su2020dcnn}
+B.\ Su, C.\ Smith, E.\ Gutierrez~Farewik,
+\textit{Gait Phase Recognition Using Deep Convolutional Neural Network with Inertial Measurement Units},
+Biosensors, 10(9): 109, 2020.
+\url{https://doi.org/10.3390/bios10090109}
+
+\bibitem{vu2020review}
+H.T.T.\ Vu, D.\ Dong, H.-L.\ Cao, T.\ Verstraten, D.\ Lefeber, B.\ Vanderborght, J.\ Geeroms,
+\textit{A Review of Gait Phase Detection Algorithms for Lower Limb Prostheses},
+Sensors, 20(14): 3972, 2020.
+\url{https://doi.org/10.3390/s20143972}
+
+\bibitem{dimmick2023fatigue}
+H.L.\ Dimmick, C.R.\ van~Rassel, M.J.\ MacInnis, R.\ Ferber,
+\textit{Use of subject-specific models to detect fatigue-related changes in running biomechanics: a random forest approach},
+Frontiers in Sports and Active Living, 5: 1283316, 2023.
+\url{https://doi.org/10.3389/fspor.2023.1283316}
+
+\bibitem{martinez2020rf}
+J.\ Mart\'{i}nez-Gramage, J.P.\ Albiach, I.N.\ Molt\'{o}, J.J.\ Amer-Cuenca, V.H.\ Moreno, E.\ Segura-Ort\'{i},
+\textit{A Random Forest Machine Learning Framework to Reduce Running Injuries in Young Triathletes},
+Sensors, 20(21): 6388, 2020.
+\url{https://doi.org/10.3390/s20216388}
+
+\bibitem{young2023smartphone}
+F.\ Young, R.\ Mason, R.\ Morris, S.\ Stuart, A.\ Godfrey,
+\textit{Internet-of-Things-Enabled Markerless Running Gait Assessment from a Single Smartphone Camera},
+Sensors, 23(2): 696, 2023.
+\url{https://doi.org/10.3390/s23020696}
+
+% ============================================================================
+% Filtrowanie sygnałów biomechanicznych
+% ============================================================================
+
+\bibitem{crenna2021filtering}
+F.\ Crenna, G.B.\ Rossi, M.\ Berardengo,
+\textit{Filtering Biomechanical Signals in Movement Analysis},
+Sensors, 21(13): 4580, 2021.
+\url{https://doi.org/10.3390/s21134580}
+
+\bibitem{savitzky1964}
+A.\ Savitzky, M.J.E.\ Golay,
+\textit{Smoothing and Differentiation of Data by Simplified Least Squares Procedures},
+Analytical Chemistry, 36(8): 1627--1639, 1964.
+\url{https://doi.org/10.1021/ac60214a047}
+
+% ============================================================================
+% Prewencja urazów biegowych / gait retraining
+% ============================================================================
+
+\bibitem{figueiredo2025cadence}
+I.\ Figueiredo, M.\ Reis~e~Silva, J.E.\ Sousa,
+\textit{The Influence of Running Cadence on Biomechanics and Injury Prevention: A Systematic Review},
+Cureus, 17(8): e90322, 2025.
+\url{https://doi.org/10.7759/cureus.90322}
+
+% ============================================================================
+% Uczenie maszynowe — podręczniki
+% ============================================================================
+
+\bibitem{goodfellow2016deep}
+I.\ Goodfellow, Y.\ Bengio, A.\ Courville,
+\textit{Deep Learning},
+MIT Press, 2016.
+
+\bibitem{hochreiter1997lstm}
+S.\ Hochreiter, J.\ Schmidhuber,
+\textit{Long Short-Term Memory},
+Neural Computation, 9(8): 1735--1780, 1997.
+\url{https://doi.org/10.1162/neco.1997.9.8.1735}
+
+\bibitem{breiman2001rf}
+L.\ Breiman,
+\textit{Random Forests},
+Machine Learning, 45(1): 5--32, 2001.
+\url{https://doi.org/10.1023/A:1010933404324}
+
+% ============================================================================
+% Narzędzia / framework
+% ============================================================================
+
+\bibitem{pytorch}
+A.\ Paszke et al.,
+\textit{PyTorch: An Imperative Style, High-Performance Deep Learning Library},
+Advances in Neural Information Processing Systems (NeurIPS), 2019.
+
+\bibitem{scipy}
+P.\ Virtanen et al.,
+\textit{SciPy 1.0: fundamental algorithms for scientific computing in Python},
+Nature Methods, 17: 261--272, 2020.
+\url{https://doi.org/10.1038/s41592-019-0686-2}
+
+\bibitem{sklearn}
+F.\ Pedregosa et al.,
+\textit{Scikit-learn: Machine Learning in Python},
+Journal of Machine Learning Research, 12: 2825--2830, 2011.
+
+\bibitem{opencv}
+G.\ Bradski,
+\textit{The OpenCV Library},
+Dr. Dobb's Journal of Software Tools, 2000.
+
+\end{thebibliography}

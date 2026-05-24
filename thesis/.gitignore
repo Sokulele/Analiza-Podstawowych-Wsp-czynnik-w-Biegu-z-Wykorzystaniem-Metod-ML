@@ -1,0 +1,32 @@
+# Artefakty kompilacji LaTeX
+*.aux
+*.log
+*.toc
+*.lof
+*.lot
+*.out
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.nav
+*.snm
+*.vrb
+
+# PDF wynikowy — komentuj/odkomentuj wg preferencji
+# main.pdf
+
+# Edytory LaTeX
+*.bak
+*.tex.bak
+.tex.swp
+
+# Build folders (np. dla VSCode LaTeX Workshop)
+out/
+build/

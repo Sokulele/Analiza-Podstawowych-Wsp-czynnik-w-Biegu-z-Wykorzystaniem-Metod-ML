@@ -1,0 +1,95 @@
+\documentclass{SGGW-thesis}
+
+\MAGISTERSKAtrue
+\WZIMtrue
+
+% ============================================================================
+% METADANE PRACY — uzupełnij przed pierwszą kompilacją
+% ============================================================================
+
+\title{Analiza podstawowych współczynników biegu\\przy pomocy uczenia maszynowego}
+\Etitle{Analysis of basic running coefficients\\using machine learning}
+
+\author{Imię Nazwisko}                     % TODO: uzupełnij
+\date{2026}                                % TODO: uzupełnij rok obrony
+\album{000000}                             % TODO: numer albumu
+\thesis{Praca dyplomowa magisterska na kierunku:}
+\course{Informatyka}                       % TODO: potwierdź kierunek
+\promotor{<tytuł> <Imię Nazwisko> promotora} % TODO: dane promotora
+\pworkplace{Instytut Informatyki Technicznej\\Katedra <nazwa katedry>} % TODO
+
+% ============================================================================
+% PAKIETY DODATKOWE
+% ============================================================================
+
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{booktabs}      % ładne tabele (\toprule, \midrule, \bottomrule)
+\usepackage{amsmath}       % wzory matematyczne
+\usepackage{listings}      % bloki kodu
+\usepackage{xcolor}        % kolory (np. dla kodu)
+
+\begin{document}
+
+\maketitle
+\statementpage
+
+% ============================================================================
+% STRESZCZENIE PL + EN
+% ============================================================================
+
+\abstractpage
+{Analiza podstawowych współczynników biegu przy pomocy uczenia maszynowego}
+{
+% TODO: streszczenie po polsku (~200 słów). Pisać NA KOŃCU, gdy reszta pracy gotowa.
+% Powinno zawierać: cel pracy, metoda (MediaPipe + LSTM + reguły),
+% główne wyniki (accuracy 70.9\%, 12 współczynników, 13+ reguł), wkład.
+Streszczenie pracy w języku polskim.
+}
+{uczenie maszynowe, biomechanika biegu, MediaPipe, klasyfikacja faz biegu, LSTM, monocular 2D wideo}
+{Analysis of basic running coefficients using machine learning}
+{
+% TODO: abstract in English (~200 words)
+Thesis abstract in English.
+}
+{machine learning, running biomechanics, MediaPipe, running phase classification, LSTM, monocular 2D video}
+
+% ============================================================================
+% SPIS TREŚCI
+% ============================================================================
+
+{
+  \doublespacing
+  \tableofcontents
+}
+
+\startchapterfromoddpage
+
+% ============================================================================
+% ROZDZIAŁY (każdy w osobnym pliku w chapters/)
+% ============================================================================
+
+\input{chapters/01-wstep}
+\input{chapters/02-state-of-the-art}
+\input{chapters/03-materialy-metody}
+\input{chapters/04-klasyfikator}
+\input{chapters/05-wspolczynniki}
+\input{chapters/06-rekomendacje}
+\input{chapters/07-wrazliwosc}
+\input{chapters/08-dyskusja-wnioski}
+
+% ============================================================================
+% BIBLIOGRAFIA
+% ============================================================================
+% Template SGGW używa ręcznego \thebibliography (nie BibTeX/biblatex).
+% Wpisy w chapters/bibliography.tex dla łatwiejszego zarządzania.
+
+\input{chapters/bibliography}
+
+% ============================================================================
+% PRZEDOSTATNIA STRONA (oświadczenie końcowe)
+% ============================================================================
+
+\beforelastpage
+
+\end{document}

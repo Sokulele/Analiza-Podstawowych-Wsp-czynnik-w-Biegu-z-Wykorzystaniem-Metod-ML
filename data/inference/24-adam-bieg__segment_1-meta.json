@@ -9,6 +9,6 @@
   "model_dir": "models\\lstm_run1_overfit",
   "model_test_acc": 0.709,
   "avg_confidence": 0.909,
-  "inference_time_s": 210.9,
-  "generated": "2026-05-13 08:51:39"
+  "inference_time_s": 188.2,
+  "generated": "2026-05-15 08:36:14"
 }

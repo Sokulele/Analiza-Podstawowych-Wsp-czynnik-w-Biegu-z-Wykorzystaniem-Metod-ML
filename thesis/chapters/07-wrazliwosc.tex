@@ -1,0 +1,80 @@
+\chapter{Wrażliwość współczynników na warunki akwizycji wideo}
+\label{ch:wrazliwosc}
+
+% TODO: Materiał: docs/thesis-notes/2026-05-14-sesja-c-foot-strike-walidacja.md,
+% 2026-05-13-sesja-b-stride-combinatorical.md, History.md (Sesja C),
+% data/visualizations/foot_strike_validation/ (18 PNG z 3 biegaczy).
+
+\section{Hipotezy badawcze}
+\label{sec:hipotezy-p3}
+
+% TODO: 3 hipotezy z 2026-05-14-temat-pracy-finalny.md:
+% H5: Współczynniki przestrzenne (foot strike, vertical oscillation, symetria L/P)
+%     są wrażliwe na perspektywę kamery.
+% H6: Współczynniki temporalne (kadencja, GCT, czas lotu, stride length, duty factor)
+%     są wrażliwe na FPS.
+% H7: Auto-detekcja niskiej wiarygodności możliwa bez ground truth przez analizę
+%     wartości metryki vs fizjologiczny zakres.
+
+\section{Studium 1: Foot strike pattern vs perspektywa kamery}
+\label{sec:case1-foot-strike}
+
+% TODO: Sesja C, 18 PNG entry-into-STANCE × 3 biegaczy × 2 nogi × 3 klatki.
+% Tabela:
+% | Biegacz | Ujęcie | Mean L / R | Werdykt wizualny |
+% | Janek | landscape, prostopadle | -4° / -3° | midfoot ✓ predykcja zgadza się |
+% | Adam | landscape, kamera od dołu | -33° / -12° | prawa OK, lewa perspective artifact |
+% | 22 | PORTRAIT pionowe | -97° / -99° | bezwartościowe (|kąt|>90°) ✗ |
+% Mitygant: low_confidence=True gdy |mean|>45° → reguła foot_strike_low_confidence.
+
+\section{Studium 2: Aspect ratio fix dla pionowego wideo (film 22)}
+\label{sec:case2-aspect}
+
+% TODO: Per-film accuracy LSTM przed/po aspect fix:
+% - Film 22 (320 klatek, portrait): 75.8% → 85.9% (+10.1 pp)
+% - Inne filmy (landscape): ±2 pp
+% Wniosek: aspect fix kluczowy dla nietypowych orientacji, neutralny dla standardowych.
+% Konkretny mechanizm: normalizacja x przez aspect ratio kadru.
+
+\section{Studium 3: FPS a precyzja metryk temporalnych (film 16)}
+\label{sec:case3-fps}
+
+% TODO: Film 16 (13.33 FPS) wykluczony z trainu (exclude_from_training=True).
+% Matematyka kwantyzacji:
+% - GCT typowy 250 ms = 8 klatek przy 30 FPS, 3.3 klatki przy 13.33 FPS
+% - Błąd ±1 klatka = ±30% przy 13.33 FPS vs ±12.5% przy 30 FPS
+% Wniosek: niski FPS dyskwalifikuje wideo do precyzyjnych metryk temporalnych,
+% ale NIE do trenowania klasyfikatora (model uczy się pozycji, nie czasu).
+
+\section{Tabela syntetyczna: metryka × warunek × auto-detekcja}
+\label{sec:tabela-wrazliwosc}
+
+% TODO: Tabela z 2026-05-14-temat-pracy-finalny.md (sekcja Synteza P3):
+% | Metryka | Wrażliwa na orientację | Wrażliwa na FPS | Auto-detekcja |
+% | Kadencja | nie | tak (>15% błąd FPS<15) | tak (z FPS metadata) |
+% | GCT | nie | tak (kwantyzacja) | tak |
+% | Czas lotu | nie | tak | tak |
+% | Stride length | nie | tak | tak |
+% | Duty factor | nie | tak | tak |
+% | Kąty stawów | minimalnie | nie | nie (cichy artefakt) |
+% | Vertical oscillation | tak (out-of-plane) | nie | częściowo |
+% | Foot strike pattern | TAK krytycznie | nie | TAK (low_confidence próg 45°) |
+% | Symetria L/P | tak (perspective asym) | nie | częściowo (SI>50% proxy) |
+
+\section{Mitygant w kodzie}
+\label{sec:mitygant-kod}
+
+% TODO: Implementacja low_confidence:
+% - compute_foot_strike_pattern (spatial_metrics.py): flaga low_confidence=True
+%   gdy |mean_angle| > 45°
+% - check_foot_strike (rules.py): reguła foot_strike_low_confidence (warning)
+%   z citation "Walidacja wizualna 2026-05-14 (Sesja C)"
+% - fallback dla legacy spatial.json (abs(mean)>45°)
+% - blokuje reguły semantyczne (consistent/inconsistent) gdy fire
+
+\section{Dyskusja: H5, H6, H7 potwierdzone}
+\label{sec:dyskusja-wrazliwosc}
+
+% TODO: Wszystkie 3 hipotezy potwierdzone empirycznie 3 case studies.
+% Wkład pracy: pierwsza systematyczna analiza wrażliwości monocular 2D dla biegu
+% (chód był badany - Stenum 2021, Ripic 2023; bieg nie).

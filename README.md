@@ -23,14 +23,14 @@ Pełny pipeline E2E uruchamia się z jednego CLI (`src/coefficients/analyze.py`)
 
 ### Współczynniki temporalne (z sekwencji faz + FPS)
 
-| Współczynnik | Jednostka | Wymagane wejście |
-|---|---|---|
-| Kadencja | kroki/min | FPS |
-| Czas kontaktu (GCT) — L i P | ms | FPS |
-| Czas lotu | ms | FPS |
-| Czas cyklu | ms | FPS |
-| Duty factor | 0–1 | FPS |
-| **Stride length** | m | FPS + prędkość bieżni |
+| Współczynnik                | Jednostka | Wymagane wejście      |
+| --------------------------- | --------- | --------------------- |
+| Kadencja                    | kroki/min | FPS                   |
+| Czas kontaktu (GCT) — L i P | ms        | FPS                   |
+| Czas lotu                   | ms        | FPS                   |
+| Czas cyklu                  | ms        | FPS                   |
+| Duty factor                 | 0–1       | FPS                   |
+| **Stride length**           | m         | FPS + prędkość bieżni |
 
 ### Współczynniki przestrzenne (z geometrii keypointów)
 
@@ -139,7 +139,14 @@ istniejącego `{slug}-phases.csv`. Przyśpiesza iterację reguł rekomendacji.
 ```
 running-analysis/
 ├── CLAUDE.md                    — zasady projektu (czyta agent Claude Code)
-├── History.md                   — log chronologiczny sesji prac
+├── history_split/
+│   ├── 00_ROZDZIELNIA.md        — główny indeks dla agenta AI
+│   ├── 01–03_*.md               — dataset, ekstrakcja keypointów, auto-etykietowanie
+│   ├── 04–09_*.md               — trenowanie modeli, RF, LSTM, aspect ratio fix
+│   ├── 10–13_*.md               — współczynniki biomechaniczne, raporty, rekomendacje
+│   ├── 14–19_*.md               — materiał do pracy magisterskiej, bibliografia, plan pisania
+│   ├── manifest.json            — indeks plików w formacie JSON
+│   └── README.md                — krótka instrukcja użycia
 ├── requirements.txt
 ├── data/
 │   ├── videos/                  — surowe filmiki (.mp4/.mov)
@@ -185,12 +192,12 @@ running-analysis/
 
 ### Modele porównane (Etap 5)
 
-| Model | Test accuracy | F1 (macro) | Komentarz |
-|---|---|---|---|
-| Random Forest (baseline, raw keypointy) | 51.3% | 0.495 | sprawdzenie czy zadanie jest "trywialne" |
-| Random Forest (engineered features) | 65.5% | 0.638 | feature engineering: kąty, prędkości, akceleracje |
-| LSTM primary (większa regularyzacja) | 68.4% | 0.683 | dwuwarstwowy BiLSTM hidden=128, dropout=0.3 |
-| **LSTM r1 + aspect fix (overfit, primary)** | **70.9%** | **0.709** | mniejsza regularyzacja + normalizacja aspect ratio na FPS-niezależną |
+| Model                                       | Test accuracy | F1 (macro) | Komentarz                                                            |
+| ------------------------------------------- | ------------- | ---------- | -------------------------------------------------------------------- |
+| Random Forest (baseline, raw keypointy)     | 51.3%         | 0.495      | sprawdzenie czy zadanie jest "trywialne"                             |
+| Random Forest (engineered features)         | 65.5%         | 0.638      | feature engineering: kąty, prędkości, akceleracje                    |
+| LSTM primary (większa regularyzacja)        | 68.4%         | 0.683      | dwuwarstwowy BiLSTM hidden=128, dropout=0.3                          |
+| **LSTM r1 + aspect fix (overfit, primary)** | **70.9%**     | **0.709**  | mniejsza regularyzacja + normalizacja aspect ratio na FPS-niezależną |
 
 Aspect fix to korekta wagi visibilty + normalizacja x przez aspect ratio kadru —
 istotne dla filmu 22 (pionowe wideo) i pozwala modelowi działać niezależnie od proporcji.
@@ -207,12 +214,12 @@ istotne dla filmu 22 (pionowe wideo) i pozwala modelowi działać niezależnie o
 
 ## Dataset
 
-| Metryka | Wartość |
-|---|---|
-| Filmów w trainie/val/test | 16 (z 1 wykluczonym jako edge case: 13 FPS) |
-| Łącznie klatek z fazami | ~8000+ |
-| Unikalnych biegaczy | ~9–10 |
-| LEFT_STANCE / RIGHT_STANCE / FLIGHT | ~34% / 32% / 34% (zbalansowane) |
+| Metryka                             | Wartość                                     |
+| ----------------------------------- | ------------------------------------------- |
+| Filmów w trainie/val/test           | 16 (z 1 wykluczonym jako edge case: 13 FPS) |
+| Łącznie klatek z fazami             | ~8000+                                      |
+| Unikalnych biegaczy                 | ~9–10                                       |
+| LEFT_STANCE / RIGHT_STANCE / FLIGHT | ~34% / 32% / 34% (zbalansowane)             |
 
 Filmy z różnym FPS (9.46, 11.25, 13.33, 15, 23.98, 29.97, 30) i tempem (jogging,
 sprint, slow-motion 5–10×). Edge cases (chód → bieg, exoskeleton, marathon pace)
@@ -254,5 +261,3 @@ Pełna sekcja "Limitations" w notatkach pracy magisterskiej:
   rozdzielenie trenowania od inferencji, auto-zapis notatek thesis)
 
 ## Licencja
-
-Projekt jest pracą magisterską. Kontakt: slawomir.sokolowski@pfro.pl.
