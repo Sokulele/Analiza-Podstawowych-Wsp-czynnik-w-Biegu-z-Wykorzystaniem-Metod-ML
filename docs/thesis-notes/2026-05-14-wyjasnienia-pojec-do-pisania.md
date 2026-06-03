@@ -577,4 +577,461 @@ Efekt: jeśli mam sekwencję ...STANCE, STANCE, FLIGHT, STANCE, STANCE..., to ta
 
 Kernel=3 oznacza okno 3 klatek (bieżąca + 1 przed + 1 po). Mediana z 3 wartości = wartość środkowa. Jeśli 2 z 3 to STANCE, mediana = STANCE.
 
+### Jądro (kernel) filtru
+
+**Jądro** (ang. *kernel*) to po prostu **rozmiar okna** filtru — ile sąsiednich elementów bierzemy pod uwagę przy obliczaniu wyniku filtracji. Słowo „jądro" to polskie tłumaczenie technicznego terminu *kernel*, które w kontekście filtrów cyfrowych oznacza „szablon/okno przesuwane po danych". Nie ma tu głębszego znaczenia matematycznego.
+
+- Kernel=3 → okno 3 elementów (1 przed + bieżący + 1 po)
+- Kernel=5 → okno 5 elementów (2 przed + bieżący + 2 po)
+- Kernel musi być nieparzysty, żeby miał jednoznaczny element środkowy
+
+W pracy piszę „filtr medianowy z jądrem $k = 3$" — to znaczy: dla każdej klatki biorę 3 sąsiednie etykiety i wybieram tę, która stanowi medianę (wartość środkową po posortowaniu).
+
+---
+
+## [2026-05-24] Pojęcia z sekcji 3.4 — architektury klasyfikatorów
+
+### Random Forest (las losowy)
+
+**Ensemble** wielu drzew decyzyjnych. Każde drzewo:
+1. Dostaje losowy podzbiór danych treningowych (bootstrap sampling)
+2. Na każdym rozgałęzieniu rozważa losowy podzbiór cech
+3. Głosuje za jedną z klas
+
+Finalna decyzja = głosowanie większościowe 300 drzew. Losowość zapobiega overfittingowi.
+
+**Kluczowe hiperparametry:**
+- `n_estimators=300` — liczba drzew. Więcej = stabilniejsze, ale wolniejsze
+- `max_depth=None` — drzewa rosną do końca (nie ograniczam głębokości)
+- `class_weight='balanced'` — automatycznie przypisuje wyższe wagi mniej licznym klasom, żeby model nie faworyzował klasy dominującej
+
+**Ograniczenie:** klasyfikuje każdą klatkę osobno — nie widzi co było w poprzedniej klatce. Ignoruje kontekst czasowy.
+
+### Surowe keypointy vs cechy inżynierowane
+
+**Surowe keypointy** (132 cechy) = bezpośrednie wyjście z MediaPipe, bez żadnej obróbki. 33 punkty × 4 wartości (x, y, z, visibility). Problem: zależą od pozycji biegacza w kadrze (ta sama poza w lewym i prawym rogu daje inny wektor x), od wielkości ciała (wysoki vs niski), i zawierają punkty nieistotne dla biegu (oczy, usta, palce dłoni).
+
+**Cechy inżynierowane** (106 cech) = te same keypointy, ale przetworzone na bardziej sensowną reprezentację:
+1. **Normalizacja do ciała** — środek bioder = punkt (0,0), jednostka = długość tułowia → ta sama poza = te same liczby, niezależnie od pozycji/wielkości. 33 × 3 = 99 cech (visibility usunięte).
+2. **Kąty stawów** (7 szt.) — zamiast surowych współrzędnych 3 keypointów, obliczam kąt w stawie. Np. kąt kolana ~170° = noga prosta (lot), ~120° = zgięta (kontakt). Kąt bezpośrednio mówi o fazie.
+
+**Paradoks:** mniej cech (106 < 132), ale lepsze wyniki — bo usunęliśmy szum i dodaliśmy wiedzę domenową (kąty).
+
+
+### BiLSTM (dwukierunkowy LSTM)
+
+**LSTM** (Long Short-Term Memory) to typ sieci neuronowej rekurencyjnej zaprojektowany do przetwarzania sekwencji (tekst, dźwięk, serie czasowe). Kluczowa innowacja: mechanizm bramek (gates), które kontrolują jaką informację zapamiętać, a jaką zapomnieć.
+
+**Bi** = dwukierunkowy: sieć przetwarza sekwencję zarówno od lewej do prawej, jak i od prawej do lewej. Wynik to konkatenacja obu kierunków. Dzięki temu model "widzi" kontekst zarówno z przeszłości jak i przyszłości danej klatki.
+
+**W moim przypadku:**
+- Wejście: okno 15 klatek × 106 cech = tensor (15, 106)
+- Sieć: 2 warstwy BiLSTM (hidden=128 → 256 po konkatenacji kierunków)
+- Wyjście: klasyfikacja klatki centralnej (7. z 15) na 3 klasy
+
+**Dlaczego BiLSTM a nie zwykły LSTM?** W biegu znamy cały film z góry — nie przetwarzamy w czasie rzeczywistym. Klatka po fazie FLIGHT prawdopodobnie jest STANCE — dwukierunkowość pomaga to zobaczyć.
+
+### Inżynieria cech (feature engineering)
+
+Transformacja surowych danych (132 współrzędne keypointów) na **bardziej informatywną reprezentację** (106 cech). Dwa kroki:
+
+1. **Normalizacja do układu ciała:** keypointy przeliczam do układu odniesienia biegacza (środek bioder = punkt 0, jednostka = długość tułowia). Eliminuje to wpływ pozycji w kadrze i różnic w wielkości ciała.
+
+2. **Kąty stawów:** obliczam kąt kolana, biodra, kostki (po 2 na nogę) + pochylenie tułowia. Kąty mają bezpośredni sens biomechaniczny — np. kąt kolana ~170° = noga prawie wyprostowana (faza lotu), ~120° = noga zgięta (faza kontaktu).
+
+**Paradoks:** RF v2 ma MNIEJ cech (106 vs 132), ale LEPSZE wyniki. Dlaczego? Bo usunęliśmy szum (visibility, pozycję w kadrze) i dodaliśmy kąty — cechę bezpośrednio powiązaną z fazą biegu.
+
+### Okno sekwencji (window) w LSTM
+
+LSTM nie dostaje pojedynczej klatki — dostaje **okno 15 kolejnych klatek**. Klasyfikuje klatkę środkową na podstawie kontekstu: 7 klatek przed + bieżąca + 7 klatek po.
+
+**Window=15 przy 30 FPS ≈ 0.5 sekundy** — obejmuje mniej więcej jeden pełny krok biegowy. Model widzi więc cały kontekst jednego cyklu.
+
+**Dlaczego nie dłuższe okno?** Dłuższe okno = więcej kontekstu, ale też więcej parametrów i ryzyko overfittingu. 15 klatek to kompromis.
+
+**Ważne:** okna NIE przekraczają granic filmów. Nie tworzę sztucznej sekwencji łączącej koniec jednego filmiku z początkiem drugiego.
+
+### StandardScaler — normalizacja cech
+
+Przed podaniem do LSTM normalizuję każdą cechę: odejmuję średnią i dzielę przez odchylenie standardowe (obliczone TYLKO na danych treningowych). Po normalizacji każda cecha ma średnią ≈ 0 i std ≈ 1.
+
+**Dlaczego?** Gdyby kąt kolana miał zakres [90°, 180°], a współrzędna X zakres [0.0, 1.0], sieć "myślałaby" że kąt kolana jest ważniejszy (większe wartości = większe gradienty). Normalizacja wyrównuje wagi.
+
+**Dlaczego nie fitujemy na val/test?** Bo to **wyciek danych** (*data leakage*).
+
+StandardScaler potrzebuje dwóch liczb: średniej i odchylenia standardowego. Te liczby obliczamy TYLKO z danych treningowych. Potem tymi samymi liczbami transformujemy dane walidacyjne i testowe.
+
+Gdybyśmy obliczyli średnią i std z całego zbioru (train + val + test razem), to do tych statystyk „wsiąknęłyby" informacje z danych testowych — np. ich zakres wartości, rozkład. Model pośrednio „wiedziałby" coś o danych testowych, zanim je zobaczy. Wyniki ewaluacji byłyby sztucznie zawyżone — nie odzwierciedlałyby tego, jak model poradzi sobie z naprawdę nowym, nieznanym filmem.
+
+**Analogia:** To jak uczeń, który przed egzaminem podejrzał odpowiedzi — nie uczył się z nich wprost, ale jego wynik nie jest uczciwy.
+
+**Zasada ogólna:** NIGDY nie fituj (obliczaj statystyk) na danych testowych. Fituj na train, transformuj train+val+test tymi samymi parametrami.
+
+### Aspect ratio fix (korekta proporcji obrazu)
+
+**Problem:** MediaPipe normalizuje x i y niezależnie do [0, 1]. Dla filmiku 608×1080 px:
+- Δx=0.1 = 60.8 pikseli
+- Δy=0.1 = 108 pikseli
+
+Gdy obliczam długość tułowia jako √(Δx² + Δy²), mieszam fizycznie różne jednostki — jak dodawanie metrów i kilometrów.
+
+**Rozwiązanie:** mnożę x × szerokość, y × wysokość → obie współrzędne w pikselach → spójne jednostki.
+
+**Efekt:** film 10 (pionowy) poprawia się z 75.8% na 85.9% (+10.1 pp). Dla filmów 16:9 prawie bez zmian (proporcje już bliskie 1:1 po normalizacji).
+
+### Dropout — regularyzacja sieci neuronowej
+
+Podczas treningu **losowo wyłącza** pewien procent neuronów w każdym kroku. Dropout=0.3 → 30% neuronów jest wyłączonych w danym kroku.
+
+**Po co?** Zapobiega overfittingowi — sieć nie może polegać na konkretnych neuronach, musi rozłożyć wiedzę na wiele ścieżek. To zmusza model do uczenia się bardziej ogólnych wzorców.
+
+**Podczas inferencji** dropout jest wyłączony — używamy pełnej sieci.
+
+### Weight decay (L2 regularization)
+
+Dodaje do funkcji straty karę proporcjonalną do sumy kwadratów wag sieci: `loss = loss_data + λ × Σ(w²)`. Parametr `weight_decay = λ` kontroluje siłę kary.
+
+**Efekt:** duże wagi → duża kara → optymalizator preferuje mniejsze wagi → prostsza sieć → mniejszy overfitting.
+
+LSTM r1: λ = 10⁻⁵ (słaba regularyzacja), LSTM r2: λ = 10⁻⁴ (10× silniejsza).
+
+### Early stopping (wczesne zatrzymanie)
+
+Trening kończy się nie po ustalonej liczbie epok, ale gdy **strata walidacyjna** przestaje się poprawiać. `patience=15` = toleruję 15 epok bez poprawy, potem przerywam.
+
+Zachowuję wagi z najlepszej epoki, nie z ostatniej. Zapobiega to overfittingowi — trening zbyt długi pogarsza generalizację.
+
+LSTM r1: najlepsza epoka 5/20. LSTM r2: najlepsza epoka 3/18. Oba modele szybko konwergowały i potem zaczynały się overfitować.
+
+---
+
+## [2026-05-24] Pojęcia z sekcji 3.5–3.8
+
+### Run-length encoding (segmentacja sekwencji)
+
+Metoda podziału sekwencji na ciągłe fragmenty o tej samej etykiecie. Przechodzisz po tablicy etykiet od początku do końca — gdy etykieta zmienia się, kończysz bieżący segment i zaczynasz nowy.
+
+Przykład: `[L, L, L, F, F, R, R, R, F, F, L, L]` → 5 segmentów:
+- L (3 klatki), F (2), R (3), F (2), L (2)
+
+Użyłem tego do obliczenia GCT (czas trwania segmentów STANCE), czasu lotu (segmenty FLIGHT) itp.
+
+### Kadencja (step rate) [spm]
+
+Liczba kontaktów stóp z podłożem na minutę. Krok = wejście w fazę STANCE (przejście z nie-STANCE do STANCE).
+
+**Formuła:** `kadencja = (n_kroków / czas_nagrania_s) × 60`
+
+**Zakresy:** rekreacyjny 150–170 spm, zaawansowany 170–185, elita 180–200.
+
+### GCT (Ground Contact Time)
+
+Czas kontaktu stopy z podłożem — jak długo stopa jest na ziemi w jednym kroku. Obliczany osobno dla L i R jako średni czas trwania segmentów STANCE.
+
+**Zakresy:** wolny bieg 250–350 ms, rekreacyjny 200–280, szybki 160–220 ms.
+
+### Duty factor
+
+Stosunek GCT do czasu cyklu: `DF = GCT / cycle_time`. Mówi, jaki procent cyklu stopa spędza na ziemi.
+
+- **DF < 0.5** = bieg (stopa krócej na ziemi niż w powietrzu)
+- **DF ≥ 0.5** = technicznie chód
+- Typowy bieg rekreacyjny: 0.35–0.45
+
+### Stride length (długość kroku)
+
+Odległość od kontaktu jednej stopy do następnego kontaktu **tej samej** stopy. Na bieżni obliczamy ją z prędkości bieżni: `stride = speed × cycle_time`.
+
+**Uwaga:** NIE można wyznaczyć z samego wideo — biegacz stoi w miejscu na bieżni. Wymaga podania prędkości przez użytkownika.
+
+### Vertical oscillation (oscylacja pionowa)
+
+Jak bardzo biodra poruszają się w górę-w dół w obrębie jednego cyklu biegowego. Mierzona jako `max(Y_hip) - min(Y_hip)` per cykl.
+
+Normalizuję ją długością tułowia (bo wielkość w pikselach zależy od odległości kamery): `VO_norm = ΔY_hip / torso_length`.
+
+**Zakresy:** dobry biegacz 0.12–0.16 torso (≈6–8 cm), rekreacyjny do 0.24 (≈12 cm).
+
+### Foot strike pattern (wzorzec lądowania stopy)
+
+Która część stopy pierwsza dotyka podłoża: pięta (heel strike), śródstopie (midfoot) czy przodostopie (forefoot). Klasyfikuję na podstawie kąta wektora HEEL→FOOT_INDEX w momencie kontaktu.
+
+**Progi:** kąt > 5° = heel strike, < −5° = forefoot, pomiędzy = midfoot.
+
+**Ważne:** ten współczynnik jest BARDZO wrażliwy na kąt kamery. Wideo pionowe daje bzdurne wyniki. Automatyczna flaga `low_confidence` gdy |kąt| > 45°.
+
+### Symmetry Index (SI) — wskaźnik symetrii Robinsona
+
+**Formuła:** `SI = 200 × |L − R| / (L + R)` [%]
+
+Mierzy różnicę między lewą i prawą stroną ciała. SI = 0% to idealna symetria.
+
+**Progi (Robinson 1987):**
+- < 5% = norma
+- 5–10% = łagodna asymetria, monitoruj
+- > 10% = znacząca asymetria, rozważ konsultację
+
+### Precision (precyzja) vs Recall (czułość)
+
+**Precision:** "Gdy model mówi FLIGHT — jak często ma rację?" = TP / (TP + FP)
+**Recall:** "Jaki % prawdziwych FLIGHT model wykrył?" = TP / (TP + FN)
+
+Trade-off: model "ostrożny" (rzadko mówi FLIGHT) ma wysoką precision ale niski recall. Model "agresywny" (dużo mówi FLIGHT) odwrotnie.
+
+### F1 (miara F1)
+
+Średnia harmoniczna precision i recall: `F1 = 2 × precision × recall / (precision + recall)`.
+
+Harmoniczna, nie arytmetyczna — każe model za słabszą z dwóch metryk. Jeśli precision=1.0 ale recall=0.01, F1≈0.02 (nie 0.5).
+
+**Macro F1** = średnia arytmetyczna F1 ze wszystkich klas. Traktuje każdą klasę z równą wagą.
+
+### Macierz pomyłek (confusion matrix)
+
+Tablica 3×3 (dla 3 klas). Wiersz = prawdziwa klasa, kolumna = co model przewidział. Przekątna = poprawne, poza przekątną = pomyłki.
+
+**Dwa typy pomyłek w naszym kontekście:**
+1. **L↔R** (model myli lewą z prawą) — psuje symetrię L/P, ale kadencja i średni GCT zostają OK
+2. **STANCE↔FLIGHT** (model myli kontakt z lotem) — psuje WSZYSTKIE współczynniki temporalne
+
+### Overfitting (przeuczenie)
+
+Model zbyt dokładnie zapamiętuje dane treningowe — włącznie z ich szumem i przypadkowymi wzorcami — i osiąga świetne wyniki na danych treningowych, ale znacząco gorsze na nowych danych.
+
+**Analogia:** uczeń, który wykuł odpowiedzi do konkretnego zestawu pytań, ale nie rozumie materiału. Na egzaminie z innym zestawem pytań wypada słabo.
+
+**Regularyzacja** = techniki ograniczające overfitting: dropout, weight decay, early stopping.
+
+### Ukryty wymiar (hidden dimension)
+
+Rozmiar wektora pamięci wewnętrznej sieci LSTM — ile liczb sieć wykorzystuje do zakodowania informacji o dotychczasowej sekwencji na każdym kroku. h=128 → na każdym kroku sieć tworzy wektor 128 liczb podsumowujący "co się wydarzyło do tej pory".
+
+Większy ukryty wymiar = sieć może zapamiętać bardziej złożone wzorce, ale ma więcej parametrów = większe ryzyko przeuczenia.
+
+### Konkatenacja kierunków w BiLSTM
+
+BiLSTM przetwarza sekwencję dwukrotnie:
+- Przejście "od lewej do prawej" → wektor 128 wartości (widział przeszłość)
+- Przejście "od prawej do lewej" → wektor 128 wartości (widział przyszłość)
+
+Te dwa wektory są **łączone (konkatenowane)** — sklejane jeden za drugim w jeden wektor o długości 128 + 128 = 256. Każda klatka ma więc kontekst z obu stron.
+
+### Parametry modelu (wagi sieci)
+
+Parametry = **liczby, które sieć dostosowuje podczas treningu**. Każde połączenie między neuronami ma wagę (mnożnik) — to te wagi tworzą "wiedzę" modelu. Sieć z 637 699 parametrami ma ponad 600 tysięcy liczb do dopasowania. Więcej parametrów = model może nauczyć się bardziej złożonych wzorców, ale też łatwiej się przeuczy.
+
+Dla porównania: LSTM r2 ma 187 779 parametrów (3.4× mniej), co ogranicza pojemność modelu.
+
+### Tempo uczenia (learning rate)
+
+Określa, jak duże korekty wag wykonuje optymalizator w każdym kroku treningowym. Za duże tempo → model "przeskakuje" optimum i nie uczy się stabilnie. Za małe tempo → trening trwa bardzo długo i może utknąć w słabym minimum.
+
+LSTM r1: lr=0.001 (standardowe), LSTM r2: lr=0.0003 (ostrożniejsze, bo mniejszy model).
+
+### Inferencja (w kontekście dropoutu)
+
+Podczas **treningu** dropout wyłącza losowo 30% neuronów. Podczas **inferencji** (użycie wytrenowanego modelu na nowych danych) dropout jest wyłączony — wszystkie neurony pracują. Wyjścia neuronów są odpowiednio przeskalowane (mnożone przez 0.7 = 1-dropout), żeby kompensować fakt, że w treningu część neuronów była wyłączona.
+
+### Korekta proporcji (aspect ratio fix) — szczegółowo
+
+MediaPipe normalizuje x do [0,1] i y do [0,1] NIEZALEŻNIE. Dla kadru 608×1080:
+- x=0.5 = 304 pikseli od lewej krawędzi
+- y=0.5 = 540 pikseli od górnej krawędzi
+
+Przesunięcie Δx=0.1 = 60.8 px, ale Δy=0.1 = 108 px. Ta sama zmiana w "znormalizowanej przestrzeni" oznacza fizycznie INNY dystans w pionie niż w poziomie.
+
+**Problem:** Gdy obliczam odległość euklidesową (np. długość tułowia) jako √(Δx² + Δy²), mieszam nierównoważne jednostki. To jak dodawanie metrów i mil.
+
+**Fix:** Przemnóż x × szerokość (608), y × wysokość (1080) → obie współrzędne w pikselach → spójne.
+
+Dla kadru 16:9 (1920×1080) stosunek szerokość/wysokość ≈ 1.78 — zniekształcenie umiarkowane. Dla kadru pionowego (608×1080) stosunek ≈ 0.56 — zniekształcenie znaczące.
+
+---
+
+## [2026-05-24] Pojęcia z sekcji 3.5 — współczynniki biomechaniczne
+
+### Dlaczego „temporalne" (czasowe)?
+
+Współczynniki biomechaniczne dzielą się na dwie grupy:
+- **Temporalne** — ich wartość wynika z CZASU TRWANIA poszczególnych faz biegu. Np. kadencja (ile kroków na minutę), GCT (ile milisekund stopa jest na ziemi). Do ich obliczenia wystarczy sekwencja etykiet faz + FPS wideo. Nie trzeba wiedzieć, gdzie są keypointy — wystarczy, że klasyfikator powiedział "STANCE przez 8 klatek, potem FLIGHT przez 3 klatki".
+- **Przestrzenne** — ich wartość wynika z POZYCJI keypointów w konkretnych klatkach. Np. kąt kolana (geometria trzech punktów: biodro-kolano-kostka). Tu etykiety faz służą tylko do wybrania odpowiednich klatek (np. "kąt kolana w momencie kontaktu").
+
+Nazwa "temporalne" pochodzi od łac. *tempus* = czas.
+
+### Segmentacja sekwencji faz — do czego służy i jak działa
+
+**Problem:** Klasyfikator daje mi tablicę etykiet, jedną na klatkę:
+```
+[L, L, L, F, F, R, R, R, R, F, F, L, L, L, ...]
+```
+Żeby obliczyć np. GCT (czas kontaktu), muszę wiedzieć "ile klatek z rzędu trwał każdy kontakt?". Potrzebuję podzielić tę tablicę na segmenty.
+
+**Jak to działa (run-length encoding):** Przechodzę tablicę od lewej do prawej. Dopóki kolejne klatki mają tę samą etykietę → ten sam segment. Gdy etykieta się zmienia → nowy segment.
+
+Przykład:
+```
+Tablica: [L, L, L, F, F, R, R, R, R, F, F, L]
+                ↓
+Segmenty:
+  1. LEFT_STANCE  (klatki 0-2, 3 klatki)
+  2. FLIGHT       (klatki 3-4, 2 klatki)
+  3. RIGHT_STANCE (klatki 5-8, 4 klatki)
+  4. FLIGHT       (klatki 8-9, 2 klatki)
+  5. LEFT_STANCE  (klatka 11,  1 klatka)
+```
+
+**Co z tego wychodzi:** Segment RIGHT_STANCE (4 klatki) przy 30 FPS = 4/30 = 0.133s = 133ms → to jest jeden pomiar GCT prawej stopy. Zbierając takie pomiary ze wszystkich segmentów STANCE danej nogi, wyliczam średnią ± std.
+
+### Jak wyliczam średnią ± std ze wszystkich cykli
+
+Każdy segment fazy to jeden pomiar. Np. w nagraniu 20s przy kadencji 170 spm mam ~28 kroków = ~14 segmentów LEFT_STANCE i ~14 RIGHT_STANCE.
+
+Dla GCT lewej stopy:
+1. Wybieram wszystkie segmenty LEFT_STANCE
+2. Obliczam czas trwania każdego: t₁, t₂, ..., t₁₄
+3. Średnia = (t₁ + t₂ + ... + t₁₄) / 14
+4. Odchylenie standardowe = mierzy rozrzut tych 14 pomiarów wokół średniej
+
+Raportowany wynik: np. "GCT_L = 245 ± 12 ms" — typowy kontakt lewej stopy trwa 245ms, z odchyleniem 12ms od cyklu do cyklu.
+
+### Cykl biegowy (gait cycle)
+
+Pełen cykl ruchu jednej nogi: od momentu gdy stopa dotyka podłoża do następnego momentu gdy TA SAMA stopa dotyka podłoża. Obejmuje:
+1. Kontakt tej stopy (STANCE)
+2. Lot (FLIGHT)
+3. Kontakt DRUGIEJ stopy (STANCE)
+4. Lot (FLIGHT)
+5. Powrót do kontaktu pierwszej stopy
+
+Czas cyklu ≈ 2 × czas kroku. Np. przy kadencji 170 spm → 85 cykli/min → czas cyklu ≈ 0.71s.
+
+Duty factor = GCT / czas_cyklu → mówi jaki % cyklu stopa spędza na ziemi. DF < 0.5 = bieg (stopa krócej na ziemi niż w powietrzu).
+
+### Osobno dla lewej i prawej
+
+Współczynniki takie jak GCT, czas cyklu, duty factor, kąt kolana, kąt kostki obliczam DWIE RAZY — raz dla segmentów LEFT_STANCE (współczynnik lewej nogi) i raz dla RIGHT_STANCE (współczynnik prawej nogi). Daje to np.:
+- GCT_L = 245 ± 12 ms
+- GCT_R = 238 ± 10 ms
+
+Porównanie L vs R = wskaźnik symetrii (Robinson SI).
+
+---
+
+## [2026-05-24] Pojęcia z sekcji 3.5.3 — współczynniki przestrzenne
+
+### Wygładzone keypointy
+
+To NIE są surowe wartości z MediaPipe, ale keypointy po przejściu przez filtr Savitzky-Golay (sekcja 3.2). Filtr usuwa szybkie, losowe fluktuacje (jitter), zachowując prawdziwy kształt ruchu. Dlaczego obliczenia robię na wygładzonych, a nie surowych?
+- Surowe = mocno szumią → kąty stawów mogą skakać o 5-10° z klatki na klatkę nawet gdy ciało porusza się płynnie
+- Wygładzone = pozbawione szumu → kąty zmieniają się płynnie, zgodnie z rzeczywistym ruchem
+
+### Klatkach LUB fazach — czemu „lub"?
+
+Część współczynników liczę z JEDNEJ klatki:
+- Kąt kolana w momencie kontaktu = pierwszy klatka segmentu STANCE → jedna wartość
+- Foot strike = ten sam moment → jedna wartość
+
+Część współczynników liczę z WIELU klatek (całej fazy):
+- Średni kąt kolana w fazie STANCE → uśredniam wszystkie klatki tej fazy
+- Oscylacja pionowa = max(y) - min(y) w obrębie cyklu → potrzebuje wielu klatek
+
+Stąd „lub" — w zależności od współczynnika.
+
+### Noga oporowa vs faza wahadła
+
+Klasyczne pojęcia z biomechaniki biegu:
+
+**Noga oporowa (stance leg)** — noga z stopą na ziemi w danej chwili. Przejmuje ciężar ciała i siły reakcji podłoża. Odpowiada fazie LEFT_STANCE lub RIGHT_STANCE w naszym klasyfikatorze.
+
+**Noga w fazie wahadła (swing leg)** — noga uniesiona, przesuwająca się do przodu. Mocno zgięta w kolanie (skraca długość wahadła → szybciej przeniesie się do przodu).
+
+Kluczowa zasada: w biegu zawsze JEDNA noga jest oporowa, druga w wahadle. Wyjątek: w fazie FLIGHT obie są w powietrzu — wtedy ani jedna ani druga nie jest "oporowa" w klasycznym sensie.
+
+**Liczby:**
+- Kąt kolana nogi oporowej: 155-175° (prawie wyprostowane → amortyzuje uderzenie)
+- Kąt kolana nogi w wahadle: 100-140° (mocno zgięte → szybsze przeniesienie)
+
+### Kreska nad symbolem = średnia
+
+W matematyce **pozioma kreska nad symbolem** to standardowa notacja oznaczająca **średnią arytmetyczną**:
+- $\overline{x}$ = średnia z x
+- $\overline{l_{torso}}$ = średnia długość tułowia
+
+W naszym wzorze `VO_norm = Δy / l̄_torso`:
+- Jedna pozioma kreska to znak DZIELENIA (ułamek)
+- Kreska nad l_torso to znak ŚREDNIEJ (uśredniam długość tułowia przez wszystkie klatki cyklu)
+
+Wzór czyta się: „delta y podzielone przez średnią długość tułowia".
+
+### Theta (θ) w foot strike
+
+W wzorze `θ = arctan2(-Δy, Δx)` mamy trzy zmienne:
+
+- **Δx = x_foot_index − x_heel** — różnica poziomych pozycji czubka stopy i pięty. Mówi „na ile pikseli czubek jest dalej od pięty w poziomie".
+- **Δy = y_foot_index − y_heel** — analogicznie w pionie. Minus przed Δy bo MediaPipe ma oś Y rosnącą w dół (0 góra, 1 dół), a my chcemy matematyczną konwencję (Y rosnące w górę).
+- **θ (theta)** — kąt stopy względem poziomu, w stopniach. Interpretacja:
+  - θ > 0 → czubek wyżej niż pięta → pięta nisko, pierwsza dotyka ziemi → heel strike
+  - θ < 0 → pięta wyżej niż czubek → przód stopy nisko → forefoot strike
+  - θ ≈ 0 → stopa równoległa do podłoża → midfoot
+
+Funkcja `arctan2(y, x)` to wariant arctan, który zwraca pełny kąt w zakresie [−180°, 180°] z uwzględnieniem znaków obu argumentów (zwykły arctan zwraca tylko [−90°, 90°]).
+
+---
+
+## [2026-05-24] Wskaźnik symetrii Robinsona (SI)
+
+### Wzór i intuicja
+
+```
+SI = 200 × |L − R| / (L + R)   [%]
+```
+
+Trzy elementy:
+1. **|L − R|** — bezwzględna różnica między stroną lewą i prawą
+2. **L + R** — suma, używana do normalizacji (dzięki niej wynik to procent, niezależny od skali)
+3. **× 200** — mnożnik dający procent względem ŚREDNIEJ z lewej i prawej (czyli (L+R)/2)
+
+Dlaczego 200, nie 100? Bo dzielimy przez SUMĘ (L+R), nie przez średnią ((L+R)/2). Łatwiej zapisać 200·|L-R|/(L+R) niż 100·|L-R|/((L+R)/2) — to dokładnie to samo.
+
+**Przykład:** GCT_L = 250 ms, GCT_R = 240 ms
+- |L − R| = 10
+- L + R = 490
+- SI = 200 × 10 / 490 ≈ 4.1%
+
+### Progi (z literatury)
+
+- **< 5%** — norma
+- **5–10%** — łagodna asymetria, monitoruj
+- **> 10%** — znacząca asymetria, rozważ konsultację
+
+### Pochodzenie
+
+Robinson, Herzog, Nigg (1987) — pierwotnie do oceny chodu po manipulacjach chiropraktycznych (force platform). Wzór działa dla DOWOLNEGO wskaźnika obliczanego osobno dla L i R. Dziś szeroko stosowany w analizie biegu.
+
+### Dla jakich współczynników liczymy SI?
+
+W mojej pracy: 5 par
+- GCT (L vs R)
+- Czas cyklu (L vs R)
+- Duty factor (L vs R)
+- Kąt kolana w fazie STANCE (L vs R)
+- Kąt kostki w fazie STANCE (L vs R)
+
+Plus foot strike pattern — ale to kategoryczne (heel/midfoot/forefoot), więc nie SI, tylko prosta flaga „spójność: tak/nie".
+
+### Dlaczego dla każdego współczynnika osobno, a nie jedna ogólna „symetria nogi"?
+
+Bo asymetria może manifestować się różnie i mówić co innego o problemie:
+
+| Symetryczny | Asymetryczny | Interpretacja |
+|---|---|---|
+| Kąty kolan | GCT | Oszczędzanie nogi po kontuzji (mimo identycznej pracy stawów dłużej trzyma stopę na ziemi) |
+| GCT | Kąty kolan | Słabość czworogłowego po jednej stronie (jedna noga ugina się mocniej) |
+| GCT, czas cyklu | Duty factor | Zaburzony rytm między nogami |
+
+Pojedyncza ogólna metryka "symetria L/R" by to zatraciła. Dla każdego współczynnika SI mówi coś innego diagnostycznie.
+
+### Koszt obliczeniowy
+
+Bardzo mały. Każda para L, R i tak jest już wyliczona w ramach obliczeń per-noga. SI to jedna prosta operacja (dwa odejmowania, dwa dodawania, jedna wartość bezwzględna, jedno dzielenie, jedno mnożenie). 5 par → 5 takich operacji. W kodzie to dosłownie pętla po słowniku par.
 
