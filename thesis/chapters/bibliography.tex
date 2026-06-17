@@ -4,7 +4,10 @@
 % Template SGGW używa ręcznego \thebibliography (nie BibTeX/biblatex).
 % Wpisy uporządkowane tematycznie: biomechanika biegu / pose estimation / ML / metodologia.
 %
-% Status: 27 wpisów (sesja 2026-05-23). Zweryfikowane 3x (agenci) + ręcznie (user).
+% Status: 31 wpisów. Pełna weryfikacja 2026-06-03 (5 niezależnych agentów: Crossref API,
+% PubMed, rozwiązywanie DOI) — wszystkie wpisy prawdziwe, DOI rozwiązują się do
+% właściwych prac, autorzy/rok/tom/strony zgodne. Zero sfabrykowanych cytatów.
+% (young2023smartphone usunięty 2026-06-03 decyzją autora — był prawdziwy, ale pominięty w narracji.)
 % Diaz 2019 usunięty — niepotwierdzony. OpenPose rok zmieniony na 2021 (tom 43, nr 1).
 % Materiał źródłowy: docs/thesis-notes/2026-05-14-research-podobnych-prac.md
 %                    docs/reference-values.md (cytaty biomechaniczne w rules.py)
@@ -19,6 +22,7 @@
 V.\ Bazarevsky, I.\ Grishchenko, K.\ Raveendran, T.\ Zhu, F.\ Zhang, M.\ Grundmann,
 \textit{BlazePose: On-device Real-time Body Pose Tracking},
 CVPR Workshop on Computer Vision for Augmented and Virtual Reality, arXiv:2006.10204, 2020.
+\url{https://doi.org/10.48550/arXiv.2006.10204}
 
 \bibitem{cao2021openpose}
 Z.\ Cao, G.\ Hidalgo, T.\ Simon, S.E.\ Wei, Y.\ Sheikh,
@@ -45,7 +49,7 @@ PLOS Computational Biology, 17(4): e1008935, 2021.
 \bibitem{ali2024dmd}
 M.M.\ Ali, M.M.\ Hassan, M.\ Zaki,
 \textit{Human Pose Estimation for Clinical Analysis of Gait Pathologies},
-Bioinformatics and Biology Insights, 2024.
+Bioinformatics and Biology Insights, 18: 11779322241231108, 2024.
 \url{https://doi.org/10.1177/11779322241231108}
 
 \bibitem{menychtas2023}
@@ -59,7 +63,8 @@ Frontiers in Rehabilitation Sciences, 4: 1238134, 2023.
 R.\ Hu, Y.\ Diao, Y.\ Wang, G.\ Li, R.\ He, Y.\ Ning, N.\ Lou, G.\ Li, G.\ Zhao,
 \textit{Effective evaluation of HGcnMLP method for markerless 3D pose estimation of musculoskeletal diseases patients based on smartphone monocular video},
 Frontiers in Bioengineering and Biotechnology, 11: 1335251, 2024.
-% Uwaga: volume 11 (2023), ale publikacja online 9 stycznia 2024
+% Uwaga: Frontiers, tom 11, eCollection 2023, publikacja online 9 stycznia 2024;
+% rok 2024 (data online) do obrony, DOI nosi rok 2023 — rozbieżność typowa dla Frontiers.
 \url{https://doi.org/10.3389/fbioe.2023.1335251}
 
 \bibitem{frontiers2025review}
@@ -150,12 +155,6 @@ J.\ Mart\'{i}nez-Gramage, J.P.\ Albiach, I.N.\ Molt\'{o}, J.J.\ Amer-Cuenca, V.H
 Sensors, 20(21): 6388, 2020.
 \url{https://doi.org/10.3390/s20216388}
 
-\bibitem{young2023smartphone}
-F.\ Young, R.\ Mason, R.\ Morris, S.\ Stuart, A.\ Godfrey,
-\textit{Internet-of-Things-Enabled Markerless Running Gait Assessment from a Single Smartphone Camera},
-Sensors, 23(2): 696, 2023.
-\url{https://doi.org/10.3390/s23020696}
-
 % ============================================================================
 % Filtrowanie sygnałów biomechanicznych
 % ============================================================================
@@ -203,6 +202,12 @@ L.\ Breiman,
 Machine Learning, 45(1): 5--32, 2001.
 \url{https://doi.org/10.1023/A:1010933404324}
 
+\bibitem{kingma2015adam}
+D.P.\ Kingma, J.\ Ba,
+\textit{Adam: A Method for Stochastic Optimization},
+International Conference on Learning Representations (ICLR), 2015.
+\url{https://doi.org/10.48550/arXiv.1412.6980}
+
 % ============================================================================
 % Narzędzia / framework
 % ============================================================================
@@ -210,7 +215,7 @@ Machine Learning, 45(1): 5--32, 2001.
 \bibitem{pytorch}
 A.\ Paszke et al.,
 \textit{PyTorch: An Imperative Style, High-Performance Deep Learning Library},
-Advances in Neural Information Processing Systems (NeurIPS), 2019.
+Advances in Neural Information Processing Systems 32 (NeurIPS), pp.\ 8024--8035, 2019.
 
 \bibitem{scipy}
 P.\ Virtanen et al.,
@@ -226,6 +231,6 @@ Journal of Machine Learning Research, 12: 2825--2830, 2011.
 \bibitem{opencv}
 G.\ Bradski,
 \textit{The OpenCV Library},
-Dr. Dobb's Journal of Software Tools, 2000.
+Dr. Dobb's Journal of Software Tools, 25(11): 120--125, 2000.
 
 \end{thebibliography}

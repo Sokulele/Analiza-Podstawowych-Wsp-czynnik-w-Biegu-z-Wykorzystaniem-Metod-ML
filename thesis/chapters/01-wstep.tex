@@ -1,40 +1,33 @@
 \chapter{Wstęp}
 \label{ch:wstep}
 
-% TODO: Pisać NA KOŃCU, gdy rozdziały 3-8 są gotowe.
-% Materiał: docs/thesis-notes/2026-05-14-temat-pracy-finalny.md (sekcja 1)
-%           + docs/thesis-notes/2026-05-14-research-podobnych-prac.md
-
 \section{Motywacja}
 \label{sec:motywacja}
 
-% TODO: Dlaczego analiza biegu jest ważna?
-% - prewencja urazów (running-related injuries),
-% - rosnąca popularność biegania,
-% - tradycyjne metody (motion capture) drogie i niedostępne,
-% - smartfony + ML = analiza dostępna szerokiej publiczności.
-%
-% Cytat-szablon do monocular 2D: docs/thesis-notes/2026-05-14-wyjasnienia-pojec-do-pisania.md
-% Cytat-szablon do Hannigan 2024 (foot strike 42.7%) jako motywacja automatyzacji.
+Bieganie należy do najpopularniejszych form aktywności fizycznej, a~wraz z~jego rosnącą popularnością rośnie liczba kontuzji przeciążeniowych związanych z~techniką biegu. Część tych urazów wiąże się z~parametrami, które można zmierzyć i~skorygować --- zbyt niską kadencją, nadmiernym wykrokiem (overstridingiem) czy asymetrią obciążenia nóg. Obiektywna analiza techniki biegu mogłaby zatem wspierać prewencję kontuzji, pod warunkiem że jest dostępna poza wyspecjalizowanym laboratorium.
 
+Tradycyjna analiza biomechaniczna opiera się na systemach motion capture z~markerami, które oferują wysoką dokładność, lecz są kosztowne, wymagają laboratorium i~obecności specjalisty --- przez co pozostają poza zasięgiem przeciętnego biegacza. Jednocześnie sami biegacze słabo oceniają własną technikę: badanie przeprowadzone na grupie 710~biegaczy wykazało, że trafność samodzielnego rozpoznania własnego wzorca lądowania stopy wynosi zaledwie około 43\%~\cite{vincent2024footstrike}. Wskazuje to na potrzebę narzędzia dostarczającego obiektywnej oceny techniki w~sposób tani i~dostępny.
+
+Rozwój metod automatycznego wykrywania ułożenia ciała na nagraniu wideo --- bez przyklejania do niego jakichkolwiek fizycznych markerów otworzył taką możliwość. Z~nagrania ze~zwykłej kamery można dziś wykryć położenie punktów charakterystycznych ciała i~na tej podstawie analizować ruch. Niniejsza praca wykorzystuje to podejście do zbudowania systemu, który z~pojedynczego nagrania biegu na bieżni mechanicznej wylicza współczynniki biomechaniczne i~generuje rekomendacje treningowe. 
+\newpage
 \section{Problem badawczy}
 \label{sec:problem-badawczy}
 
-% TODO: 3 pytania badawcze (P1, P2, P3) z 2026-05-14-temat-pracy-finalny.md
-% P1: Pipeline ML do obliczania 12 współczynników biegu z monocular 2D wideo.
-% P2: Który klasyfikator faz najlepiej wpływa na precyzję metryk temporalnych?
-% P3: Wrażliwość współczynników na warunki akwizycji (orientacja, perspektywa, FPS)
-%     + auto-detekcja niskiej wiarygodności.
+Praca odpowiada na trzy główne pytania badawcze.
 
-\section{Cel i zakres pracy}
+Pierwsze pytanie dotyczy projektu i~dokładności samego systemu, jak zaprojektować pipeline uczenia maszynowego --- prowadzący od estymacji pozy, przez klasyfikację faz biegu, po obliczenia geometryczne --- który z~pojedynczego nagrania jedną kamerą wylicza komplet współczynników biegu, i~jaką dokładność osiąga dla poszczególnych z~nich.
+
+Drugie pytanie dotyczy klasyfikatora faz biegu jako fundamentu całego pipeline'u. Który z~rozważanych klasyfikatorów najtrafniej rozpoznaje fazy kontaktu z~podłożem oraz fazy lotu, a~także jak dokładność tego rozpoznawania przekłada się na precyzję wyliczanych z~faz współczynników czasowych, takich jak kadencja czy czas kontaktu z~podłożem.
+
+Trzecie pytanie dotyczy tego, jak warunki nagrania wpływają na wyniki. Które współczynniki są wrażliwe na to, czy nagranie jest poziome czy pionowe, na kąt ustawienia kamery oraz na liczbę klatek na sekundę, a~także czy można automatycznie rozpoznać przypadki, w~których dany współczynnik staje się niewiarygodny z~powodu sposobu nagrania.
+
+Przy projektowaniu pracy przyjąłem kilka założeń, które następnie zweryfikowałem. Spodziewałem się, że model sekwencyjny, uwzględniający kontekst sąsiednich klatek, przewyższy klasyfikator analizujący każdą klatkę niezależnie, i~że dokładniejsza klasyfikacja przełoży się na precyzyjniejsze metryki czasowe. Zakładałem również, że współczynniki przestrzenne, oparte na geometrii ciała w~płaszczyźnie obrazu, okażą się wrażliwe na perspektywę kamery, podczas gdy współczynniki czasowe, oparte na czasie trwania faz, będą wrażliwe przede wszystkim na częstotliwość klatek. Przyjąłem wreszcie, że najbardziej zawodne przypadki uda się rozpoznać automatycznie, bez dodatkowego pomiaru wzorcowego, sprawdzając, czy wyliczona wartość mieści się w~zakresie możliwym dla człowieka. 
+
+\section{Cel i~zakres pracy}
 \label{sec:cel-zakres}
 
-% TODO: Cel = system analizujący wideo biegu i obliczający współczynniki biomechaniczne
-% z rekomendacjami. Zakres = 12 współczynników (5 temporalnych + 7 przestrzennych),
-% klasyfikator faz biegu LSTM, 13+ reguł rekomendacji.
-% Wyjaśnić ewolucję zakresu z "podstawowe" → 12 (z 2026-05-14-temat-pracy-finalny.md).
+Celem pracy jest zaprojektowanie, implementacja i~ocena systemu, który z~nagrania biegu na bieżni oblicza współczynniki biomechaniczne i~generuje na ich podstawie rekomendacje treningowe oparte na literaturze.
+\newpage
+Pierwotnie zakładałem analizę kilku podstawowych współczynników --- kadencji, czasu kontaktu z~podłożem, długości kroku i~wzorca lądowania stopy. W~trakcie realizacji okazało się, że z~tych samych danych wejściowych (sekwencji faz i~wygładzonych keypointów) da się w~naturalny sposób obliczyć więcej wielkości, bez dodatkowych wymagań wobec nagrania. Ostateczny zakres objął dwanaście współczynników --- pięć czasowych i~siedem przestrzennych --- uzupełnionych o~wskaźniki symetrii między lewą a~prawą stroną ciała.
 
-\section{Struktura pracy}
-\label{sec:struktura}
-
-% TODO: Krótki opis każdego z 8 rozdziałów (1 zdanie na rozdział).
+Uczenie maszynowe wykorzystuję w~jednym, ale kluczowym miejscu pipeline'u --- na etapie klasyfikacji faz biegu. To wytrenowany model rozstrzyga dla każdej klatki, czy biegacz znajduje się w~fazie kontaktu lewej stopy, prawej stopy czy lotu. Bez tej klasyfikacji nie da się wyznaczyć żadnego ze~współczynników czasowych, więc jest ona warunkiem działania całego systemu. Same współczynniki obliczam następnie metodami geometrycznymi z~położenia keypointów, a~rekomendacje generuję regułami opartymi na literaturze biomechanicznej, a~nie modelem uczonym z~danych. Uczenie maszynowe jest więc narzędziem umożliwiającym całą analizę, choć nie jedynym jej elementem.

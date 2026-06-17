@@ -1,14 +1,10 @@
 \chapter{Materiały i metody}
 \label{ch:materialy-metody}
 
-% TODO: Najłatwiejszy rozdział do napisania — wszystkie liczby/decyzje są obiektywne.
-% Rekomendacja: pisać jako PIERWSZY, daje "rozruch" pisania.
-% Materiał: CLAUDE.md, History.md (etapy 1-7), src/, data/, docs/reference-values.md.
-
 \section{Dataset}
 \label{sec:dataset}
 
-Zbiór danych wykorzystany w~niniejszej pracy składa się z~15 nagrań wideo przedstawiających bieg na bieżni mechanicznej w~ujęciu z~boku. Materiał pochodzi z~dwóch źródeł: publicznie dostępnych nagrań opublikowanych w~serwisie YouTube (13~nagrań, w~tym segmenty dłuższych filmów) oraz nagrań własnych zarejestrowanych na potrzeby projektu z~udziałem trzech członków klubu biegowego \textit{Zabiegani na Szamę} --- Pawła, Adama i~Janka --- którym dziękuje za pomoc i udział w~badaniu. Nagrania Pawła (film~11) i~Adama (film~12) włączyłem do zbioru treningowego, natomiast materiał Janka posłużył wyłącznie do walidacji pełnego pipeline'u na wytrenowanym modelu (sekcja~\ref{sec:obliczanie-wspolczynnikow}). Nagrania obejmują łącznie około 12~biegaczy o~zróżnicowanym poziomie zaawansowania --- od rekreacyjnych joggerów po zawodowego ultramaratończyka.
+Zbiór danych wykorzystany w~niniejszej pracy składa się z~15 nagrań wideo przedstawiających bieg na bieżni mechanicznej w~ujęciu z~boku. Materiał pochodzi z~dwóch źródeł: publicznie dostępnych nagrań opublikowanych w~serwisie YouTube oraz nagrań własnych zarejestrowanych na potrzeby projektu z~udziałem trzech członków klubu biegowego \textit{Zabiegani na Szamę} --- Pawła, Adama i~Janka --- którym dziękuje za pomoc i udział w~badaniu. Nagrania Pawła (film~11) i~Adama (film~12) włączyłem do zbioru treningowego, natomiast materiał Janka posłużył wyłącznie do walidacji pełnego pipeline'u na wytrenowanym modelu. Te 15 nagrań pochodzi od~kilkunastu biegaczy o~zróżnicowanym poziomie zaawansowania --- od rekreacyjnych joggerów po zawodowego ultramaratończyka.
 
 \subsection{Kryteria doboru nagrań}
 \label{sec:dataset-kryteria}
@@ -16,14 +12,14 @@ Zbiór danych wykorzystany w~niniejszej pracy składa się z~15 nagrań wideo pr
 Minimalne kryteria włączenia nagrania do zbioru były następujące:
 
 \begin{itemize}
-    \item ujęcie z~boku (sagittalne) --- kamera ustawiona w~przybliżeniu prostopadle do~kierunku biegu,
+    \item ujęcie z~boku  --- kamera ustawiona w~przybliżeniu prostopadle do~kierunku biegu,
     \item bieżnia mechaniczna --- stałe tło umożliwiające stabilną detekcję pozy,
     \item sylwetka biegacza widoczna w~kadrze w~stopniu wystarczającym do detekcji keypointów,
     \item co najmniej 10~sekund ciągłego biegu bez zasłonięcia sylwetki,
     \item jakość obrazu wystarczająca do poprawnej detekcji keypointów przez MediaPipe Pose.
 \end{itemize}
 
-Do zbioru celowo włączyłem nagrania odbiegające od warunków idealnych --- m.in.\ wideo w~orientacji pionowej (film~10), nagrania w~trybie slow-motion o~efektywnym FPS poniżej 15 (filmy~4, 7, 8) czy bieg boso (film~8) --- w~celu oceny odporności pipeline'u na zróżnicowane warunki akwizycji (rozdział~\ref{ch:wrazliwosc}).
+Do zbioru celowo włączyłem nagrania odbiegające od warunków idealnych --- m.in.\ wideo w~orientacji pionowej (film~10), nagrania w~trybie slow-motion o~efektywnym FPS poniżej 15 (filmy~4, 7, 8) --- w~celu oceny odporności pipeline'u na zróżnicowane warunki nagrania.
 
 \subsection{Charakterystyka zbioru}
 \label{sec:dataset-charakterystyka}
@@ -48,12 +44,12 @@ Tabela~\ref{tab:dataset} przedstawia parametry techniczne wszystkich nagrań w~z
 6a & Bieg maratoński (seg.\ 1)  & 29{,}97 & $512 \times 360$   & 892  & --- \\
 6b & Bieg maratoński (seg.\ 2)  & 29{,}97 & $512 \times 360$   & 438  & --- \\
 7  & Bieg 4\,m/s                & 13{,}33 & $360 \times 450$   & 800  & slow-motion \\
-8  & Bieg boso 16\,km/h         & 11{,}25 & $364 \times 360$   & 900  & slow-motion \\
+8  & Bieg 16\,km/h         & 11{,}25 & $364 \times 360$   & 900  & slow-motion \\
 9  & Bieg zmiennym tempem       & 30{,}00 & $640 \times 360$   & 870  & --- \\
-10 & Bieg, kamera pionowa       & 29{,}97 & $608 \times 1080$  & 320  & wideo pionowe \\
+10 & Bieg kamera pionowa       & 29{,}97 & $608 \times 1080$  & 320  & wideo pionowe \\
 11 & Paweł --- bieg             & 29{,}97 & $1280 \times 720$  & 1649 & nagranie własne \\
 12 & Adam --- bieg              & 29{,}99 & $1920 \times 1080$ & 2399 & nagranie własne \\
-13 & Bieg 4\,m/s                & 15{,}00 & $600 \times 800$   & 750  & slow-motion \\
+13 & Bieg 2 4\,m/s                 & 15{,}00 & $600 \times 800$   & 750  & slow-motion \\
 \hline
 \multicolumn{4}{l}{\textit{Razem:}} & \textit{12\,087} & \\
 \hline
@@ -62,12 +58,12 @@ Tabela~\ref{tab:dataset} przedstawia parametry techniczne wszystkich nagrań w~z
 
 Cztery nagrania w~zbiorze (filmy~4, 7, 8, 13) zarejestrowane zostały w~trybie slow-motion, co przekłada się na niski FPS w~metadanych pliku wideo (od~9{,}46 do~15~FPS). Pomimo pozornie niskiej płynności, nagrania te są pełnowartościowym materiałem treningowym --- ruch biegacza jest rozciągnięty w~czasie, dzięki czemu jeden cykl biegowy obejmuje kilkadziesiąt klatek zamiast kilkunastu. Klasyfikator uczy się rozpoznawać pozycję ciała na podstawie geometrii keypointów, nie na podstawie czasu między klatkami, dlatego większa ilość klatek na cykl stanowi dodatkowy atut.
 
-Łącznie 15~nagrań obejmuje 12\,087~klatek, z~których 12\,007 posiada etykiety faz biegu. Zbiór podzieliłem na część treningową (10~filmów, 9\,779~klatek), walidacyjną (2~filmy, 738~klatek) i~testową (3~filmy, 1\,490~klatek). Szczegółowy opis podziału i~jego uzasadnienie przedstawiłem w~sekcji~\ref{sec:splity}.
+Łącznie 15~nagrań obejmuje $\approx$~12\,000~klatek, z~których większość posiada etykiety faz biegu. Zbiór podzieliłem na część treningową (10~filmów, $\approx$~9\,800~klatek), walidacyjną (2~filmy, $\approx$~740~klatek) i~testową (3~filmy, $\approx$~1\,500~klatek).
 
 \section{Pipeline ekstrakcji keypointów}
 \label{sec:pipeline-extraction}
 
-Ekstrakcja punktów charakterystycznych ciała (keypointów) z~nagrań wideo stanowi pierwszy etap pipeline'u analitycznego. Proces przebiega w~trzech krokach: dekodowanie klatek wideo, detekcja pozy przez sieć neuronową oraz wygładzanie uzyskanych trajektorii keypointów.
+Ekstrakcja punktów charakterystycznych ciała (keypointów) z~nagrań wideo stanowi pierwszy etap pipeline'u analitycznego. Proces przebiega w~trzech krokach: dekodowanie klatek wideo (biblioteka OpenCV~\cite{opencv}), detekcja pozy przez sieć neuronową oraz wygładzanie uzyskanych trajektorii keypointów.
 
 \subsection{Detekcja pozy --- MediaPipe Pose}
 \label{sec:mediapipe}
@@ -75,12 +71,20 @@ Ekstrakcja punktów charakterystycznych ciała (keypointów) z~nagrań wideo sta
 Do detekcji pozy zastosowałem bibliotekę MediaPipe Pose w~wersji 0.10.14 (legacy Solutions API) \cite{bazarevsky2020blazepose}. Model wykrywa 33~keypointy w~każdej klatce wideo: 1~punkt centralny (nos) oraz 16~par punktów symetrycznych L/P obejmujących twarz, tułów, kończyny górne i~dolne --- w~tym pięty (\texttt{HEEL}) i~czubki stóp (\texttt{FOOT\_INDEX}). Każdy keypoint opisany jest czterema wartościami:
 
 \begin{itemize}
-    \item $x, y \in [0, 1]$ --- znormalizowane współrzędne w~płaszczyźnie obrazu (0{,}0 = lewy górny róg, 1{,}1 = prawy górny),
-    \item $z$ --- estymowana głębia, tj.\ przybliżona odległość keypointu od~kamery względem punktu centralnego bioder. Wartość ta nie jest mierzona czujnikiem głębi, lecz wnioskowana przez sieć neuronową na podstawie wskazówek wizualnych: relatywnych rozmiarów kończyn (bliższe wydają się większe), efektów perspektywy (skrócenie kończyn skierowanych ku/od kamery), wzorców zasłonięć oraz wyuczonych proporcji anatomicznych ciała. Sieć trenowana jest na zbiorach zawierających zarówno adnotacje 2D, jak i~dane referencyjne z~systemów motion capture 3D. W~tej pracy korzystałem głównie ze~współrzędnych $x$ i~$y$,
+    \item $x, y \in [0, 1]$ --- znormalizowane współrzędne w~płaszczyźnie obrazu (0{,}0 = lewy górny róg, 1{,}1 = prawy dolny róg); oś $x$ rośnie w~prawo, a~oś $y$ w~dół,
+    \item $z$ --- estymowana współrzędna głębi, określająca przybliżone położenie keypointu względem kamery. Ponieważ nagrania pochodzą z pojedynczej kamery, wartość $z$ nie jest wynikiem bezpośredniego pomiaru odległości, lecz predykcją modelu MediaPipe. Z tego powodu traktowałem ją jako informację pomocniczą, mniej stabilną i trudniejszą do interpretacji niż współrzędne $x$ i $y$. W dalszych etapach pracy wykorzystywałem głównie dane dwuwymiarowe.
+
     \item $visibility \in [0, 1]$ --- wskaźnik pewności detekcji, określający prawdopodobieństwo, że dany keypoint jest widoczny w~kadrze i~nie jest zasłonięty przez inne części ciała. Sieć neuronowa uczy się przewidywać tę wartość na podstawie tego, czy okolica keypointu jest przesłonięta przez inne kończyny lub wykracza poza kadr, oraz czy cechy wizualne w~otoczeniu keypointu są spójne z~oczekiwaną konfiguracją pozy. Wartość generowana jest przez warstwę sigmoidalną na wyjściu modelu.
 \end{itemize}
 
-Zastosowałem najwyższy poziom złożoności modelu (\texttt{model\_complexity=2}), który zapewnia najdokładniejszą lokalizację keypointów kosztem dłuższego czasu przetwarzania (inferencji). Tryb wideo (\texttt{static\_image\_mode=False}) umożliwia wykorzystanie śledzenia między klatkami, co poprawia stabilność trajektorii.
+Zastosowałem najwyższy poziom złożoności modelu (\texttt{model\_complexity=2}), który zapewnia najdokładniejszą lokalizację keypointów kosztem dłuższego czasu przetwarzania (inferencji). Tryb wideo (\texttt{static\_image\_mode=False}) umożliwia wykorzystanie śledzenia między klatkami, co poprawia stabilność trajektorii. Przykład pozy wykrytej tą metodą na klatce nagrania przedstawia rysunek~\ref{fig:szkielet-mediapipe}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{figures/szkielet_13kmh_prawa.png}
+\caption{Poza wykryta przez MediaPipe Pose --- 33~keypointy połączone w~model szkieletowy, nałożone na klatkę nagrania biegu w~ujęciu bocznym.}
+\label{fig:szkielet-mediapipe}
+\end{figure}
 
 MediaPipe Pose wybrałem spośród trzech rozważanych standardów detekcji pozy:
 
@@ -90,7 +94,7 @@ MediaPipe Pose wybrałem spośród trzech rozważanych standardów detekcji pozy
     \item \textbf{MediaPipe BlazePose} \cite{bazarevsky2020blazepose} --- 33~keypointy, w~tym pięty (\texttt{HEEL}) oraz \texttt{FOOT\_INDEX} (punkt odpowiadający przedniej części stopy).
 \end{itemize}
 
-Choć OpenPose również oferuje keypointy stopy, wybrałem MediaPipe z~dwóch powodów. Po~pierwsze, punkt \texttt{FOOT\_INDEX} lepiej reprezentuje przednią krawędź kontaktu stopy z~podłożem niż \texttt{BIG\_TOE}, co jest istotne przy wyznaczaniu kąta lądowania stopy (sekcja~\ref{sec:obliczanie-wspolczynnikow}). Po~drugie, MediaPipe jest zoptymalizowany pod detekcję pojedynczej osoby i~nie wymaga karty graficznej --- wystarczy standardowy procesor, co upraszcza wdrożenie pipeline'u.
+Choć OpenPose również oferuje keypointy stopy, wybrałem MediaPipe z~dwóch powodów. Po~pierwsze, punkt \texttt{FOOT\_INDEX} lepiej reprezentuje przednią krawędź kontaktu stopy z~podłożem niż \texttt{BIG\_TOE}, co jest istotne przy wyznaczaniu kąta lądowania stopy. Po~drugie, MediaPipe jest zoptymalizowany pod detekcję pojedynczej osoby i~nie wymaga karty graficznej --- wystarczy standardowy procesor, co upraszcza wdrożenie pipeline'u.
 
 Z~33 wykrywanych keypointów w~dalszej analizie wykorzystywałem przede wszystkim 13~punktów istotnych dla biomechaniki biegu: nos, ramiona (2), biodra (2), kolana (2), kostki (2), pięty (2) i~czubki stóp (2). Pozostałe keypointy (twarz, dłonie, łokcie, nadgarstki) rejestrowałem, lecz nie wnosiły informacji do klasyfikacji faz ani obliczania współczynników.
 
@@ -121,7 +125,7 @@ Wygładzanie stosowałem oddzielnie dla współrzędnych $x$, $y$ i~$z$ każdego
 
 W~pojedynczych klatkach MediaPipe może nie wykryć pozy, np.~z~powodu rozmycia ruchu, chwilowego zasłonięcia części ciała lub niejednoznacznego ułożenia sylwetki. Filtr Savitzky-Golay wymaga ciągłego sygnału, dlatego przed jego zastosowaniem konieczne było uzupełnienie brakujących wartości.
 
-Luki w~trajektoriach uzupełniałem interpolacją liniową. Jeżeli keypoint miał znaną pozycję w~klatce $a$ oraz w~klatce $b$, a~brakowało danych w~klatkach pomiędzy nimi, to brakujące wartości wyznaczałem jako punkty leżące na odcinku łączącym pozycję z~klatki $a$ z~pozycją z~klatki $b$. Interpolację stosowałem dla luk wewnętrznych, tj.~takich, dla których istniała znana pozycja keypointu zarówno przed, jak i~po brakującym fragmencie.
+Luki w~trajektoriach uzupełniałem interpolacją liniową. Jeżeli keypoint miał znaną pozycję w~klatce $a$ oraz w~klatce $b$, a~brakowało danych w~klatkach pomiędzy nimi, to brakujące wartości wyznaczałem jako punkty leżące na odcinku łączącym pozycję z~klatki $a$ z~pozycją z~klatki $b$. Interpolację stosowałem dla luk wewnętrznych, czyli takich, dla których istniała znana pozycja keypointu zarówno przed, jak i~po brakującym fragmencie.
 
 \subsubsection{Ocena skuteczności wygładzania}
 
@@ -129,7 +133,7 @@ Skuteczność filtracji oceniałem za pomocą metryki \textit{jittera}, definiow
 \[
 d^2_i = x_{i+2} - 2 \cdot x_{i+1} + x_i
 \]
-i~stanowi dyskretne przybliżenie lokalnej zmiany prędkości sygnału, czyli jego przyspieszenia. Dla gładkiej trajektorii wartości drugiej różnicy zmieniają się w~sposób uporządkowany, dlatego ich odchylenie standardowe jest relatywnie małe. Dla sygnału zaszumionego druga różnica przyjmuje bardziej nieregularne wartości, co prowadzi do wzrostu $\mathrm{std}(d^2)$.
+i~stanowi dyskretne przybliżenie lokalnej zmiany prędkości sygnału, czyli jego przyspieszenia. Dla gładkiej trajektorii wartości drugiej różnicy zmieniają się w~sposób uporządkowany, dlatego ich odchylenie standardowe jest relatywnie małe. \\ Dla sygnału zaszumionego druga różnica przyjmuje bardziej nieregularne wartości, co prowadzi do wzrostu $\mathrm{std}(d^2)$.
 
 Metrykę tę obliczałem dla współrzędnych $x$ i~$y$ dwunastu kluczowych keypointów: ramion, bioder, kolan, kostek, pięt oraz czubków stóp. Porównanie wartości metryki przed i~po filtracji pozwalało ilościowo ocenić, w~jakim stopniu filtr Savitzky-Golay ograniczył wysokoczęstotliwościowe fluktuacje trajektorii. Procentową redukcję jittera wyznaczałem ze wzoru:
 \[
@@ -152,50 +156,465 @@ Wynikiem ekstrakcji jest jeden plik CSV na nagranie, zawierający kolumny: numer
 \section{Auto-etykietowanie faz biegu}
 \label{sec:auto-labeling}
 
-% TODO: Algorytm peak-based z .claude/rules/labeling.md
-% - max(heel_y, foot_index_y) per stopa
-% - scipy.signal.find_peaks (distance=12, prominence=0.03)
-% - alternacja L-R, podział STANCE/FLIGHT (flight_fraction=0.4)
-% - filtr medianowy kernel=3
-% Argument: dlaczego peak-based, nie progowanie Y (notatka 2026-04-16).
+Klasyfikator faz biegu wymaga etykiet treningowych --- dla każdej klatki wideo informacji, czy biegacz znajduje się w~fazie kontaktu lewej stopy (\texttt{LEFT\_STANCE}), prawej stopy (\texttt{RIGHT\_STANCE}) czy lotu (\texttt{FLIGHT}). Ręczna adnotacja ponad 12~tysięcy klatek byłaby czasochłonna i~obarczona subiektywną oceną momentu kontaktu, opracowałem więc algorytm automatycznego etykietowania na podstawie trajektorii keypointów stóp.
+
+\subsection{Odrzucone podejście --- progowanie pozycji pięty}
+\label{sec:labeling-rejected}
+
+Pierwszym podejściem, które testowałem, było progowanie współrzędnej $y$ pięty: jeśli pięta znajduje się poniżej ustalonego progu (blisko podłoża), klatka klasyfikowana jest jako STANCE, w~przeciwnym razie jako FLIGHT. Podejście to okazało się niewystarczające z~trzech powodów:
+
+\begin{enumerate}
+    \item \textbf{Krótka faza lotu.} Przy 30~FPS faza lotu trwa zaledwie 2--3~klatki, co daje bardzo wąskie okno detekcji. Nawet niewielki błąd w~progu eliminuje te klatki --- przy progu 0{,}02 (w~znormalizowanej przestrzeni keypointów) algorytm klasyfikował ponad 70\% klatek jako FLIGHT.
+    \item \textbf{Asymetria L/R z~kąta kamery.} Ujęcie boczne powoduje, że stopa bliższa kamery ma systematycznie inną wartość $y$ niż stopa dalsza. Stały próg nie radzi sobie z~tą asymetrią.
+    \item \textbf{Utrata krótkich segmentów.} Filtr medianowy stosowany po progowaniu kasował jednoklatowe segmenty FLIGHT, zamiast je zachować.
+\end{enumerate}
+
+\subsection{Algorytm peak-based}
+\label{sec:labeling-peak-based}
+
+Finalne podejście opiera się na detekcji lokalnych maksimów (peaków) w~sygnale kontaktu stopy, co odpowiada momentom uderzenia stopy o~podłoże. Algorytm składa się z~pięciu kroków.
+
+\subsubsection{Konstrukcja sygnału kontaktu}
+
+Dla każdej stopy obliczałem sygnał kontaktu jako maksimum ze współrzędnych $y$ pięty i~czubka stopy:
+\[
+s_{\text{kontakt}}(t) = \max\bigl(y_{\text{heel}}(t),\; y_{\text{foot\_index}}(t)\bigr)
+\]
+Operacja $\max$ zapewnia, że sygnał obejmuje cały cykl kontaktu --- od momentu uderzenia piętą (heel strike, kiedy $y_{\text{heel}}$ jest maksymalne) do oderwania palców (toe-off, kiedy $y_{\text{foot\_index}}$ jest maksymalne). Stosowanie samego $y_{\text{heel}}$ pomijałoby końcową fazę kontaktu, a~samego $y_{\text{foot\_index}}$ --- początkową.
+\newpage
+\subsubsection{Detekcja foot strikes}
+
+Momenty uderzenia stopy identyfikowałem osobno dla lewej i~prawej nogi za pomocą funkcji \texttt{scipy.signal.find\_peaks()} z~biblioteki SciPy~\cite{scipy}, z~dwoma parametrami:
+
+\begin{itemize}
+    \item \textbf{Minimalna odległość} (\texttt{distance}) --- wyznaczana dynamicznie ze wzoru:
+    \[
+    d_{\min} = \max\!\left(3,\;\left\lfloor \frac{\text{FPS} \cdot 60}{c_{\max}} \right\rfloor\right)
+    \]
+    gdzie $c_{\max} = 150$ to maksymalna spodziewana kadencja jednej stopy (kontaktów na minutę). Przy 30~FPS daje to $d_{\min} = 12$~klatek ($\approx$0{,}4~s), co zapobiega wykryciu dwóch peaków w~obrębie jednego kroku.
+    \item \textbf{Minimalna prominencja} (\texttt{prominence} $= 0{,}03$) --- miara tego, jak bardzo peak wystaje ponad otaczający sygnał w~znormalizowanej przestrzeni keypointów $[0, 1]$. Próg ten odrzuca drobne oscylacje szumu, zachowując rzeczywiste kontakty stopy.
+\end{itemize}
+
+\subsubsection{Wymuszenie alternacji L--R}
+
+W~prawidłowym biegu stopy lądują naprzemiennie: lewa, prawa, lewa, prawa. Algorytm scala peaki obu stóp w~jedną listę chronologiczną i~wymusza ten wzorzec: jeśli dwa kolejne peaki dotyczą tej samej stopy (np.~L--L), zachowuję ten z~wyższą prominencją, a~drugi odrzucam. Wynikiem jest ściśle naprzemienna sekwencja kontaktów L--R--L--R.
+
+\subsubsection{Podział na fazy STANCE i~FLIGHT}
+
+Między każdą parą kolejnych kontaktów algorytm wyznacza punkt przejścia --- klatkę, w~której wartość $\max(s_{\text{L}}, s_{\text{R}})$ osiąga minimum, co odpowiada momentowi, gdy obie stopy są najwyżej nad podłożem (szczyt fazy lotu). Każdy region między punktami przejścia dzielę na strefę centralną (STANCE) i~marginesy brzegowe (FLIGHT) za pomocą parametru $f_{\text{flight}} = 0{,}4$:
+\[
+m = \max\!\left(1,\;\left\lfloor \frac{l_{\text{region}} \cdot f_{\text{flight}}}{2} \right\rfloor\right)
+\]
+gdzie $l_{\text{region}}$ to długość regionu w~klatkach, a~$m$ to szerokość marginesu. Klatki w~pierwszych $m$ klatkach regionu oraz ostatnich $m$ klatkach oznaczam jako \texttt{FLIGHT}, a~klatki centralne jako odpowiednio \texttt{LEFT\_STANCE} lub \texttt{RIGHT\_STANCE}. \\Parametr $f_{\text{flight}} = 0{,}4$ oznacza, że około 40\% klatek między kolejnymi kontaktami przypisywanych jest do fazy lotu --- co jest zgodne z~typowymi proporcjami faz biegu rekreacyjnego \cite{novacheck1998}.
+
+\subsubsection{Detekcja kierunku biegu i~filtr medianowy}
+
+Algorytm automatycznie wykrywa kierunek biegu, porównując średnią pozycję $x$ nosa ze~średnią pozycją $x$ środka bioder w~całym nagraniu. Jeśli nos znajduje się na lewo od bioder (biegacz biegnie w~lewo w~kadrze), zamieniam etykiety \texttt{LEFT\_STANCE} $\leftrightarrow$ \texttt{RIGHT\_STANCE}, aby zachować anatomiczną poprawność niezależnie od orientacji nagrania.
+
+Na zakończenie stosowałem filtr medianowy z rozmiarem okna $k = 3$ klatki --- dla każdej klatki filtr bierze ją samą oraz jedną klatkę przed i~jedną po, a~jako wynik przyjmuje etykietę występującą najczęściej w~tym trójkowym oknie, eliminując ewentualne pojedyncze klatki z~błędną etykietą. W~praktyce filtr ten zmieniał znikomą liczbę klatek --- algorytm peak-based generuje sekwencję wystarczająco czystą, że post-processing jest niemal zbędny. Wynikowe etykiety zapisywałem w~dwóch kolumnach pliku CSV z~keypointami: \texttt{phase\_auto} (surowa etykieta przed filtrem) i~\texttt{phase} (finalna etykieta po filtrze medianowym).
 
 \section{Architektury klasyfikatorów}
 \label{sec:architektury}
 
-% TODO: 4 modele:
-% - RF v1 (raw, 132 features) - baseline
-% - RF v2 (engineered, 106 features) - kąty, prędkości, akceleracje
-% - LSTM run 1 (BiLSTM, h=128, dropout=0.3, window=15) - overfit but high acc
-% - LSTM run 2 (BiLSTM, h=64, dropout=0.4) - primary stable
-% Plus aspect ratio fix (pre-processing dla LSTM).
-% Liczby features: 132 i 106 z comparison_summary.json. ZWERYFIKOWANE.
+W~ramach pracy porównałem cztery architektury klasyfikatorów faz biegu, aby ocenić wpływ inżynierii cech oraz modelowania kontekstu czasowego na dokładność klasyfikacji. Modele różnią się zarówno algorytmem (Random Forest vs BiLSTM), jak i~reprezentacją danych wejściowych (surowe keypointy vs cechy inżynierowane).
+
+\subsection{Random Forest --- baseline (RF\,v1)}
+\label{sec:rf-v1}
+
+Pierwszy model stanowi baseline --- punkt odniesienia weryfikujący, czy samo zadanie klasyfikacji faz biegu jest wykonalne na podstawie keypointów z~pojedynczej klatki. Random Forest~\cite{breiman2001rf} otrzymuje na wejściu wektor 132~surowych cech, czyli bezpośrednich, nieprzetworzonych wyjść z~MediaPipe Pose: $33 \text{ keypointy} \times 4 \text{ wartości } (x, y, z, visibility) = 132$. Surowe współrzędne zależą od pozycji biegacza w~kadrze i~proporcji jego ciała --- ta sama poza w~innym miejscu kadru daje inny wektor cech. Model musi samodzielnie nauczyć się ignorować te nieistotne różnice.
+
+Hiperparametry (w~implementacji biblioteki scikit-learn~\cite{sklearn}): 300~drzew (\texttt{n\_estimators}), nieograniczona głębokość (\texttt{max\_depth=None}), zbalansowane wagi klas (parametr \texttt{class\_weight} ustawiony na \texttt{'balanced'}) kompensujące ewentualne nierówności w~rozkładzie faz.
+
+\subsection{Random Forest z~cechami inżynierowanymi (RF\,v2)}
+\label{sec:rf-v2}
+
+Drugi model wykorzystuje 106~cech inżynierowanych, czyli wielkości obliczonych z~surowych keypointów w~celu uzyskania reprezentacji bardziej informatywnej i~niezależnej od warunków nagrania. Proces transformacji przebiega w~dwóch krokach:
+
+\begin{enumerate}
+    \item \textbf{Normalizacja do układu ciała.} Obliczałem punkt środkowy bioder (\textit{mid\_hip}) jako średnią pozycji lewego i~prawego biodra, a~następnie długość tułowia jako odległość euklidesową między \textit{mid\_hip} a~środkiem ramion (\textit{mid\_shoulder}). Każdy keypoint normalizowałem odejmując pozycję \textit{mid\_hip} i~dzieląc przez długość tułowia. Daje to $33 \times 3 = 99$~cech znormalizowanych, niezależnych od pozycji biegacza w~kadrze i~przeskalowanych względem proporcji ciała.
+    \item \textbf{Kąty stawów.} Obliczałem 6~kątów stawów (po 3 na nogę): kąt kolana (biodro--kolano--kostka), kąt biodra (ramię--biodro--kolano) i~kąt kostki (kolano--kostka--czubek stopy), oraz pochylenie tułowia (kąt wektora \textit{mid\_hip}$\to$\textit{mid\_shoulder} względem pionu). Razem 7~dodatkowych cech, łącznie $99 + 7 = 106$.
+\end{enumerate}
+
+Hiperparametry Random Forest pozostawiłem identyczne jak w~RF\,v1 (300~drzew, brak ograniczenia głębokości, zbalansowane wagi klas), aby różnica w~wynikach odzwierciedlała wyłącznie wpływ inżynierii cech.
+
+\subsection{BiLSTM --- model sekwencyjny}
+\label{sec:bilstm}
+
+Modele Random Forest klasyfikują każdą klatkę niezależnie, ignorując kontekst czasowy --- nie wiedzą, co działo się w~klatkach sąsiednich. Tymczasem fazy biegu tworzą uporządkowaną sekwencję (kontakt lewej stopy $\to$ lot $\to$ kontakt prawej stopy $\to$ lot), co sugeruje, że model uwzględniający kolejność klatek powinien osiągnąć lepsze wyniki.
+
+\subsubsection{Architektura sieci}
+
+Zastosowałem sieć typu LSTM (Long Short-Term Memory) \cite{hochreiter1997lstm} --- rodzaj sieci neuronowej rekurencyjnej zaprojektowanej do przetwarzania sekwencji. W~odróżnieniu od Random Forest, LSTM przetwarza ciąg kolejnych klatek i~na każdym kroku decyduje, które informacje z~wcześniejszych klatek zapamiętać, a~które zapomnieć. Dzięki temu model może uchwycić wzorce czasowe --- np.~że po fazie lotu zawsze następuje kontakt stopy.
+
+Sieć jest dwukierunkowa (BiLSTM), co oznacza, że przetwarza sekwencję zarówno od~lewej do~prawej, jak i~od~prawej do~lewej. Wyniki obu kierunków są łączone, dzięki czemu dla każdej klatki model widzi kontekst zarówno z~przeszłości, jak i~z~przyszłości.
+
+Na wejściu sieć otrzymuje okno 15~kolejnych klatek (po 106~cech inżynierowanych na klatkę) i~klasyfikuje fazę klatki środkowej -- 7. Okno 15~klatek przy 30~FPS obejmuje $\approx$ 0{,}5~sekundy, co odpowiada w~przybliżeniu jednemu pełnemu cyklowi biegowemu --- wystarczająco dużo kontekstu, by model widział przejścia między fazami. 
+
+Cechy przed podaniem do sieci normalizowałem za pomocą \texttt{StandardScaler}: od~każdej cechy odejmowałem jej średnią i~dzieliłem przez odchylenie standardowe, tak aby wszystkie cechy miały porównywalny zakres wartości (średnia~$\approx 0$, odchylenie~$\approx 1$). Średnią i~odchylenie standardowe obliczałem wyłącznie na danych treningowych, a~następnie tymi samymi wartościami transformowałem dane walidacyjne i~testowe. Gdybym obliczył statystyki na całym zbiorze łącznie, model pośrednio ``poznałby'' rozkład danych testowych jeszcze przed testowaniem --- wyniki byłyby sztucznie zawyżone i~nie odzwierciedlałyby rzeczywistej zdolności modelu do generalizacji na nowe, nieznane dane. 
+
+\subsubsection{Trening sieci}
+
+Trening sieci neuronowej~\cite{goodfellow2016deep} polega na iteracyjnym dostrajaniu jej parametrów (wag), tak aby predykcje modelu były jak najbliższe prawdziwym etykietom. Sieć zaimplementowałem w~bibliotece PyTorch~\cite{pytorch}. Proces wymaga zdefiniowania trzech elementów:
+
+\begin{itemize}
+    \item \textbf{Funkcja straty} --- mierzy, jak bardzo predykcja modelu odbiega od prawdziwej etykiety. Zastosowałem \texttt{CrossEntropyLoss}, standardową funkcję straty dla klasyfikacji wieloklasowej, która karze model proporcjonalnie do pewności, z~jaką wskazuje błędną klasę. Ponieważ trzy fazy biegu występują w~zbiorze z~różną częstością, zastosowałem zbalansowane wagi klas --- fazy rzadsze mają proporcjonalnie wyższą wagę w~funkcji straty, co zapobiega faworyzowaniu klasy dominującej.
+    \item \textbf{Optymalizator} --- algorytm, który na podstawie wartości straty koryguje wagi sieci. Wybrałem Adam \cite{kingma2015adam}, który automatycznie dostosowuje tempo uczenia osobno dla każdego parametru. Jest to najpowszechniej stosowany optymalizator w~głębokim uczeniu, ponieważ dobrze radzi sobie z~różnorodnymi zadaniami bez konieczności szczegółowego dostrajania.
+    \item \textbf{Tempo uczenia} --- określa, jak duże korekty wag wykonuje optymalizator w~każdym kroku. Zbyt wysokie tempo powoduje niestabilność (model ``przeskakuje'' optimum), zbyt niskie --- bardzo wolną zbieżność.
+\end{itemize}
+
+\subsubsection{Dwie konfiguracje --- LSTM\,r1 i~LSTM\,r2}
+
+Wytrenowałem dwie konfiguracje BiLSTM, aby zbadać, czy mniejszy model z~silniejszą regularyzacją lepiej generalizuje na nowe filmy. Regularyzacja to zbiorcze określenie na techniki ograniczające \textit{overfitting}, czyli przeuczenie --- sytuację, w~której model zbyt dokładnie zapamiętuje dane treningowe (włącznie z~ich szumem i~przypadkowymi wzorcami) i~osiąga wysoką dokładność na danych treningowych, ale znacząco gorszą na nowych, niewidzianych wcześniej danych.
+
+\begin{itemize}
+    \item \textbf{LSTM\,r1} --- większy model o~ukrytym wymiarze $h = 128$ na kierunek. Ukryty wymiar to rozmiar wektora pamięci wewnętrznej sieci, czyli ile liczb sieć wykorzystuje do zakodowania informacji o~dotychczasowej sekwencji na każdym kroku. Większa wartość pozwala uchwycić bardziej złożone wzorce, ale zwiększa ryzyko przeuczenia. Ponieważ sieć jest dwukierunkowa, każda klatka otrzymuje dwa wektory pamięci --- jeden z~przejścia ``od lewej do prawej'' i~drugi z~przejścia ``od prawej do lewej'' --- które są łączone (konkatenowane) w~jeden wektor o~wymiarze $2 \times 128 = 256$. Model ma łącznie 637\,699~parametrów, czyli tylu liczbowych wag, które sieć dostosowuje w~trakcie treningu. Tempo uczenia: $0{,}001$.
+    \item \textbf{LSTM\,r2} --- mniejszy model: $h = 64$ (128~po połączeniu obu kierunków), czyli 187\,779~parametrów --- redukcja o~71\% względem LSTM\,r1. Niższe tempo uczenia ($0{,}0003$) sprawia, że model uczy się ostrożniej --- korekty wag w~każdym kroku są mniejsze.
+\end{itemize}
+
+Oba modele stosują dwa mechanizmy ograniczające przeuczenie:
+
+\begin{itemize}
+\item \textbf{Dropout} --- podczas treningu losowo wyłącza część neuronów. W~modelu LSTM\,r1 wyłączałem 30\% neuronów, a~w~LSTM\,r2 --- 40\%. Dzięki temu sieć nie może zbyt mocno polegać na pojedynczych neuronach i~jest mniej podatna na zapamiętywanie przypadkowych wzorców z~danych treningowych. Większy dropout w~LSTM\,r2 zastosowałem, aby silniej przeciwdziałać przeuczeniu.
+
+\item \textbf{Weight decay} --- ogranicza nadmierny wzrost wag modelu. Można to rozumieć jako dodatkową karę za zbyt skomplikowane rozwiązania. W modelu LSTM\,r1 zastosowałem wartość \(10^{-5}\), a w LSTM\,r2 większą wartość \(10^{-4}\), aby mocniej ograniczyć przeuczenie. Dzięki temu LSTM\,r2 miał być prostszym i ostrożniej uczącym się modelem.
+
+\end{itemize}
+
+
+Trening kończył się automatycznie mechanizmem \textit{early stopping}: jeśli strata na zbiorze walidacyjnym nie poprawiała się przez 15~kolejnych epok, przerywałem trening i~zachowywałem wagi z~najlepszej epoki. Zapobiegało to sytuacji, w~której dłuższy trening pogarsza generalizację. LSTM\,r1 osiągnął najlepszą epokę jako 5.~z~20, LSTM\,r2 --- jako 3.~z~18, co wskazuje na szybką zbieżność obu modeli.
+
+\subsection{Korekta proporcji obrazu (aspect ratio fix)}
+\label{sec:aspect-fix}
+
+W~trakcie eksperymentów zaobserwowałem, że modele z~cechami inżynierowanymi (RF\,v2, oba LSTM) osiągały systematycznie gorsze wyniki na filmie~10 (wideo pionowe, $608 \times 1080$~px). Przyczyną okazał się sposób, w~jaki MediaPipe normalizuje współrzędne keypointów.
+
+MediaPipe zwraca współrzędne $x$ i~$y$ w~zakresie $[0, 1]$, niezależnie od rzeczywistych proporcji kadru. Oznacza to, że przesunięcie keypointu o~$\Delta x = 0{,}1$ w~filmie o~szerokości 608~pikseli odpowiada 60{,}8~pikseli, natomiast przesunięcie o~$\Delta y = 0{,}1$ przy wysokości 1080~pikseli odpowiada 108~pikseli --- prawie dwukrotnie więcej. Innymi słowy: ta sama zmiana w~znormalizowanych współrzędnych oznacza fizycznie inny dystans w~pionie niż w~poziomie. Problem ten ujawnia się przy obliczaniu odległości euklidesowych, np.~długości tułowia --- formuła traktuje $\Delta x$ i~$\Delta y$ jako porównywalne, podczas gdy w~rzeczywistości odpowiadają one różnej liczbie pikseli. Przy filmach o~standardowych proporcjach 16:9 (np.~$1920 \times 1080$) różnica jest umiarkowana, natomiast przy wideo pionowym ($608 \times 1080$, proporcje $\approx$~9:16) zniekształcenie jest znaczące.
+
+Korektę zaimplementowałem jako krok preprocessingu przed obliczaniem cech inżynierowanych: mnożę współrzędne $x$ przez szerokość kadru, a~$y$ przez wysokość, przywracając fizycznie spójne jednostki (piksele). Dzięki temu $\Delta x$ i~$\Delta y$ wyrażają rzeczywiste odległości w~pikselach, a~obliczane na ich podstawie kąty i~odległości odpowiadają geometrii ciała biegacza, nie proporcjom kadru. Dla filmów o~standardowych proporcjach 16:9 korekta ma niewielki wpływ, natomiast dla wideo pionowego (film~10) poprawiła test accuracy modelu LSTM\,r1 na tym filmie z~75{,}8\% do~85{,}9\% (+10{,}1~pp). Łączna poprawa na całym zbiorze testowym wyniosła +3{,}8~pp (z~67{,}1\% do~70{,}9\%).
+
+Tabela~\ref{tab:classifiers} podsumowuje architektury wszystkich czterech modeli.
+
+\begin{table}[htbp]
+\centering
+\caption{Porównanie architektur klasyfikatorów faz biegu}
+\label{tab:classifiers}
+\small
+\begin{tabular}{lcccc}
+\hline
+ & \textbf{RF\,v1} & \textbf{RF\,v2} & \textbf{LSTM\,r1} & \textbf{LSTM\,r2} \\
+\hline
+Algorytm       & Random Forest & Random Forest & BiLSTM & BiLSTM \\
+Cechy           & 132 (surowe) & \multicolumn{3}{c}{106 (inżynierowane)} \\
+Kontekst czasowy & 1~klatka & 1~klatka & 15~klatek & 15~klatek \\
+Aspect fix      & nie & tak & tak & tak \\
+Ukryty wymiar   & --- & --- & 128 & 64 \\
+Dropout         & --- & --- & 0{,}3 & 0{,}4 \\
+Parametry       & --- & --- & 637\,699 & 187\,779 \\
+\hline
+\end{tabular}
+\end{table}
 
 \section{Obliczanie współczynników biomechanicznych}
 \label{sec:obliczanie-wspolczynnikow}
 
-% TODO: 5 temporalnych + 7 przestrzennych (z reference-values.md).
-% Formuły z .claude/rules/coefficients.md.
-% Agregacje: mean, std per cykl, osobno L/P.
+Po sklasyfikowaniu faz biegu pipeline oblicza 12~współczynników biomechanicznych opisujących technikę biegacza. Współczynniki podzieliłem na dwie grupy:
 
+\begin{itemize}
+    \item \textbf{Temporalne} (czasowe) --- oparte na czasie trwania poszczególnych faz biegu. Nazywam je temporalnymi, ponieważ ich wartość wynika z~tego, jak długo trwają kolejne fazy (kontakt, lot), a~nie z~tego, jaką pozycję ciało przyjmuje. Do ich obliczenia wystarczy sekwencja etykiet faz i~częstotliwość klatek wideo. 
+    \item \textbf{Przestrzenne} --- oparte na geometrii keypointów w~konkretnych klatkach, czyli na tym, gdzie w~przestrzeni obrazu znajdują się poszczególne punkty ciała. 
+\end{itemize}
+
+W~typowym nagraniu biegacz wykonuje kilkanaście do kilkudziesięciu cykli biegowych. Każdy cykl daje jedną wartość danego współczynnika --- np.~jeden czas kontaktu lewej stopy, jeden czas lotu, jeden kąt kolana w~momencie kontaktu. Wynikowy współczynnik raportowałem jako średnią arytmetyczną $\pm$~odchylenie standardowe ze~wszystkich cykli w~nagraniu, co pozwala ocenić zarówno typową wartość, jak i~jej zmienność od cyklu do cyklu. Współczynniki zależne od strony ciała --- takie jak czas kontaktu czy kąt kolana --- obliczałem osobno dla lewej i~prawej nogi, uzyskując dwie niezależne wartości (np.~GCT$_L$ i~GCT$_R$), które następnie porównywałem wskaźnikiem symetrii.
+
+\subsection{Segmentacja sekwencji faz}
+\label{sec:segmentacja}
+
+Klasyfikator faz przypisuje każdej klatce wideo jedną z~trzech etykiet: \texttt{LEFT\_STANCE}, \texttt{RIGHT\_STANCE} lub \texttt{FLIGHT}. Aby obliczyć współczynniki temporalne, muszę wiedzieć, jak długo trwa każda kolejna faza --- np.~ile klatek z~rzędu biegacz spędza w~fazie kontaktu lewej stopy, zanim przejdzie do fazy lotu. W~tym celu dzielę sekwencję etykiet na ciągłe fragmenty (segmenty) o~jednakowej etykiecie.
+
+Algorytm przebiega sekwencję etykiet od pierwszej do ostatniej klatki: dopóki kolejne klatki mają tę samą etykietę, należą do tego samego segmentu. Gdy etykieta się zmienia, bieżący segment się kończy i~zaczyna nowy. Metodę tę określa się jako \textit{run-length encoding}. Przykładowo, sekwencja 12~klatek:
+
+\begin{center}
+\small
+\texttt{L, L, L, F, F, R, R, R, R, F, F, L}
+\end{center}
+
+\noindent
+zostaje podzielona na pięć segmentów: \texttt{LEFT\_STANCE} (3~klatki), \texttt{FLIGHT} (2~klatki), \texttt{RIGHT\_STANCE} (4~klatki), \texttt{FLIGHT} (2~klatki), \texttt{LEFT\_STANCE} (1~klatka). Dla każdego segmentu zapisuję fazę, indeks klatki początkowej i~końcowej oraz czas trwania obliczony ze~wzoru:
+\[
+t_{\text{segment}} = \frac{n_{\text{klatek}}}{\text{FPS}} \quad [\text{s}]
+\]
+Na~przykład segment \texttt{RIGHT\_STANCE} trwający 4~klatki przy 30~FPS ma czas trwania $4 / 30 \approx 0{,}133$~s, czyli 133~ms. Te czasy trwania poszczególnych segmentów stanowią podstawę do obliczenia współczynników temporalnych opisanych w~kolejnych sekcjach.
+
+\subsection{Współczynniki temporalne}
+\label{sec:temporal}
+
+\subsubsection{Kadencja}
+
+Kadencja określa liczbę kontaktów stóp z~podłożem na minutę i~jest jednym z~podstawowych wskaźników ekonomii biegu. Obliczałem ją jako:
+\[
+\text{kadencja} = \frac{n_{\text{kroków}}}{t_{\text{nagrania}}} \cdot 60 \quad [\text{spm}]
+\]
+gdzie $n_{\text{kroków}}$ to liczba przejść z~fazy FLIGHT do STANCE (lewej lub prawej), a~$t_{\text{nagrania}}$ to czas trwania analizowanego fragmentu w~sekundach. Krok definiowałem jako wejście w~fazę kontaktu, czyli przejście z~klatki niebędącej STANCE do klatki STANCE. Kadencja typowego biegacza rekreacyjnego mieści się w~zakresie 150--170~spm, a~biegaczy zaawansowanych w~zakresie 170--185~spm \cite{heiderscheit2011}.
+
+\subsubsection{Czas kontaktu z~podłożem (GCT)}
+
+Czas kontaktu z~podłożem (\textit{Ground Contact Time}, GCT) to czas, przez jaki stopa pozostaje w~kontakcie z~podłożem w~trakcie jednego kroku. Segment STANCE to ciągły fragment klatek, w~których stopa pozostaje na ziemi --- np.~6~kolejnych klatek z~etykietą \texttt{LEFT\_STANCE} stanowi jeden segment, czyli jeden pojedynczy kontakt lewej stopy z~podłożem. W~typowym 20-sekundowym nagraniu mieści się kilkanaście takich segmentów na nogę.
+
+Obliczałem GCT osobno dla lewej i~prawej nogi jako średni czas trwania segmentów o~etykiecie odpowiednio \texttt{LEFT\_STANCE} i~\texttt{RIGHT\_STANCE}:
+\[
+\text{GCT} = \frac{1}{N} \sum_{i=1}^{N} t_{\text{stance},\,i} \quad [\text{ms}]
+\]
+gdzie $N$ to łączna liczba segmentów STANCE danej nogi w~nagraniu, indeks $i$ numeruje kolejne segmenty (od pierwszego do $N$-tego), a~$t_{\text{stance},\,i}$ to czas trwania $i$-tego segmentu w~milisekundach, obliczony z~liczby klatek segmentu i~FPS nagrania. Wzór ten oznacza po prostu średnią arytmetyczną wszystkich pojedynczych czasów kontaktu zarejestrowanych dla danej nogi. Typowy GCT dla biegu rekreacyjnego wynosi 200--280~ms --- krótszy GCT jest kojarzony z~lepszą ekonomią biegu \cite{souza2016}.
+
+\subsubsection{Czas lotu}
+
+Czas lotu  to czas, w~którym obie stopy znajdują się w~powietrzu. Obliczałem go analogicznie do GCT --- jako średni czas trwania segmentów FLIGHT. Typowy zakres to 80--150~ms; brak fazy lotu oznacza chód, nie bieg \cite{novacheck1998}.
+
+\subsubsection{Czas cyklu i~długość kroku}
+
+Czas cyklu to czas od kontaktu jednej stopy do następnego kontaktu \textit{tej samej} stopy, obejmujący pełen cykl ruchu: kontakt~$\to$~lot~$\to$~kontakt drugiej stopy~$\to$~lot~$\to$~powrót do kontaktu pierwszej stopy. Obliczałem go osobno dla lewej i~prawej nogi jako różnicę znaczników czasowych kolejnych wejść w~STANCE tej samej nogi.
+
+Jeśli użytkownik podał prędkość bieżni $v$~[m/s], obliczałem długość kroku:
+\[
+\text{stride} = v \cdot t_{\text{cykl}} \quad [\text{m}]
+\]
+Formuła ta wykorzystuje fakt, że na bieżni mechanicznej biegacz porusza się ze~stałą prędkością wymuszoną przez taśmę bieżni. Prędkość nie jest możliwa do wyznaczenia z~samego nagrania wideo --- wymaga podania przez użytkownika. 
+
+\subsubsection{Duty factor}
+
+Duty factor to stosunek czasu kontaktu stopy z~podłożem do czasu cyklu.
+\[
+\text{DF} = \frac{\text{GCT}}{t_{\text{cykl}}}
+\]
+Wartość poniżej~0{,}5 oznacza, że stopa spędza mniej niż połowę cyklu na podłożu, co jest charakterystyczne dla biegu. Wartość powyżej~0{,}5 oznacza, że stopa jest dłużej na ziemi niż w~powietrzu --- jest to cecha chodu, nie biegu. Typowy zakres dla biegu rekreacyjnego to 0{,}35--0{,}45, dla sprintów 0{,}22--0{,}30 \cite{souza2016}.
+
+\subsection{Współczynniki przestrzenne}
+\label{sec:spatial}
+
+Współczynniki przestrzenne obliczałem na podstawie geometrii keypointów --- czyli ich położenia w~przestrzeni obrazu. Wykorzystywałem keypointy po filtracji filtrem Savitzky-Golay, nczyli \textit{wygładzone keypointy} --- są to surowe pozycje z~MediaPipe pozbawione szybkich, losowych fluktuacji (jittera), ale zachowujące rzeczywisty kształt ruchu ciała.
+
+Część współczynników obliczałem w~pojedynczych klatkach --- np.~kąt kolana wyznaczany w~konkretnej klatce wejścia stopy w~fazę STANCE, dający jedną wartość na każdy kontakt. Część obliczałem z~całych faz --- np.~średni kąt kolana w~ciągu wszystkich klatek fazy STANCE, dający jedną uśrednioną wartość na każdy segment. Wartości raportowałem jako średnią~$\pm$~odchylenie standardowe ze~wszystkich cykli biegowych, z~rozbiciem na fazy (\texttt{LEFT\_STANCE}, \texttt{RIGHT\_STANCE}, \texttt{FLIGHT}) tam, gdzie miało to sens biomechaniczny.
+
+\subsubsection{Kąty stawów}
+
+Obliczałem sześć kątów stawów (po trzy na nogę) za pomocą funkcji trygonometrycznej:
+\[
+\alpha = \arccos\!\left(\frac{\vec{u} \cdot \vec{v}}{\|\vec{u}\| \cdot \|\vec{v}\|}\right) \cdot \frac{180^\circ}{\pi}
+\]
+gdzie $\vec{u}$ i~$\vec{v}$ to wektory wychodzące od keypointu stawu do dwóch sąsiednich keypointów:
+
+\begin{itemize}
+    \item \textbf{Kąt kolana} --- wektory: biodro~$\to$~kolano i~kolano~$\to$~kostka. Noga wyprostowana $\approx$~$170$--$180^\circ$, ugięta $\approx$~$90$--$120^\circ$.
+    \item \textbf{Kąt biodra} --- wektory: ramię~$\to$~biodro i~biodro~$\to$~kolano. Opisuje rozwarcie uda względem tułowia.
+    \item \textbf{Kąt kostki} --- wektory: kolano~$\to$~kostka i~kostka~$\to$~czubek stopy. Opisuje zgięcie stopy.
+\end{itemize}
+
+W~biomechanice biegu wyróżnia się dwa stany danej nogi w~obrębie cyklu:
+
+\begin{itemize}
+    \item \textbf{Noga oporowa} --- noga, której stopa aktualnie dotyka podłoża. Jest to noga utrzymująca ciężar ciała i~przejmująca siły reakcji podłoża. Odpowiada fazie \texttt{LEFT\_STANCE} lub \texttt{RIGHT\_STANCE} sklasyfikowanej przez model.
+    \item \textbf{Noga w~fazie wahadła} --- noga uniesiona, przesuwająca się do przodu, aby przygotować się do kolejnego kontaktu. W~tym czasie druga noga jest albo w~kontakcie (STANCE) albo obie nogi są w~powietrzu (FLIGHT).
+\end{itemize}
+
+W~dowolnym momencie biegu jedna noga jest oporowa, a~druga w~wahadle --- nigdy nie obie naraz w~tym samym stanie. Kąty kolan obu nóg zmieniają się w~zależności od tego, w~którym stanie się znajdują --- np.~kąt kolana nogi oporowej (w~fazie STANCE) wynosi typowo $155$--$175^\circ$ (noga prawie wyprostowana, by amortyzować uderzenie), a~tej samej nogi w~fazie wahadła spada do~$100$--$140^\circ$ (silne zgięcie, by skrócić długość wahadła i~przyspieszyć przeniesienie nogi do przodu) \cite{novacheck1998}.
+
+\subsubsection{Kąt kolana w~momencie kontaktu}
+
+Oprócz kątów uśrednionych w~ramach całej fazy, obliczałem kąt kolana w~konkretnej klatce wejścia stopy w~fazę STANCE. Wartość ta jest wskaźnikiem overstridingu: kąt $160$--$175^\circ$ oznacza prawidłowe, lekko ugięte kolano absorbujące siłę uderzenia, natomiast kąt powyżej~$175^\circ$ wskazuje, że stopa ląduje daleko przed środkiem ciężkości, co zwiększa siły hamowania i~ryzyko kontuzji kolana \cite{heiderscheit2011}.
+
+\subsubsection{Pochylenie tułowia}
+
+Pochylenie tułowia obliczałem jako kąt między wektorem tułowia (od~środka bioder do~środka ramion) a~kierunkiem pionu w~płaszczyźnie obrazu. Wartości powyżej~$0^\circ$ oznaczają pochylenie do przodu. Zalecany zakres to $5$--$15^\circ$ --- lekkie pochylenie z~kostek wykorzystuje siłę ciężkości do napędu, natomiast pochylenie powyżej~$20^\circ$ nadmiernie obciąża dolny odcinek kręgosłupa \cite{novacheck1998}.
+
+\subsubsection{Oscylacja pionowa}
+
+Oscylacja pionowa  mierzy amplitudę ruchu bioder w~pionie w~obrębie jednego cyklu biegowego:
+\[
+\Delta y = \max(y_{\text{mid\_hip}}) - \min(y_{\text{mid\_hip}})
+\]
+obliczaną w~oknie od jednego wejścia w~\texttt{LEFT\_STANCE} do~następnego. Wartość surową normalizowałem względem średniej długości tułowia w~danym cyklu, dzięki czemu uzyskałem bezwymiarowy wskaźnik niezależny od odległości kamery i~rozdzielczości nagrania.
+
+Długość tułowia w~pojedynczej klatce wyznaczałem jako odległość euklidesową między środkiem bioder a~środkiem ramion:
+\[
+l_{\text{torso}}(t) = \left\| \mathbf{p}_{\text{mid\_shoulder}}(t) - \mathbf{p}_{\text{mid\_hip}}(t) \right\|
+\]
+Następnie dla całego cyklu biegowego obliczałem średnią długość tułowia:
+\[
+L_{\text{torso}} = \frac{1}{N} \sum_{t=1}^{N} l_{\text{torso}}(t)
+\]
+gdzie $N$ oznacza liczbę klatek w~analizowanym cyklu biegowym.\\ Znormalizowaną oscylację pionową obliczałem jako:
+\[
+\text{VO}_{\text{norm}} = \frac{\Delta y}{L_{\text{torso}}}
+\]
+
+Uśrednianie długości tułowia w~obrębie cyklu jest konieczne, ponieważ wartość ta drobno waha się z~klatki na klatkę, zarówno z~powodu rzeczywistego ruchu ciała, jak i~resztkowego szumu MediaPipe. Wzięcie średniej daje stabilną wartość odniesienia.
+
+Typowy zakres wynosi 0{,}12--0{,}16 długości tułowia ($\approx$~6--8~cm) dla dobrego biegacza i~do~0{,}24 ($\approx$~12~cm) dla biegacza rekreacyjnego. Wyższe wartości oznaczają nadmierne ``podskakiwanie'', czyli marnowanie energii na ruch pionowy zamiast na przemieszczanie się do przodu \cite{novacheck1998}.
+
+\subsubsection{Wzorzec lądowania stopy}
+
+Wzorzec lądowania stopy opisuje, która część stopy pierwsza dotyka podłoża w~momencie kontaktu. Klasyfikowałem go na podstawie kąta wektora od~pięty (\texttt{HEEL}) do~czubka stopy (\texttt{FOOT\_INDEX}) w~klatce wejścia w~fazę STANCE:
+\[
+\theta = \arctan2(-\Delta y,\; \Delta x)
+\]
+gdzie:
+\begin{itemize}
+    \item $\Delta x = x_{\text{foot\_index}} - x_{\text{heel}}$ --- różnica współrzędnych poziomych czubka stopy i~pięty (na ile pikseli czubek jest dalej od pięty w~poziomie),
+    \item $\Delta y = y_{\text{foot\_index}} - y_{\text{heel}}$ --- różnica współrzędnych pionowych (na ile pikseli czubek jest wyżej lub niżej niż pięta). Znak minus przed $\Delta y$ we wzorze odwraca oś $y$, ponieważ w~MediaPipe oś pionowa rośnie w~dół (0~na górze, 1~na dole kadru), a~chcę mieć konwencję matematyczną (oś $y$ rosnąca w~górę),
+    \item $\theta$ --- wynikowy kąt stopy w~stopniach. Geometrycznie reprezentuje on nachylenie stopy względem poziomu w~momencie kontaktu z~podłożem: $\theta > 0$ oznacza, że czubek stopy jest wyżej niż pięta (pięta nisko, pierwsza dotyka ziemi); $\theta < 0$ oznacza, że pięta jest wyżej niż czubek (przód stopy nisko, pierwszy dotyka ziemi); $\theta \approx 0$ to stopa równoległa do podłoża.
+\end{itemize}
+
+Na podstawie wartości $\theta$ klasyfikowałem wzorzec lądowania: $\theta > 5^\circ$ oznacza lądowanie na pięcie, $\theta < -5^\circ$ --- lądowanie na przodzie stopy, wartości pomiędzy --- lądowanie na śródstopiu. Progi $\pm  5^\circ$ przyjąłem jako wąską strefę neutralną wokół poziomu. Dominujący wzorzec dla nogi wyznaczałem na podstawie najczęściej występującej kategorii ze~wszystkich kontaktów tej nogi w~nagraniu \cite{daoud2012}.
+
+Współczynnik ten jest wrażliwy na perspektywę kamery --- przy ujęciu innym niż ściśle boczne (np.~wideo pionowe) kąty stopy są zniekształcone. Dlatego zaimplementowałem automatyczną flagę \texttt{low\_confidence}: jeśli średni kąt stopy przekraczał $45^\circ$ w~wartości bezwzględnej, wzorzec lądowania oznaczałem jako niewiarygodny. 
+
+\subsection{Symetria lewo-prawo}
+\label{sec:symmetry}
+
+W~prawidłowo wykonywanym biegu lewa i~prawa noga powinny pracować podobnie --- mieć zbliżone czasy kontaktu, zbliżone kąty stawów, zbliżoną długość cyklu. Różnice mogą sygnalizować niestabilność biegu, dysbalans mięśniowy lub inne anomalię biegu. Aby ilościowo opisać te różnice, dla każdego współczynnika obliczanego osobno dla lewej i~prawej strony wyznaczałem wskaźnik symetrii Robinsona (\textit{Symmetry Index}, SI), zaproponowany pierwotnie do oceny chodu po manipulacjach chiropraktycznych \cite{robinson1987}, a~obecnie szeroko stosowany w~analizie biegu:
+\[
+\text{SI} = \frac{200 \cdot |L - R|}{L + R} \quad [\%]
+\]
+gdzie $L$ i~$R$ to wartości danego współczynnika dla lewej i~prawej nogi. Sposób działania wzoru:
+
+\begin{itemize}
+    \item $|L - R|$ to bezwzględna różnica między stroną lewą a~prawą --- mierzy, „o~ile" się różnią,
+    \item $L + R$ to suma obu wartości --- służy do normalizacji, dzięki czemu wynik nie zależy od skali współczynnika (SI~=~5\% oznacza tę samą względną asymetrię niezależnie od tego, czy mierzymy GCT w~milisekundach, czy kąt kolana w~stopniach),
+    \item mnożnik 200 zapewnia, że wynik wyrażony jest w~procentach względem średniej z~lewej i~prawej (czyli $(L+R)/2$).
+\end{itemize}
+
+Dla przykładu: GCT$_L = 250$~ms, GCT$_R = 240$~ms $\Rightarrow$ SI $= 200 \cdot 10 / 490 \approx 4{,}1\%$. SI~=~0\% oznacza idealną symetrię. Na podstawie literatury przyjąłem trzy progi interpretacyjne: poniżej~5\% --- norma, 5--10\% --- łagodna asymetria wymagająca monitorowania, powyżej~10\% --- asymetria znacząca, potencjalnie wskazująca na niestabilność biegu lub kompensacje ruchu po kontuzji.
+
+\subsubsection{Dla jakich współczynników obliczam SI}
+
+Wskaźnik symetrii obliczałem dla pięciu par współczynników:
+\begin{itemize}
+    \item GCT (czas kontaktu) --- L vs~R,
+    \item Czas cyklu --- L vs~R,
+    \item Duty factor --- L vs~R,
+    \item Kąt kolana w~fazie STANCE --- L vs~R,
+    \item Kąt kostki w~fazie STANCE --- L vs~R.
+\end{itemize}
+
+Dodatkowo porównywałem wzorzec lądowania stopy (heel / midfoot / forefoot) --- sprawdzając, czy obie stopy lądują tym samym wzorcem. Tu nie stosowałem wzoru SI, ponieważ wzorzec jest zmienną kategoryczną (heel/midfoot/forefoot), a~nie liczbową --- zamiast tego zwracałem prostą flagę „spójność: tak/nie".
+
+\subsubsection{Dlaczego dla każdego współczynnika osobno, a~nie jedna miara „symetrii nogi"}
+
+Naturalne pytanie brzmi: czy nie wystarczyłoby obliczyć \textit{jednej} ogólnej miary symetrii między lewą a~prawą nogą? Odpowiedź brzmi: nie, ponieważ asymetria może manifestować się w~różny sposób i~różne typy asymetrii mają różne implikacje biomechaniczne. Biegacz może na przykład mieć:
+
+\begin{itemize}
+    \item \textbf{Symetryczny GCT, ale asymetryczne kąty kolan}
+    \item \textbf{Asymetryczny GCT, ale symetryczne kąty} 
+    \item \textbf{Asymetryczny duty factor, symetryczny GCT i~czas cyklu}
+\end{itemize}
+
+Pojedyncza ogólna metryka zatraciłaby tę informację diagnostyczną. Dla każdego współczynnika SI mówi coś innego o~biomechanice biegacza, dlatego warto obliczać je osobno.
+
+Pod względem kosztu obliczeniowego nie jest to znaczące obciążenie: dla każdej pary wartości $L$ i~$R$ (które i~tak są już wyliczone w~ramach obliczeń per-noga) zastosowanie wzoru SI to jedna operacja do obliczenia.
 \section{Silnik reguł rekomendacji}
 \label{sec:silnik-regul}
 
-% TODO: 13+ reguł z citation (Heiderscheit, Souza, Novacheck, Diaz, Robinson, Daoud).
-% Severity: critical/warning/watch/info.
-% Reguły łączone (combinatorical: overstriding, stride_long, quality).
+Ostatnim etapem pipeline'u jest generowanie rekomendacji treningowych na podstawie obliczonych współczynników. Rekomendacje opierają się na regułach zakodowanych ręcznie na podstawie literatury biomechanicznej --- nie są uczone z~danych, lecz odzwierciedlają ustalone w~literaturze zakresy referencyjne i~wzorce ryzyka. Każda reguła analizuje jeden aspekt techniki biegu (np.~kadencję, czas kontaktu, symetrię) i~zwraca rekomendację z~przypisanym poziomem ważności oraz źródłem literaturowym.
 
-\section{Splity train/val/test}
+Architekturę silnika, pełny katalog reguł, reguły łączone oraz źródła literaturowe progów opisuję w~całości w~rozdziale~\ref{ch:rekomendacje}, poświęconym systemowi rekomendacji. W~tym miejscu sygnalizuję jedynie, że silnik reguł domyka pipeline --- przekształca surowe współczynniki w~konkretne, opatrzone źródłami wskazówki treningowe.
+
+\section{Podział danych na zbiory treningowy, walidacyjny i~testowy}
 \label{sec:splity}
 
-% TODO: data/splits.json.
-% Train: 10 filmów, val: 2 filmy, test: 3 filmy (02, 20, 22).
-% UCZCIWA WZMIANKA: split per-film, NIE per-runner.
-% Sage Canaday (film 09) ma segmenty w train i val - drobne ograniczenie metodologiczne.
+Zbiór 15~nagrań podzieliłem na trzy rozłączne podzbiory: treningowy (10~filmów, $\approx$~9\,800~klatek), walidacyjny (2~filmy, $\approx$~740~klatek) i~testowy (3~filmy, $\approx$~1\,500~klatek). Podział wykonałem na poziomie całych filmów, czyli wszystkie klatki danego nagrania trafiają do tego samego podzbioru --- nie dzielę pojedynczego filmu między zbiory. Dzięki temu model nie widzi w~treningu żadnych klatek z~filmów testowych, co daje uczciwą ocenę zdolności do generalizacji na nowe nagrania.
+
+\subsection{Przypisanie filmów do zbiorów}
+\label{sec:splity-przypisanie}
+
+Tabela~\ref{tab:splits} przedstawia przydział filmów do zbiorów wraz z~rozkładem klas.
+
+\begin{table}[htbp]
+\centering
+\caption{Podział filmów na zbiory treningowy, walidacyjny i~testowy}
+\label{tab:splits}
+\small
+\begin{tabular}{lccccc}
+\hline
+\textbf{Zbiór} & \textbf{Filmów} & \textbf{Klatek} & \textbf{L\_STANCE} & \textbf{R\_STANCE} & \textbf{FLIGHT} \\
+\hline
+Treningowy  & 10 & 9\,779 & 3\,334 (34{,}1\%) & 3\,105 (31{,}7\%) & 3\,340 (34{,}2\%) \\
+Walidacyjny &  2 &    738 &    261 (35{,}4\%) &    253 (34{,}3\%) &    224 (30{,}4\%) \\
+Testowy     &  3 & 1\,490 &    525 (35{,}2\%) &    489 (32{,}8\%) &    476 (31{,}9\%) \\
+\hline
+\end{tabular}
+\end{table}
+
+Trzy klasy faz biegu rozkładają się w~zbiorze treningowym w~przybliżeniu równomiernie (31{,}7--34{,}2\%), co minimalizuje ryzyko faworyzowania klasy dominującej. Proporcje w~zbiorach walidacyjnym i~testowym są zbliżone do treningowych.
+
+Do zbioru testowego celowo wybrałem trzy nagrania o~zróżnicowanym charakterze:
+\begin{itemize}
+    \item film~2 --- bieg w~stałym tempie 13~km/h, niska rozdzielczość ($360 \times 450$~px),
+    \item film~9 (segment~1) --- bieg zmiennym tempem (0{,}8--3{,}5~m/s),
+    \item film~10 --- wyższe tempo.
+\end{itemize}
 
 \section{Metryki ewaluacji}
 \label{sec:metryki}
 
-% TODO: accuracy, F1 macro, confusion matrix.
-% Per-klasa: precision, recall (FLIGHT, LEFT_STANCE, RIGHT_STANCE).
-% Per-film breakdown w per_file_test.md.
-% Error breakdown: L↔R vs FLIGHT↔STANCE confusion.
+Do oceny jakości klasyfikatorów faz biegu zastosowałem trzy metryki: dokładność ogólną (\textit{accuracy}), makro-uśrednioną miarę F1 (\textit{macro F1}) oraz macierz pomyłek (\textit{confusion matrix}). Wszystkie metryki obliczałem na zbiorze testowym (3~filmy, $\approx$~1\,500~klatek dla Random Forest, $\approx$~1\,450~klatek dla BiLSTM --- różnica wynika z~tego, że BiLSTM operuje na oknach 15~kolejnych klatek, więc kilkanaście klatek z~początku i~końca każdego filmu nie ma pełnego kontekstu i~jest pomijanych).
+
+\subsection{Dokładność ogólna (accuracy)}
+\label{sec:metryki-accuracy}
+
+Dokładność ogólna to odsetek poprawnie sklasyfikowanych próbek:
+\[
+\text{accuracy} = \frac{\text{liczba poprawnych predykcji}}{\text{liczba wszystkich predykcji}}
+\]
+Metryka ta jest intuicyjna, ale przy niezbalansowanych klasach może być myląca --- model przypisujący wszystkim próbkom klasę dominującą uzyskałby wysoką dokładność bez rzeczywistej zdolności klasyfikacji. W~moim zbiorze klasy są przybliżeniu zbalansowane ($\approx$~33\% każda), więc accuracy stanowi rozsądną główną metrykę.
+
+\subsection{Precyzja, czułość i~miara F1}
+\label{sec:metryki-f1}
+
+Dla każdej z~trzech klas obliczałem:
+
+\begin{itemize}
+    \item \textbf{Precyzja} (\textit{precision}) --- odsetek poprawnych predykcji wśród wszystkich próbek, którym model przypisał daną klasę. Odpowiada na pytanie: ``Gdy model mówi FLIGHT, jak często ma rację?''
+    \[
+    \text{precision}_c = \frac{TP_c}{TP_c + FP_c}
+    \]
+    \item \textbf{Czułość} (\textit{recall}) --- odsetek poprawnie wykrytych próbek wśród wszystkich próbek rzeczywiście należących do danej klasy. Odpowiada na pytanie: ``Jaki odsetek prawdziwych klatek FLIGHT model wykrył?''
+    \[
+    \text{recall}_c = \frac{TP_c}{TP_c + FN_c}
+    \]
+    \item \textbf{Miara F1} --- średnia harmoniczna precyzji i~czułości:
+    \[
+    F1_c = 2 \cdot \frac{\text{precision}_c \cdot \text{recall}_c}{\text{precision}_c + \text{recall}_c}
+    \]
+\end{itemize}
+
+\noindent
+gdzie $TP_c$ to liczba \textit{true positives} klasy $c$ (poprawnie rozpoznane próbki tej klasy), $FP_c$ --- \textit{false positives} (próbki innych klas błędnie przypisane do $c$), a~$FN_c$ --- \textit{false negatives} (próbki klasy $c$ błędnie przypisane do innej).
+
+Miara F1 zdefiniowana powyżej jest \textit{per-klasa} --- dla problemu klasyfikacji trzech faz biegu mam więc trzy osobne wartości F1: jedną dla \texttt{FLIGHT}, jedną dla \texttt{LEFT\_STANCE} i~jedną dla \texttt{RIGHT\_STANCE}. Aby uzyskać jedną liczbę porównawczą między modelami, potrzebowałem sposobu na zagregowanie tych trzech wartości w~jedną.
+
+Zastosowałem \textbf{makro-uśrednione F1} (\textit{macro F1}), czyli zwykłą średnią arytmetyczną miar F1 z~poszczególnych klas:
+\[
+F1_{\text{macro}} = \frac{1}{3} \sum_{c=1}^{3} F1_c
+\]
+gdzie indeks $c$ przebiega trzy klasy: \texttt{FLIGHT}, \texttt{LEFT\_STANCE}, \texttt{RIGHT\_STANCE}.
+
+Słowo „makro" odróżnia ten sposób uśredniania od alternatywnego podejścia zwanego \textit{micro F1}, w~którym najpierw sumuje się surowe liczby TP, FP i~FN ze wszystkich klas, a~dopiero potem oblicza pojedynczą wartość F1. Różnica między tymi podejściami sprowadza się do tego, czy klasy są traktowane jednakowo:
+
+\begin{itemize}
+    \item \textbf{macro F1} --- każda klasa wnosi równy wkład do końcowego wyniku, niezależnie od tego, ile próbek danej klasy znajduje się w~zbiorze (rzadka klasa ma taki sam wpływ jak częsta),
+    \item \textbf{micro F1} --- klasy są ważone proporcjonalnie do liczby próbek (klasa z~1000~próbek waży 10$\times$ więcej niż klasa z~100~próbek). Dla klasyfikacji wieloklasowej z~jedną prawdziwą etykietą na próbkę micro F1 jest równe dokładności ogólnej (\textit{accuracy}).
+\end{itemize}
+
+Makro-uśrednioną miarę F1 wybrałem, ponieważ fazy biegu mogą mieć różną liczność w~zbiorze testowym. Sama dokładność ogólna mogłaby zawyżać ocenę modelu, jeśli dobrze rozpoznawałby fazy częste, a~popełniał więcej błędów w~klasach rzadszych lub trudniejszych do rozróżnienia. Macro F1, traktując każdą fazę z~równą wagą, lepiej odzwierciedla, czy klasyfikator działa stabilnie dla wszystkich faz cyklu biegowego, a~nie tylko dla klas dominujących liczbowo.
+\newpage
+\subsection{Macierz pomyłek}
+\label{sec:metryki-confusion}
+
+Macierz pomyłek to tablica $3 \times 3$, w~której wiersz $i$ i~kolumna $j$ zawiera liczbę próbek klasy $i$ (prawdziwej), które model przypisał do klasy $j$ (predykowanej). Elementy na przekątnej odpowiadają poprawnym klasyfikacjom, a~elementy poza przekątną --- pomyłkom. Macierz pozwala zidentyfikować, które pary klas model najczęściej myli.
+
+W~kontekście faz biegu szczególnie istotne są dwa typy pomyłek:
+\begin{itemize}
+    \item \textbf{Pomyłka L$\leftrightarrow$R} (zamiana lewej i~prawej nogi) --- wpływa na współczynniki obliczane osobno per noga (GCT L/R, symetria), ale nie na współczynniki agregowane (kadencja, średni GCT),
+    \item \textbf{Pomyłka STANCE$\leftrightarrow$FLIGHT} (zamiana kontaktu z~lotem) --- wpływa na wszystkie współczynniki temporalne, ponieważ zmienia długość segmentów faz.
+\end{itemize}
+

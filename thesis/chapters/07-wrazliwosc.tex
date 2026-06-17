@@ -1,80 +1,151 @@
 \chapter{Wrażliwość współczynników na warunki akwizycji wideo}
 \label{ch:wrazliwosc}
 
-% TODO: Materiał: docs/thesis-notes/2026-05-14-sesja-c-foot-strike-walidacja.md,
-% 2026-05-13-sesja-b-stride-combinatorical.md, History.md (Sesja C),
-% data/visualizations/foot_strike_validation/ (18 PNG z 3 biegaczy).
+Pipeline opisany w~poprzednich rozdziałach wyznacza wartości współczynników niezależnie od tego, w~jakich warunkach nagrano wideo. Nie wszystkie współczynniki są jednak równie odporne na te warunki. Część z nich zależy od perspektywy kamery, część od częstotliwości klatek, a~niektóre pozostają wiarygodne niezależnie od obu. Rozdział ten bada tę wrażliwość i~pokazuje, że najbardziej zawodne przypadki da się wykryć automatycznie, bez dostępu do pomiarów referencyjnych.
 
-\section{Hipotezy badawcze}
+\section{Hipotezy}
 \label{sec:hipotezy-p3}
 
-% TODO: 3 hipotezy z 2026-05-14-temat-pracy-finalny.md:
-% H5: Współczynniki przestrzenne (foot strike, vertical oscillation, symetria L/P)
-%     są wrażliwe na perspektywę kamery.
-% H6: Współczynniki temporalne (kadencja, GCT, czas lotu, stride length, duty factor)
-%     są wrażliwe na FPS.
-% H7: Auto-detekcja niskiej wiarygodności możliwa bez ground truth przez analizę
-%     wartości metryki vs fizjologiczny zakres.
+Rozdział weryfikuje trzy hipotezy dotyczące wpływu warunków akwizycji na jakość obliczanych współczynników:
 
-\section{Studium 1: Foot strike pattern vs perspektywa kamery}
+\begin{enumerate}
+    \item \textbf{Współczynniki przestrzenne są wrażliwe na perspektywę kamery.} Wartości oparte na geometrii keypointów w~płaszczyźnie obrazu (zwłaszcza wzorzec lądowania stopy) zniekształcają się przy ujęciu innym niż ściśle boczne.
+    \item \textbf{Współczynniki temporalne są wrażliwe na częstotliwość klatek (FPS).} Przy niskim FPS jedna klatka odpowiada dłuższemu odcinkowi czasu, przez co pomiar metryk czasowych jest mniej dokładny i może zawierać większy błąd względny.
+
+    \item \textbf{Niską wiarygodność pomiaru można wykryć automatycznie, bez pomiarów referencyjnych} --- analizując, czy wyliczona wartość mieści się w~zakresie fizjologicznie możliwym.
+\end{enumerate}
+
+Każdą hipotezę sprawdzam na podstawie analizy konkretnych nagrań ze zbioru.
+
+
+\section{Analiza 1: wzorzec lądowania stopy a~perspektywa kamery}
 \label{sec:case1-foot-strike}
 
-% TODO: Sesja C, 18 PNG entry-into-STANCE × 3 biegaczy × 2 nogi × 3 klatki.
-% Tabela:
-% | Biegacz | Ujęcie | Mean L / R | Werdykt wizualny |
-% | Janek | landscape, prostopadle | -4° / -3° | midfoot ✓ predykcja zgadza się |
-% | Adam | landscape, kamera od dołu | -33° / -12° | prawa OK, lewa perspective artifact |
-% | 22 | PORTRAIT pionowe | -97° / -99° | bezwartościowe (|kąt|>90°) ✗ |
-% Mitygant: low_confidence=True gdy |mean|>45° → reguła foot_strike_low_confidence.
+Wzorzec lądowania stopy klasyfikowany jest na podstawie kąta wektora od~pięty do~czubka stopy w~klatce wejścia w~fazę kontaktu. Aby ocenić jego wiarygodność, przeprowadziłem walidację wizualną na trzech biegaczach o~różnych warunkach nagrania: Adamie (film~12, zbiór treningowy), biegaczu z~filmu~10 (zbiór testowy) oraz Janku (nagranie spoza zbiorów modelu). Ponieważ jest to walidacja wizualna samej geometrii kąta stopy, a~nie ocena generalizacji klasyfikatora, użycie filmu ze~zbioru treningowego (Adam) nie wpływa na wnioski. Dla każdego biegacza wyrenderowałem szkielet MediaPipe na klatkach wejścia w~fazę STANCE (po trzy klatki na nogę, rozłożone równomiernie) i~porównałem obliczony kąt z~rzeczywistym ułożeniem stopy widocznym na obrazie. Poniżej znajduje się zestawienie wyników.
 
-\section{Studium 2: Aspect ratio fix dla pionowego wideo (film 22)}
-\label{sec:case2-aspect}
+\begin{table}[htbp]
+\centering
+\caption{Walidacja wzorca lądowania stopy dla trzech warunków nagrania}
+\label{tab:foot-strike-validation}
+\small
+\begin{tabular}{p{2.2cm}p{4.2cm}p{2.6cm}p{3.6cm}}
+\hline
+\textbf{Biegacz} & \textbf{Ujęcie} & \textbf{Średni kąt L / P} & \textbf{Werdykt} \\
+\hline
+Janek    & boczne, kamera prostopadle do toru & $-4^\circ$ / $-3^\circ$ & midfoot, wiarygodne \\
+Adam     & boczne, kamera lekko od dołu & $-33^\circ$ / $-12^\circ$ & forefoot; lewa noga zawyżona przez perspektywę \\
+Film~10  & pionowe (portrait) & $-97^\circ$ / $-99^\circ$ & bezwartościowe ($|\text{kąt}| > 90^\circ$) \\
+\hline
+\end{tabular}
+\end{table}
 
-% TODO: Per-film accuracy LSTM przed/po aspect fix:
-% - Film 22 (320 klatek, portrait): 75.8% → 85.9% (+10.1 pp)
-% - Inne filmy (landscape): ±2 pp
-% Wniosek: aspect fix kluczowy dla nietypowych orientacji, neutralny dla standardowych.
-% Konkretny mechanizm: normalizacja x przez aspect ratio kadru.
+Wyniki układają się w~czytelny wzorzec. Przy standardowym ujęciu bocznym (Janek) obliczone kąty zgadzają się z moją obserwacją wizualną --- stopa ląduje płasko, a~klasyfikacja midfoot jest wiarygodna. Przy ujęciu bocznym, ale z~kamerą ustawioną lekko od dołu (Adam), prawa noga (bliżej kamery) daje sensowny wynik, natomiast lewa (dalej, silniej dotknięta perspektywą) ma kąt zawyżony --- wektor pięta--czubek jest skrócony w~rzucie, co matematycznie wzmacnia składową pionową. Asymetria $-33^\circ$ wobec $-12^\circ$ jest więc artefaktem perspektywy, nie biomechaniki. Przy ujęciu pionowym (Film~10) wszystkie kąty przekraczają $90^\circ$ w~wartości bezwzględnej, co jest geometrycznie niemożliwe dla biegacza zwróconego w~kierunku biegu --- predykcja jest bezwartościowa.
 
-\section{Studium 3: FPS a precyzja metryk temporalnych (film 16)}
-\label{sec:case3-fps}
+Studium to potwierdza pierwszą hipotezę: wzorzec lądowania stopy jest wiarygodny przy ujęciu ściśle bocznym i~zawodzi przy ujęciu pionowym lub ukośnym. Warto zauważyć, że ta sama pionowa orientacja Filmu~10, która psuje kąt stopy, obniża również dokładność klasyfikatora faz --- problem ten zaadresowałem korektą proporcji obrazu, której wpływ przeanalizowałem osobno w~sekcji~\ref{sec:ablation-aspect}.
 
-% TODO: Film 16 (13.33 FPS) wykluczony z trainu (exclude_from_training=True).
-% Matematyka kwantyzacji:
-% - GCT typowy 250 ms = 8 klatek przy 30 FPS, 3.3 klatki przy 13.33 FPS
-% - Błąd ±1 klatka = ±30% przy 13.33 FPS vs ±12.5% przy 30 FPS
-% Wniosek: niski FPS dyskwalifikuje wideo do precyzyjnych metryk temporalnych,
-% ale NIE do trenowania klasyfikatora (model uczy się pozycji, nie czasu).
+\section{Analiza 2: częstotliwość klatek a~precyzja metryk temporalnych}
+\label{sec:case2-fps}
 
-\section{Tabela syntetyczna: metryka × warunek × auto-detekcja}
-\label{sec:tabela-wrazliwosc}
+W~sekcji~\ref{sec:wplyw-na-metryki} pokazałem, że czas kontaktu obejmuje zaledwie kilka klatek, przez co błąd nawet jednej klatki przekłada się na duży błąd względny --- tam źródłem tego błędu były pomyłki klasyfikatora na granicy faz. Niska częstotliwość klatek jest drugim, niezależnym źródłem tej samej wrażliwości. Im mniej klatek na sekundę, tym dłuższy odcinek czasu przypada na jedną klatkę, a~więc tym grubsza kwantyzacja pomiaru czasu.
 
-% TODO: Tabela z 2026-05-14-temat-pracy-finalny.md (sekcja Synteza P3):
-% | Metryka | Wrażliwa na orientację | Wrażliwa na FPS | Auto-detekcja |
-% | Kadencja | nie | tak (>15% błąd FPS<15) | tak (z FPS metadata) |
-% | GCT | nie | tak (kwantyzacja) | tak |
-% | Czas lotu | nie | tak | tak |
-% | Stride length | nie | tak | tak |
-% | Duty factor | nie | tak | tak |
-% | Kąty stawów | minimalnie | nie | nie (cichy artefakt) |
-% | Vertical oscillation | tak (out-of-plane) | nie | częściowo |
-% | Foot strike pattern | TAK krytycznie | nie | TAK (low_confidence próg 45°) |
-% | Symetria L/P | tak (perspective asym) | nie | częściowo (SI>50% proxy) |
+Skutek widać w~porównaniu dwóch częstotliwości dla typowego kontaktu GCT~$=250$~ms. Przy 30~FPS kontakt obejmuje około 7,5~klatki, więc błąd $\pm 1$~klatki to zaledwie $\pm 13\%$; przy 13,33~FPS (slow-motion, Film~7) kontakt to już tylko $\approx$~3,3~klatki, a~ten sam błąd jednej klatki rośnie do $\pm 30\%$. Im krótsza faza i~niższy FPS, tym większy względny błąd.
 
-\section{Mitygant w kodzie}
-\label{sec:mitygant-kod}
+Wniosek ten jest spójny z założeniami przyjętymi przy budowie zbioru danych. Nagrania o niskim FPS mogą być użyteczne do treningu klasyfikatora faz, ponieważ model uczy się głównie ułożenia ciała, a nie czasu trwania faz. Jednocześnie takie nagrania nie nadają się do precyzyjnego obliczania współczynników temporalnych. Przy metrykach czasowych FPS należy więc traktować jako ważny parametr jakości nagrania.
 
-% TODO: Implementacja low_confidence:
-% - compute_foot_strike_pattern (spatial_metrics.py): flaga low_confidence=True
-%   gdy |mean_angle| > 45°
-% - check_foot_strike (rules.py): reguła foot_strike_low_confidence (warning)
-%   z citation "Walidacja wizualna 2026-05-14 (Sesja C)"
-% - fallback dla legacy spatial.json (abs(mean)>45°)
-% - blokuje reguły semantyczne (consistent/inconsistent) gdy fire
 
-\section{Dyskusja: H5, H6, H7 potwierdzone}
-\label{sec:dyskusja-wrazliwosc}
+\section{Synteza: wrażliwość metryk i~możliwość auto-detekcji}
+\label{sec:synteza-wrazliwosc}
 
-% TODO: Wszystkie 3 hipotezy potwierdzone empirycznie 3 case studies.
-% Wkład pracy: pierwsza systematyczna analiza wrażliwości monocular 2D dla biegu
-% (chód był badany - Stenum 2021, Ripic 2023; bieg nie).
+Tabela~\ref{tab:wrazliwosc-synteza} podsumowuje cały rozdział: dla każdego współczynnika wskazuje, czy jest on wrażliwy na dwa rozważane warunki nagrania, oraz czy jego ewentualną niewiarygodność da się wykryć automatycznie. Trzy kolumny oceny oznaczają:
+
+\begin{itemize}
+    \item \textbf{Orientacja} --- czy wartość zniekształca się przy zmianie ustawienia kamery (np.~ujęcie pionowe zamiast bocznego albo kamera pod kątem); „tak" oznacza, że współczynnik jest na to wrażliwy.
+    \item \textbf{FPS} --- liczba klatek na sekundę (z ang.\ \textit{frames per second}); „tak” oznacza, że przy niskim FPS pomiar czasu trwania fazy jest mniej dokładny.
+
+    \item \textbf{Auto-detekcja} --- czy system potrafi sam rozpoznać, że dany wynik jest niewiarygodny, bez dostępu do pomiaru referencyjnego; „tak" oznacza, że taka detekcja jest możliwa.
+\end{itemize}
+
+\begin{table}[htbp]
+\centering
+\caption{Wrażliwość współczynników na warunki akwizycji i~możliwość automatycznej detekcji}
+\label{tab:wrazliwosc-synteza}
+\small
+\begin{tabular}{p{3.4cm}p{2.8cm}p{2.4cm}p{3.4cm}}
+\hline
+\textbf{Współczynnik} & \textbf{Wrażliwy na orientację?} & \textbf{Wrażliwy na FPS?} & \textbf{Auto-detekcja?} \\
+\hline
+Kadencja            & nie & tak & tak (z~metadanych FPS) \\
+GCT                 & nie & tak & tak \\
+Czas lotu           & nie & tak & tak \\
+Stride length       & nie & tak & tak \\
+Duty factor         & nie & tak & tak \\
+Kąty stawów         & minimalnie & nie & nie (cichy artefakt) \\
+Oscylacja pionowa   & tak (out-of-plane) & nie & częściowo \\
+Foot strike         & tak (krytycznie) & nie & tak (próg $45^\circ$) \\
+Symetria L/P        & tak (perspektywa) & nie & częściowo (SI~$>$~50\% jako przesłanka) \\
+\hline
+\end{tabular}
+\end{table}
+
+Z~tabeli wynika wyraźny podział. Metryki temporalne są odporne na orientację, lecz wrażliwe na FPS --- a~FPS jest znany z~metadanych pliku, więc problem da się wykryć w~pełni automatycznie. Metryki przestrzenne są odwrotne. Są niewrażliwe na FPS, ale za to są wrażliwe na perspektywę. Tu auto-detekcja jest trudniejsza, bo nie ma metadanych mówiących o~poprawności ujęcia --- trzeba wnioskować z~samych wartości. Najtrudniejszy przypadek to kąty stawów, których zniekształcenie perspektywiczne jest ciężkie do wykrycia, wartość pozostaje w~pozornie sensownym zakresie, więc nie sposób jej odrzucić bez pomiaru referencyjnego.
+
+\section{Automatyczna detekcja niewiarygodnych pomiarów}
+\label{sec:auto-detekcja}
+
+Trzecia hipoteza --- możliwość automatycznego wykrycia niewiarygodnych pomiarów bez ground truth --- znajduje potwierdzenie w~przypadkach, gdzie wartość metryki wykracza poza zakres fizjologicznie możliwy. Zaimplementowałem dwa takie mechanizmy.
+
+\textbf{Flaga \texttt{low\_confidence} dla wzorca lądowania stopy.} W~funkcji obliczającej wzorzec lądowania oznaczam wynik jako niewiarygodny, gdy średni kąt stopy przekracza $45^\circ$ w~wartości bezwzględnej. Próg ten skalibrowałem na podstawie walidacji wizualnej z~Analizy~1: Janek (poprawne ujęcie) osiągał $|\text{kąt}| \le 4^\circ$, Adam (ujęcie graniczne) $12$--$33^\circ$, a~Film~10 (ujęcie pionowe) $97$--$99^\circ$. Próg $45^\circ$ oddziela „poprawne z~marginesem" od „ewidentny artefakt". Gdy flaga się zapala, silnik reguł zwraca ostrzeżenie o~niskiej wiarygodności i~wstrzymuje reguły interpretujące wzorzec lądowania --- nie ma sensu doradzać na podstawie wartości, która jest artefaktem perspektywy.
+
+\textbf{Reguła łączona jakości predykcji.} Drugi mechanizm, opisany w~sekcji~\ref{sec:rules-combined}, wychwytuje sytuacje, w~których wysoki wskaźnik symetrii łączy się z~obniżoną pewnością predykcji --- sygnał, że asymetria L/P jest raczej artefaktem klasyfikatora niż cechą biegacza.
+
+Oba mechanizmy działają bez pomiarów referencyjnych: opierają się wyłącznie na tym, czy wartość mieści się w~zakresie możliwym fizycznie i~czy różne wskaźniki jakości są ze~sobą spójne. To potwierdza trzecią hipotezę w~zakresie metryk, których zniekształcenie wyprowadza wartość poza zakres fizjologiczny. Ograniczeniem pozostają „ciche" artefakty kątów stawów, dla których taka detekcja nie jest możliwa.
+
+\section{Walidacja na nagraniu własnym z~pomiarem referencyjnym}
+\label{sec:walidacja-garmin}
+
+Dotychczasowe oceny opierały się na porównaniu wyliczonych wartości z~zakresami z~literatury, ponieważ zbiór nie zawierał nagrań z~równoległym, niezależnym pomiarem. Aby uzupełnić ten brak, zarejestrowałem dodatkowe nagranie własnego biegu na bieżni mechanicznej, rejestrując jednocześnie dane z~zegarka sportowego Garmin i specjalistycznej opaski do mierzenia tętna HRM 600 dla dokładniejszych wyników. Zegarek zapisuje wartości dynamiki biegu --- kadencję, czas cyklu i~czas kontaktu z~podłożem --- które posłużyły jako pomiar referencyjny dla wyników pipeline'u. W całej pracy stanowi to jedyny punkt odniesienia wyznaczony na podstawie danych z~zewnętrznego urządzenia, a~nie na podstawie zakresów opisanych w~literaturze.  Kadr z~tego nagrania ze~szkieletem wykrytym przez pipeline przedstawia rysunek~\ref{fig:wojtek-szkielet}, a~tabela~\ref{tab:garmin-validation} zestawia wyniki.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/szkielet_wojtek_lewa.png}
+\caption{Kadr z~nagrania własnego (\textit{Wojtek}) ze~szkieletem MediaPipe. To nagranie posłużyło do walidacji pipeline'u względem zegarka Garmin.}
+\label{fig:wojtek-szkielet}
+\end{figure}
+
+
+\begin{table}[H]
+\centering
+\caption{Porównanie pipeline'u z~pomiarem referencyjnym Garmin (okno biegu właściwego)}
+\label{tab:garmin-validation}
+\small
+\begin{tabular}{lccc}
+\hline
+\textbf{Metryka} & \textbf{Pipeline} & \textbf{Garmin} & \textbf{Różnica} \\
+\hline
+Kadencja [spm]   & 162{,}5 & 163{,}3 & $-0{,}5\%$ \\
+Czas cyklu [ms]  & 737     & 735 & $+0{,}3\%$ \\
+GCT (śr. L/P) [ms] & 255   & 297     & $-14\%$ \\
+\hline
+\end{tabular}
+\end{table}
+
+Wynik jest zgodny z analizą z sekcji~\ref{sec:wplyw-na-metryki}. Kadencja i czas cyklu zgadzają się z pomiarem Garmina prawie idealnie, z różnicą poniżej 1\%. Czas kontaktu z podłożem jest natomiast systematycznie zaniżony o około 14\%.
+
+Różnica ta wynika z tego, że metryki te mierzą inne rzeczy. Kadencja opiera się na zliczaniu kontaktów stopy z podłożem. Wystarczy więc poprawnie wykryć, że kontakt nastąpił; dokładna granica między fazą kontaktu a fazą lotu ma mniejsze znaczenie. Czas kontaktu z podłożem zależy natomiast bezpośrednio od długości fazy \texttt{STANCE}. Nawet niewielkie przesunięcie granicy między \texttt{STANCE} i \texttt{FLIGHT} zmienia więc wynik.
+
+W analizowanym nagraniu pipeline skracał fazę \texttt{STANCE}, co zaniżało zarówno czas kontaktu, jak i duty factor. Duty factor wyniósł 0{,}345, podczas gdy z pomiaru Garmina wynikała wartość około 0{,}40. Może to wynikać z przyjętego w auto-etykietowaniu parametru \texttt{flight\_fraction = 0{,}4} oraz z różnicy między metodami pomiaru: Garmin wyznacza kontakt na podstawie czujników ruchu, a pipeline na podstawie obrazu i etykiet faz.
+
+Wynik ten pokazuje, że metryki oparte na zliczaniu zdarzeń, takie jak kadencja, są bardziej odporne na drobne błędy granic faz niż metryki oparte na czasie trwania faz, takie jak czas kontaktu.
+
+Nagranie potwierdziło również wniosek z analizy wpływu perspektywy kamery na wzorzec lądowania stopy. Mimo poziomej orientacji i wysokiej rozdzielczości nagrania, kąt stopy w momencie kontaktu wyniósł $-90{,}5^\circ$ dla lewej nogi i $-98{,}4^\circ$ dla prawej. Są to wartości fizycznie niemożliwe, dlatego system automatycznie oznaczył ten wynik flagą \texttt{low\_confidence}.
+
+Oznacza to, że pozioma orientacja nie wystarcza do wiarygodnej oceny wzorca lądowania --- kamera musi być też ustawiona prostopadle do kierunku biegu, czego w tym nagraniu zabrakło. Współczynniki temporalne, niezależne od perspektywy, pozostały jednak wiarygodne.
+
+
+Warto też odnotować, że symetria lewo-prawo tego biegu była najlepsza w~całym materiale (maksymalny wskaźnik symetrii Robinsona 9{,}5\%, średni 3{,}1\%), co odpowiada balansowi kroków 49,5/50,5\% raportowanemu przez Garmin Connect. 
+\section{Podsumowanie}
+\label{sec:podsumowanie-wrazliwosc}
+
+Przeprowadzone analizy potwierdziły trzy postawione hipotezy. Współczynniki przestrzenne okazały się wrażliwe na perspektywę kamery, współczynniki temporalne na częstotliwość klatek, a najbardziej skrajne i niewiarygodne wyniki można wykrywać automatycznie na podstawie reguł diagnostycznych. Walidacja na nagraniu własnym z pomiarem referencyjnym Garmin dodatkowo potwierdziła te wnioski. Kadencja zgodziła się z pomiarem referencyjnym w granicach 1\%, natomiast czas kontaktu był zaniżony o 14\%, co potwierdza wrażliwość metryk opartych na czasie trwania faz. Wzorzec lądowania został automatycznie oznaczony jako niewiarygodny mimo poziomej orientacji i~wysokiej rozdzielczości nagrania, ponieważ kamera nie była ustawiona prostopadle do kierunku biegu.
+
+Wkładem tej części pracy jest systematyczna analiza wrażliwości pipeline'u opartego na wideo z pojedynczej kamery w kontekście biegu. Wcześniejsze prace opisywały podobne ograniczenia głównie dla chodu, np. Stenum i wsp.~\cite{stenum2021} wskazali zależność długości kroku od pozycji osoby w kadrze, a Menychtas i wsp.~\cite{menychtas2023} opisali błędy pojawiające się przy ruchach poza płaszczyzną obrazu. Dla biegu sportowego brakowało jednak takiego zestawienia połączonego z mechanizmem automatycznego ostrzegania użytkownika o potencjalnie niewiarygodnych wynikach.

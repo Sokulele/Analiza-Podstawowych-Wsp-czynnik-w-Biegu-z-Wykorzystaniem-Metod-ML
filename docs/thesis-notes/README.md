@@ -28,6 +28,7 @@ Folder na myśli, obserwacje i surowe fragmenty, które będą materiałem źró
 - [2026-05-14 — **Temat pracy (FINALNY)** + struktura 8 rozdziałów (~60 stron)](2026-05-14-temat-pracy-finalny.md)
 - [2026-05-14 — Wyjaśnienia pojęć i decyzji projektowych do pisania pracy (rosnący dokument)](2026-05-14-wyjasnienia-pojec-do-pisania.md)
 - [2026-05-14 — Setup LaTeX dla pracy + 7 technik optymalizacji kosztów Claude](2026-05-14-setup-latex-i-koszty.md)
+- [2026-06-03 — **Walidacja pipeline względem Garmina** (własne nagranie Wojtek — pierwszy ground truth)](2026-06-03-walidacja-wojtek-garmin.md)
 
 ## Folder `figures/`
 

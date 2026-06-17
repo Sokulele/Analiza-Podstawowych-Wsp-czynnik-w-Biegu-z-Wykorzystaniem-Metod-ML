@@ -1,65 +1,208 @@
-\chapter{Klasyfikator faz biegu --- wybór modelu i pre-processing}
+\chapter{Klasyfikator faz biegu --- wyniki i~wybór modelu}
 \label{ch:klasyfikator}
 
-% TODO: Materiał — comparison_summary.json, per_file_test.md, error_breakdown.md,
-% confusion_matrices_test.png, learning_curves_lstm.png, feature_importances_rf.png.
+W~tym rozdziale przedstawiam wyniki porównania czterech architektur klasyfikatorów faz biegu opisanych w~sekcji~\ref{sec:architektury}. Omawiam dokładność ogólną, strukturę błędów, wpływ inżynierii cech i~korekty proporcji obrazu, a~na końcu uzasadniam wybór modelu głównego używanego w~dalszych etapach pipeline'u.
 
 \section{Porównanie czterech modeli}
 \label{sec:porownanie-modeli}
 
-% TODO: Tabela "PRZED aspect fix" (z comparison_summary.json):
-% | Model | Test acc | F1 macro |
-% | RF v1 (raw, 132 features) | 62.7% | 0.617 |
-% | RF v2 (engineered, 106) | 67.0% | 0.671 |
-% | LSTM run 1 (h=128, overfit) | 67.1% | 0.663 |
-% | LSTM run 2 (h=64, primary) | 65.3% | 0.645 |
-% UCZCIWA WZMIANKA: liczby PRZED aspect fix. Po aspect fix LSTM r1 = 70.9% (sekcja 4.4).
+Tabela~\ref{tab:model-results} zestawia wyniki wszystkich czterech modeli na zbiorze walidacyjnym i~testowym. Wszystkie modele korzystające z~cech inżynierowanych stosowały korektę proporcji obrazu. Wartości F1 w~tabeli to makro-uśrednione miary F1. Kolumna ``Różnica'' przedstawia różnicę dokładności między zbiorem walidacyjnym a~testowym (val acc $-$ test acc) i~służy jako miara generalizacji modelu.
 
-\section{Confusion matrices i analiza błędów}
+Generalizacja to zdolność modelu do osiągania dobrych wyników nie tylko na danych, na których się uczył, ale także na nowych, wcześniej niewidzianych przykładach. W~moim przypadku ``nowe przykłady'' to nagrania z~filmów testowych, których model nigdy nie widział w~trakcie treningu --- inni biegacze, inne kąty kamery, inne rozdzielczości. Model, który dobrze generalizuje, radzi sobie z~takimi nowymi nagraniami niemal tak samo dobrze, jak z~tymi, na których się uczył. Model słabo generalizujący osiąga wysokie wyniki tylko na danych treningowych, a~na nowych --- znacznie gorsze, bo zapamiętał konkretne wzorce z~treningu zamiast nauczyć się ogólnych reguł rozróżniania faz biegu. Im większa różnica między dokładnością walidacyjną a~testową, tym gorzej model generalizuje.
+
+\begin{table}[htbp]
+\centering
+\caption{Wyniki klasyfikatorów faz biegu na zbiorze walidacyjnym i~testowym}
+\label{tab:model-results}
+\small
+\begin{tabular}{lcccccc}
+\hline
+\textbf{Model} & \textbf{Val acc} & \textbf{Val F1} & \textbf{Test acc} & \textbf{Test F1} & \textbf{Różnica} \\
+\hline
+RF\,v1 (132 surowe)         & 82{,}0\% & 0{,}816 & 62{,}7\% & 0{,}617 & 19{,}3~pp \\
+RF\,v2 (106 inżynierowane)  & 80{,}5\% & 0{,}803 & 65{,}7\% & 0{,}650 & 14{,}8~pp \\
+LSTM\,r1 ($h$=128)   & 87{,}2\% & 0{,}869 & \textbf{70{,}9\%} & \textbf{0{,}709} & 16{,}3~pp \\
+LSTM\,r2 ($h$=64)    & 85{,}0\% & 0{,}845 & 68{,}2\% & 0{,}681 & 16{,}8~pp \\
+\hline
+\end{tabular}
+\end{table}
+
+Z~porównania wynikają trzy główne obserwacje:
+
+\begin{enumerate}
+    \item \textbf{Inżynieria cech poprawia generalizację.} RF\,v2, który korzysta z~cech inżynierowanych --- czyli z~keypointów znormalizowanych do układu ciała biegacza wraz z~obliczonymi kątami stawów --- osiągnął na teście o~3{,}0~pp wyższą dokładność niż RF\,v1 operujący na surowych keypointach (65{,}7\% vs 62{,}7\%), mimo niższej dokładności na walidacji (80{,}5\% vs 82{,}0\%). Mniejsza różnica między walidacją a~testem (14{,}8~pp vs 19{,}3~pp) wskazuje, że taka reprezentacja lepiej generalizuje na nowych biegaczy: kąt kolana czy znormalizowana pozycja stopy względem bioder przyjmują podobne wartości niezależnie od tego, gdzie w~kadrze znajduje się biegacz, jak duża jest jego sylwetka i~jakie ma proporcje ciała --- podczas gdy surowe współrzędne $x$, $y$ keypointów zmieniają się przy każdym z~tych czynników.
+
+    \item \textbf{Kontekst czasowy daje istotną poprawę.} Oba modele LSTM, które przetwarzają okno 15~klatek zamiast pojedynczej klatki, osiągnęły wyższe wyniki testowe niż oba modele Random Forest. Najlepszy LSTM\,r1 (70{,}9\%) przewyższył najlepszy RF\,v2 (65{,}7\%) o~5{,}2~pp, co potwierdza założenie, że uwzględnianie kontekstu czasowego między klatkami pozwala wyraźnie poprawić jakość klasyfikacji faz biegu.
+
+    \item \textbf{Większy model lepszy od mniejszego.} LSTM\,r1 (128~neuronów, 637\,699~parametrów) osiągnął o~2{,}7~pp wyższą test accuracy niż LSTM\,r2 (64~neurony, 187\,779~parametrów). Silniejsza regularyzacja w~LSTM\,r2 (dropout~0{,}4, weight decay~$10^{-4}$) nie zrekompensowała ograniczonej pojemności modelu.
+\end{enumerate}
+
+Wszystkie modele wykazują znaczną różnicę między dokładnością na walidacji a~na teście (14{,}8--19{,}3~pp), co wynika z~tego, że zbiór testowy zawiera biegaczy nieobecnych w~zbiorze treningowym, biegających w~innych warunkach (rozdzielczość, tempo, orientacja kamery). Jest to oczekiwane zachowanie --- modele muszą generalizować na nowe osoby i~warunki nagrania.
+\newpage
+\section{Macierz pomyłek i~analiza błędów}
 \label{sec:confusion-matrices}
 
-% TODO: confusion_matrices_test.png + error_breakdown.md.
-% Tabela error breakdown:
-% | Model | L↔R errors | FLIGHT↔STANCE errors | % L↔R w błędach |
-% | RF v1 | 153 | 403 | 27.5% |
-% | RF v2 | 88 | 403 | 17.9% |
-% | LSTM r1 | 79 | 397 | 16.6% |
-% | LSTM r2 | 79 | 424 | 15.7% |
-% Wniosek: LSTM mocno redukuje L↔R confusion vs RF — najgorszy typ błędu (rujnuje symetrię).
+Tabela~\ref{tab:confusion-lstm} przedstawia macierz pomyłek modelu LSTM\,r1 na zbiorze testowym ($\approx$~1\,450~klatek). Wiersze odpowiadają prawdziwym klasom, kolumny --- klasom przewidywanym przez model.
 
-\section{Feature importance dla Random Forest}
+\begin{table}[htbp]
+\centering
+\caption{Macierz pomyłek LSTM\,r1 na zbiorze testowym}
+\label{tab:confusion-lstm}
+\begin{tabular}{l|ccc|c}
+ & \textbf{FLIGHT} & \textbf{L\_STANCE} & \textbf{R\_STANCE} & \textbf{Czułość} \\
+\hline
+\textbf{FLIGHT}      & 321 &  79 &  76 & 67{,}4\% \\
+\textbf{L\_STANCE}   & 110 & 333 &  54 & 67{,}0\% \\
+\textbf{R\_STANCE}   &  82 &  21 & 372 & 78{,}3\% \\
+\hline
+\textbf{Precyzja}    & 62{,}6\% & 76{,}9\% & 74{,}1\% & \\
+\end{tabular}
+\end{table}
+
+Najwyższą czułość (recall) model osiąga dla klasy \texttt{RIGHT\_STANCE} (78{,}3\%), najniższą --- dla \texttt{LEFT\_STANCE} (67{,}0\%). Klasa \texttt{FLIGHT} jest najczęściej mylona z~obiema klasami STANCE: 79~klatek lotu model błędnie przypisał do~\texttt{LEFT\_STANCE}, a~76 do~\texttt{RIGHT\_STANCE}. Ta asymetria jest spodziewana --- faza lotu trwa zaledwie 2--3~klatki przy 30~FPS, co oznacza, że klatki graniczne (na przejściu STANCE$\to$FLIGHT) mogą wyglądać niejednoznacznie.
+
+\subsection{Struktura błędów: L$\leftrightarrow$R vs STANCE$\leftrightarrow$FLIGHT}
+
+Nie wszystkie błędy klasyfikacji mają jednakowe konsekwencje dla obliczanych współczynników. Pomyłki \textbf{L$\leftrightarrow$R} (zamiana lewej i~prawej nogi) bezpośrednio rujnują wskaźniki symetrii i~współczynniki obliczane osobno per noga (GCT~L/R, duty factor~L/R). Pomyłki \textbf{STANCE$\leftrightarrow$FLIGHT} przesuwają granice faz o~1--2~klatki, co wpływa na czas kontaktu i~czas lotu, ale nie zmienia przypisania nogi.
+
+Tabela~\ref{tab:error-breakdown} zestawia strukturę błędów wszystkich czterech modeli.
+
+\begin{table}[htbp]
+\centering
+\caption{Struktura błędów klasyfikacji na zbiorze testowym}
+\label{tab:error-breakdown}
+\small
+\begin{tabular}{lcccc}
+\hline
+\textbf{Model} & \textbf{Błędy} & \textbf{L$\leftrightarrow$R} & \textbf{S$\leftrightarrow$F} & \textbf{\% L$\leftrightarrow$R} \\
+\hline
+RF\,v1   & 556 & 153 & 403 & 27{,}5\% \\
+RF\,v2   & 511 & 124 & 387 & 24{,}3\% \\
+LSTM\,r1 & 422 &  75 & 347 & 17{,}8\% \\
+LSTM\,r2 & 460 &  74 & 386 & 16{,}1\% \\
+\hline
+\end{tabular}
+\end{table}
+
+Kluczowa obserwacja: modele LSTM radykalnie redukują pomyłki L$\leftrightarrow$R --- z~153 (RF\,v1) do~75 (LSTM\,r1), czyli dwukrotnie. Jest to bezpośrednia konsekwencja kontekstu czasowego: LSTM widzi naprzemienną sekwencję faz (L$\to$F$\to$R$\to$F$\to$L) \\dzięki czemu `wie'', że po kontakcie lewej stopy następuje lot, a~potem kontakt prawej. Random Forest, klasyfikujący każdą klatkę niezależnie, nie ma tej informacji.
+
+Inżynieria cech również pomaga: RF\,v2 popełnia mniej pomyłek L$\leftrightarrow$R niż RF\,v1 (124 vs 153), ponieważ normalizacja keypointów do układu ciała zmniejsza wpływ asymetrycznej perspektywy kamery na rozróżnienie stron.
+
+
+\section{Ważność cech w~modelach Random Forest}
 \label{sec:feature-importance}
 
-% TODO: feature_importances_rf.png.
-% Top features dla RF v1 vs RF v2 — pokazać że engineered features (kąty, prędkości)
-% są bardziej informatywne niż raw keypointy.
+W~tej sekcji sprawdzam, na czym właściwie modele Random Forest opierają swoje decyzje --- czyli które z~cech wejściowych okazują się dla nich najważniejsze. Pomaga to ocenić, czy model rzeczywiście patrzy na ruch biegacza, czy raczej zapamiętał, w~którym miejscu kadru zwykle pojawiają się stopy. Porównanie RF\,v1 i~RF\,v2 jest tu szczególnie ciekawe, bo drugi z~nich dostaje już przetworzone cechy (kąty stawów, znormalizowane pozycje keypointów względem ciała), a~pierwszy operuje na surowych współrzędnych z~MediaPipe.
 
-\section{Ablation: aspect ratio fix}
-\label{sec:aspect-ratio-fix}
+Wagę każdej cechy Random Forest oblicza sprawdzając, jak skutecznie ta cecha pomaga drzewom rozdzielać próbki na właściwe klasy. Im częściej cecha sprawdzała się przy takich podziałach, tym wyższa jej waga. Wagi wszystkich cech sumują się do 100\%, więc wartość 3{,}6\% przy konkretnej cesze oznacza, że odpowiada ona za 3{,}6\% decyzji całego lasu. To pomocnicza miara --- mówi nam, na co model patrzył przy klasyfikacji, ale nie udowadnia, że właśnie ta cecha fizycznie decyduje o~tym, czy klatka to kontakt, czy lot.
 
-% TODO: Ablation study PRZED/PO aspect fix dla LSTM.
-% Tabela:
-% | Model | przed fix | po fix | różnica |
-% | LSTM run 1 | 67.1% | 70.9% | +3.8 pp |
-% | LSTM run 2 | 65.3% | ~68% | ~+3 pp |
-% Per-film breakdown (per_file_test.md):
-% - Film 22 (pionowy): 75.8% → 85.9% (+10.1 pp) - kluczowy edge case
-% - Inne filmy (landscape): ±2 pp
-% Wniosek: aspect fix kluczowy dla nietypowych orientacji, neutralny dla standardowych.
+Tabela poniżej zestawia pięć najważniejszych cech w~obu modelach.
 
-\section{Wpływ accuracy klasyfikatora na precyzję metryk temporalnych}
+\begin{table}[htbp]
+\centering
+\caption{Pięć najważniejszych cech w~modelach Random Forest}
+\label{tab:feature-importance}
+\small
+\begin{tabular}{clcclc}
+\hline
+\multicolumn{3}{c}{\textbf{RF\,v1 (surowe keypointy)}} & \multicolumn{3}{c}{\textbf{RF\,v2 (cechy inżynierowane)}} \\
+\ & Cecha & Waga & \ & Cecha & Waga \\
+\hline
+1 & RIGHT\_FOOT\_INDEX\_y & 3{,}6\% & 1 & left\_knee\_angle      & 3{,}6\% \\
+2 & RIGHT\_ANKLE\_y       & 3{,}4\% & 2 & right\_knee\_angle     & 3{,}3\% \\
+3 & RIGHT\_HEEL\_y        & 3{,}2\% & 3 & RIGHT\_HEEL\_y\_norm   & 3{,}2\% \\
+4 & LEFT\_ANKLE\_y        & 3{,}1\% & 4 & RIGHT\_ANKLE\_y\_norm  & 2{,}8\% \\
+5 & LEFT\_HEEL\_y         & 3{,}0\% & 5 & LEFT\_FOOT\_INDEX\_x\_norm & 2{,}5\% \\
+\hline
+\end{tabular}
+\end{table}
+
+W~RF\,v1 wszystkie pięć najważniejszych cech to surowe współrzędne $y$ stóp i~kostek. Model nauczył się, że gdy stopa jest nisko w~kadrze (czyli $y$ blisko 1 w~układzie MediaPipe), to prawdopodobnie dotyka ziemi. Jest to sensowne, ale działa dobrze tylko wtedy, gdy biegacz znajduje się w~podobnym miejscu kadru co w~filmach treningowych. Inne ujęcie, inna rozdzielczość, inny biegacz --- i wartości $y$ się przesuwają, a~model traci punkt odniesienia.
+
+W~RF\,v2 na pierwszych dwóch miejscach znalazły się kąty kolan --- lewego i~prawego. Jest to dużo bardziej stabilna cecha niż surowe $y$. Kat kolana $170^\circ$ oznacza nogę prawię wyprostowaną niezależnie od tego, gdzie biegacz stoi w~kadrze i~jakiej jest postury. Na dalszych miejscach pojawiają się cechy z~dopiskiem \texttt{\_norm}, czyli pozycje keypointów przeliczone względem środka bioder i~długości tułowia --- również odporne na zmianę położenia w~kadrze.
+
+To porównanie pokazuje, dlaczego RF\,v2 lepiej radzi sobie z~nowymi nagraniami. RF\,v1 zapamiętał wzorce wyglądu konkretnych biegaczy w~konkretnych ujęciach i~na nowych filmach jest zagubiony. RF\,v2 dostał cechy opisujące samą technikę biegu, a~nie jej konkretną wizualną realizację --- i~dlatego rozpoznaje tę technikę także u~innych biegaczy.
+
+
+
+\section{Badanie wpływu korekty proporcji obrazu}
+\label{sec:ablation-aspect}
+
+Aby ocenić wpływ korekty proporcji obrazu (sekcja~\ref{sec:aspect-fix}), porównałem wyniki modelu LSTM\,r1 przed i~po zastosowaniu korekty. 
+
+\begin{table}[htbp]
+\centering
+\caption{Wpływ korekty proporcji obrazu na dokładność LSTM\,r1}
+\label{tab:aspect-fix-results}
+\small
+\begin{tabular}{lcccc}
+\hline
+ & \textbf{Bez korekty} & \textbf{Z~korektą} & \textbf{$\Delta$} & \textbf{Orientacja} \\
+\hline
+Film~2 (13~km/h)      & 54{,}9\% & 54{,}5\% & $-$0{,}4~pp & pozioma \\
+Film~9 (zmienne tempo) & 68{,}1\% & 70{,}9\% & $+$2{,}8~pp & pozioma \\
+Film~10 (kamera pionowa) & 75{,}8\% & 85{,}9\% & $+$10{,}1~pp & \textbf{pionowa} \\
+\hline
+\textbf{Łącznie (test)} & \textbf{67{,}1\%} & \textbf{70{,}9\%} & $+$\textbf{3{,}8~pp} & \\
+\hline
+\end{tabular}
+\end{table}
+
+Korekta daje największą poprawę na filmie~10 (wideo pionowe, 608$\times$1080~px): +10{,}1~pp. Wynika to z~faktu, że w~formacie pionowym proporcje szerokości do wysokości ($608/1080 \approx 0{,}56$) znacznie odbiegają od proporcji filmów poziomych ($\approx$1{,}33--1{,}78), co bez korekty powoduje błędne obliczanie długości tułowia i~kątów stawów. Dla filmów o~standardowych proporcjach (filmy~2 i~9) wpływ korekty jest niewielki ($-$0{,}4 do $+$2{,}8~pp).
+
+Łączna poprawa na zbiorze testowym wyniosła +3{,}8~pp (z~67{,}1\% do~70{,}9\%). Korekta jest prostym krokiem preprocessingu --- przemnożeniem współrzędnych przez wymiary kadru ($x$ przez szerokość, $y$ przez wysokość) --- który nie wydłuża czasu inferencji, a~istotnie poprawia wyniki na nagraniach o~nietypowych proporcjach.
+
+\section{Analiza wyników per-film}
+\label{sec:per-film}
+
+Tabela~\ref{tab:per-film} przedstawia dokładność wszystkich modeli na poszczególnych filmach testowych. Wyniki uwidaczniają, jak różnorodność warunków nagrania wpływa na jakość klasyfikacji.
+
+\begin{table}[H]
+\centering
+\caption{Dokładność per-film na zbiorze testowym}
+\label{tab:per-film}
+\small
+\begin{tabular}{lcccc}
+\hline
+\textbf{Film} & \textbf{RF\,v1} & \textbf{RF\,v2} & \textbf{LSTM\,r1} & \textbf{LSTM\,r2} \\
+\hline
+2 --- bieg 13\,km/h ($\approx$~300~klatek)      & 51{,}7\% & 60{,}3\% & 54{,}5\% & 54{,}9\% \\
+9 --- zmienne tempo ($\approx$~870~klatek)      & 63{,}7\% & 63{,}2\% & 70{,}9\% & 69{,}3\% \\
+10 --- kamera pionowa ($\approx$~320~klatek)    & 70{,}3\% & 77{,}5\% & \textbf{85{,}9\%} & 77{,}8\% \\
+\hline
+Łącznie                               & 62{,}7\% & 65{,}7\% & \textbf{70{,}9\%} & 68{,}2\% \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Film~2} (bieg 13~km/h, niska rozdzielczość 360$\times$450~px) okazał się najtrudniejszy dla wszystkich modeli --- najlepszy z~nich (RF\,v2) osiągnął na nim jedynie 60{,}3\%, a~główny model pracy (LSTM\,r1) --- 54{,}5\%. Prawdopodobną przyczyną jest niska rozdzielczość, która ogranicza precyzję detekcji keypointów przez MediaPipe, oraz fakt, że biegacz biega w~tempie i~stylu niereprezentowanym w~zbiorze treningowym.
+
+\textbf{Film~9} (bieg zmiennym tempem, od~0{,}8 do~3{,}5~m/s) to najdłuższe nagranie w~zbiorze testowym ($\approx$~870~klatek), przez co najmocniej waży na wyniku łącznym --- dokładność LSTM\,r1 na tym filmie (70{,}9\%) niemal pokrywa się z~wynikiem ogólnym. Jest to przypadek pośredni między trudnym filmem~2 a~łatwym filmem~10. Zmienne tempo (od marszu po szybki bieg) sprawia, że czas trwania faz zmienia się w~obrębie nagrania, a~mimo to oba modele sekwencyjne wyraźnie przewyższają tu Random Forest (LSTM\,r1 70{,}9\% wobec około 63\% obu wariantów RF) --- kontekst czasowy pomaga zwłaszcza przy zmiennej dynamice biegu.
+
+\textbf{Film~10} (kamera pionowa, analiza z~fizjoterapeutą) to film, na którym LSTM\,r1 osiągnął najlepszy wynik (85{,}9\%). Wysoka jakość nagrania (dobra rozdzielczość, stabilna kamera) i~wyraźny bieg w~stałym tempie sprzyjają zarówno detekcji pozy, jak i~klasyfikacji faz.
+
+Różnica między filmami pokazuje, że jakość pipeline'u silnie zależy od warunków nagrania --- jest to ograniczenie omówione w~rozdziale~\ref{ch:wrazliwosc}.
+
+\section{Wpływ dokładności klasyfikatora na precyzję współczynników}
 \label{sec:wplyw-na-metryki}
 
-% TODO: Jak różnica 5 pp accuracy LSTM vs RF przekłada się na precyzję obliczeń?
-% Granice faz → kadencja, GCT, czas lotu, stride length.
-% Argumentacja: LSTM dokładniejszy → granice precyzyjniejsze → metryki bliższe ground truth.
-% Konkretna analiza: per_file_test.md → 22, 02, 20.
+Dokładność klasyfikatora faz wpływa bezpośrednio na precyzję obliczanych współczynników biomechanicznych. Każda błędna klasyfikacja klatki przesuwa granicę między fazami, co zmienia czas trwania segmentów STANCE i~FLIGHT.
 
-\section{Wnioski metodologiczne}
+Przy 30~FPS jedna klatka odpowiada $\approx$~33~ms. Jeśli model błędnie zaklasyfikuje 2~klatki na granicy STANCE$\to$FLIGHT, czas kontaktu (GCT) zostanie zawyżony o~$\approx$~67~ms --- przy typowym GCT wynoszącym 220~ms jest to błąd $\approx$~30\%. Przy 70{,}9\% dokładności LSTM\,r1 popełnia błędy STANCE$\leftrightarrow$FLIGHT w~$\approx$~347 z~$\approx$~1\,450~klatek, natomiast RF\,v1 --- w~$\approx$~403 z~$\approx$~1\,500. Poprawa o~5~pp oznacza w~praktyce mniej przesuniętych granic faz i~dokładniejsze czasy kontaktu.
+
+Powyższy argument ma charakter teoretyczny, ale znalazł praktyczne potwierdzenie w~walidacji względem zegarka Garmin (sekcja~\ref{sec:walidacja-garmin}): na tym samym nagraniu kadencja (metryka oparta na zliczaniu kontaktów) zgodziła się z~pomiarem referencyjnym w~granicach 1\%, podczas gdy czas kontaktu (metryka oparta na pomiarze czasu trwania fazy) był zaniżony o~14\%. Potwierdza to, że to właśnie metryki czasu trwania --- zależne od dokładnego położenia granicy faz --- są najbardziej wrażliwe na błędy klasyfikatora.
+
+Pomyłki L$\leftrightarrow$R mają jeszcze poważniejsze konsekwencje: jeśli model zamieni \texttt{LEFT\_STANCE} z~\texttt{RIGHT\_STANCE} w~kilku cyklach, wskaźnik symetrii Robinsona zostanie zaburzony --- system może fałszywie zasygnalizować asymetrię, której biegacz w~rzeczywistości nie ma. Dwukrotna redukcja pomyłek L$\leftrightarrow$R w~LSTM\,r1 (75) względem RF\,v1 (153) jest zatem kluczowa dla wiarygodności analizy symetrii.
+\newpage
+\section{Wnioski --- wybór modelu głównego}
 \label{sec:wnioski-klasyfikator}
 
-% TODO: Kiedy LSTM, kiedy RF wystarczy.
-% - LSTM r1 + aspect fix = primary model (70.9%, ~$15 GPU time)
-% - RF v2 = solid baseline (67%, sekundy CPU)
-% - LSTM r2 = alternatywa stabilniejsza ale niższa accuracy
-% Argument za LSTM dla produkcji: kontekst czasowy zmniejsza L↔R confusion 3x vs RF v1.
+Na podstawie tych wyników jako model główny pipeline'u wybrałem \textbf{LSTM\,r1 z~korektą proporcji obrazu}, z~trzech powodów:
+
+\begin{enumerate}
+    \item \textbf{Najwyższa dokładność} testowa (70{,}9\%) i~F1 (0{,}709) spośród wszystkich modeli.
+    \item \textbf{Najmniej pomyłek L$\leftrightarrow$R} (75; 17{,}8\% błędów), co przekłada się na wiarygodniejsze wskaźniki symetrii.
+    \item \textbf{Najlepszy wynik na filmie~10} (85{,}9\%), potwierdzający skuteczność korekty proporcji przy nietypowej orientacji.
+\end{enumerate}
+
+Pozostałe modele zachowują wartość pomocniczą: RF\,v2 (65{,}7\%) jest szybki w~treningu i~nie wymaga GPU, więc nadaje się do prototypowania, a~LSTM\,r2 (68{,}2\%) --- choć nieco mniej dokładny --- jest mniejszy (187\,779 parametrów) i~oszczędniejszy obliczeniowo. Wspólnym ograniczeniem pozostaje niska dokładność na filmie~2 ($\approx$55\%), wskazująca na potrzebę rozszerzenia zbioru o~nagrania niskiej rozdzielczości i~zróżnicowanych stylów biegu.

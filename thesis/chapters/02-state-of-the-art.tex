@@ -1,53 +1,46 @@
 \chapter{Stan wiedzy}
 \label{ch:sota}
 
-% TODO: Materiał: docs/thesis-notes/2026-05-14-research-podobnych-prac.md
-% 7 prac peer-reviewed z cytatami + 4 wzorce sformułowań + 5 gap'ów w literaturze.
+Zanim przedstawię swoje rozwiązanie, przeprowadziłem przegląd dotychczasowych prac związanych z analizowanym problemem. Obejmuje on cztery obszary: estymację pozy człowieka z nagrań pojedynczej kamery, biomechanikę biegu, klasyfikację faz biegu metodami uczenia maszynowego oraz walidację metod dwuwymiarowych względem trójwymiarowego motion capture. Taki podział pozwala uporządkować najważniejsze zagadnienia potrzebne do uzasadnienia przyjętego podejścia. Na końcu wskazuję luki badawcze, które wypełnia niniejsza praca.
 
-\section{Pose estimation z monocular 2D wideo}
+
+\section{Estymacja pozy z~nagrań pojedynczej kamery}
 \label{sec:sota-pose}
 
-% TODO: OpenPose (Cao 2018), MediaPipe BlazePose (Bazarevsky 2020), AlphaPose, HRNet.
-% Diagram 33 keypointów MediaPipe — z 2026-05-14-wyjasnienia-pojec-do-pisania.md
-% (sekcja "Dlaczego MediaPipe Pose ma akurat 33 keypointy").
-% Cytat-szablon dla monocular 2D — ten sam plik (sekcja "Monocular 2D wideo").
+Klasyczna analiza ruchu opiera się na systemach motion capture z~markerami (np.~Vicon, Qualisys), w~których ruch rejestruje jednocześnie wiele rozmieszczonych wokół biegacza kamer. Ponieważ każdy znacznik na ciele widzi kilka kamer z~różnych stron, system odtwarza jego położenie w~trzech wymiarach. Systemy te oferują wysoką dokładność, lecz są drogie, wymagają laboratorium i~doświadczonego operatora. Rozwój metod estymacji pozy bez markerów otworzył możliwość analizy ruchu z~nagrania jedną, zwykłą kamerą. W~odróżnieniu od~systemów wielokamerowych daje ona jedynie płaski, dwuwymiarowy obraz, bez bezpośredniej informacji o~głębi --- takie ujęcie określa się w~literaturze jako \textit{monocular}. Frameworki takie jak OpenPose~\cite{cao2021openpose} oraz MediaPipe BlazePose~\cite{bazarevsky2020blazepose}, trenowane m.in.\ na zbiorze COCO~\cite{lin2014coco}, wykrywają keypointy ciała w~każdej klatce takiego nagrania.
 
-\section{Współczynniki biomechaniczne biegu}
+Roggio i~wsp.~\cite{roggio2024review} w~przeglądzie dziewięciu modeli estymacji pozy wskazują na ich potencjał w~zastosowaniach klinicznych, sportowych i~ergonomicznych jako tania, nieinwazyjna alternatywa dla systemów markerowych, zaznaczając jednocześnie wyzwania związane z~dokładnością, jakością danych i~zasłonięciami. Edriss i~wsp.~\cite{frontiers2025review} w~przeglądzie poświęconym analizie ruchu w~sporcie podkreślają, że rozwiązania 2D są ekonomiczne i~proste w~użyciu, lecz wciąż mają trudność z~rejestracją ruchów poza płaszczyzną obrazu. 
+
+\section{Biomechanika biegu --- współczynniki i~ich znaczenie}
 \label{sec:sota-wspolczynniki}
 
-% TODO: Klasyczne metryki z literatury — citation:
-% - Heiderscheit 2011 (kadencja, knee@contact, overstriding)
-% - Souza 2016 (GCT, foot strike pattern)
-% - Novacheck 1998 (czas lotu, torso lean, stride length)
-% - Diaz 2019 (vertical oscillation)
-% - Robinson 1987 (Symmetry Index)
-% - Daoud 2012 (foot strike injury risk)
+Cykl biegowy różni się od cyklu chodu, w~biegu występuje faza lotu (obie stopy w~powietrzu), a~zanika faza podwójnego podparcia charakterystyczna dla chodu~\cite{novacheck1998}. Z~tego powodu progi referencyjne i~wzorce ruchu ustalone dla chodu nie przenoszą się wprost na bieg sportowy.
 
-\section{Klasyfikatory faz biegu i chodu}
+Literatura biomechaniczna dostarcza ugruntowanych współczynników opisujących technikę biegu. Heiderscheit i~wsp.~\cite{heiderscheit2011} wykazali, że manipulacja kadencją wpływa na obciążenia stawów i~wiąże się z~overstridingiem oraz kątem kolana w~momencie kontaktu. Souza~\cite{souza2016} omawia czas kontaktu z~podłożem i~wzorzec lądowania stopy w~kontekście analizy wideo. Novacheck~\cite{novacheck1998} opisuje fazy cyklu biegowego, pochylenie tułowia, kąty stawów i~oscylację pionową. Daoud i~wsp.~\cite{daoud2012} powiązali wzorzec lądowania stopy z~częstością kontuzji u~biegaczy długodystansowych, a~Robinson i~wsp.~\cite{robinson1987} zaproponowali wskaźnik symetrii do ilościowego opisu różnic między stronami ciała. Przeglądy nowsze, jak Figueiredo i~wsp.~\cite{figueiredo2025cadence}, potwierdzają związek kadencji z~zapobiegnięciem kontuzji.
+
+\section{Klasyfikacja faz biegu i~chodu metodami uczenia maszynowego}
 \label{sec:sota-klasyfikatory}
 
-% TODO: Przegląd metod klasyfikacji faz gait/running:
-% - klasyczne ML (Random Forest, SVM) na keypointach
-% - deep learning (LSTM, BiLSTM, 1D-CNN, Transformer)
-% - Stenum 2021 (OpenPose vs MoCap, klasyk walidacji)
-% - Ali 2024 (MediaPipe + LSTM-CNN dla DMD gait)
+Rozpoznawanie faz cyklu ruchu jest przedmiotem wielu prac, najczęściej opartych na czujnikach inercyjnych (IMU) noszonych na ciele. Vu i~wsp.~\cite{vu2020review} dokonali przeglądu algorytmów detekcji faz chodu dla protez kończyn dolnych. Su i~wsp.~\cite{su2020dcnn} zastosowali głęboką sieć konwolucyjną z~danych IMU, a~Jeon i~Lee~\cite{jeon2024bilstm} dwukierunkową sieć LSTM (BiLSTM) odporną na zmiany kierunku ruchu --- architekturę pokrewną zastosowanej w~niniejszej pracy.
 
-\section{Walidacja 2D pose vs 3D motion capture}
+W~kontekście biegu klasyczne metody uczenia maszynowego wykorzystywano m.in.\ do wykrywania zmian zmęczeniowych: Dimmick i~wsp.~\cite{dimmick2023fatigue} zastosowali model Random Forest do analizy biomechaniki biegu, a~Martínez-Gramage i~wsp.~\cite{martinez2020rf} --- do redukcji ryzyka kontuzji u~młodych triathlonistów. Prace łączące estymację pozy z~wideo z~klasyfikacją uczenia maszynowego pojawiają się rzadziej. Ali i~wsp.~\cite{ali2024dmd} połączyli estymację pozy (m.in.\ MediaPipe) z~klasyfikatorem SVM oraz LSTM-CNN do rozróżniania patologii chodu. Większość prac dotyczy jednak chodu klinicznego i~opiera się na czujnikach noszonych, nie na czystym wideo.
+
+\section{Walidacja estymacji 2D względem 3D motion capture}
 \label{sec:sota-walidacja}
 
-% TODO: Stenum 2021, Ripic 2023, HGcnMLP 2023, Frontiers Phys 2025 review.
-% Cytaty z 2026-05-14-research-podobnych-prac.md.
-% Akcent na limitations monocular 2D zidentyfikowane w literaturze:
-% - out-of-plane motions
-% - perspective dependence
-% - field of view position effect (Stenum 2021)
+Kluczowym wątkiem literatury jest pytanie, na ile estymacja pozy z~wideo 2D dorównuje referencyjnym systemom 3D. Stenum i~wsp.~\cite{stenum2021} porównali OpenPose z~systemem 3D MoCap dla chodu, uzyskując błąd średni rzędu 0{,}02~s dla metryk czasowych oraz kilku stopni dla kątów stawów. Wskazali przy tym istotne ograniczenie: długość kroku jest estymowana najdokładniej, gdy osoba znajduje się w~centrum pola widzenia kamery --- a~więc wynik zależy od pozycji w~kadrze. Menychtas i~wsp.~\cite{menychtas2023} porównali OpenPose i~MediaPipe z~systemem Vicon, raportując błędy w~ruchach prostopadłych do płaszczyzny obrazu oraz problemy z~lokalizacją keypointu kostki. Praca oparta na metodzie HGcnMLP~\cite{hgcnmlp2024} pokazała wysoką zgodność estymacji 3D ze~smartfona z~systemem Vicon, lecz dane zbierano wyłącznie przy jednej orientacji kamery ($90^\circ$), bez walidacji innych perspektyw.
 
-\section{Identyfikacja luki w literaturze}
+Z~prac tych wyłania się spójny obraz ograniczeń estymacji 2D: błędy dla ruchów poza płaszczyzną obrazu, zależność od perspektywy oraz od pozycji w~polu widzenia. Ograniczenia te są w~literaturze identyfikowane, ale rzadko systematycznie analizowane pod kątem wpływu na konkretne współczynniki --- co stanowi część luki opisanej poniżej.
+
+\section{Luka badawcza}
 \label{sec:sota-luka}
 
-% TODO: 5 gap'ów z 2026-05-14-research-podobnych-prac.md:
-% 1. Running-specific (vs chód kliniczny)
-% 2. Systematyczne porównanie 4 klasyfikatorów na małym datasecie
-% 3. Aspect ratio fix jako pre-processing
-% 4. System rekomendacji rule-based z citation z literatury
-% 5. Auto-detekcja niskiej wiarygodności predykcji
+Z~przeglądu literatury wynika, że żadna z~analizowanych prac nie łączy jednocześnie następujących elementów, które wyznaczają zakres niniejszej pracy:
+
+\begin{enumerate}
+    \item \textbf{Ukierunkowanie na bieg, nie chód.} Analizowane prace dotyczą niemal wyłącznie chodu, zwykle w~kontekście klinicznym. Bieg sportowy na bieżni ma odmienne fazy (występuje faza lotu), inne progi kadencji i~czasu kontaktu oraz inne wartości referencyjne --- stanowi więc odrębną niszę.
+    \item \textbf{Systematyczne porównanie czterech klasyfikatorów na małym zbiorze.} Większość prac proponuje jeden model. W~niniejszej pracy porównuję cztery konfiguracje (las losowy na cechach surowych i~inżynierowanych oraz dwie sieci BiLSTM), traktując mały, dobrze opisany zbiór jako świadomą specyfikację, nie wadę.
+    \item \textbf{Korekta proporcji obrazu jako krok preprocessingu.} Menychtas i~wsp.~\cite{menychtas2023} identyfikują błędy dla ruchów poza płaszczyzną obrazu, lecz nie raportują badania wpływu korekty proporcji kadru na jakość klasyfikatora faz.
+    \item \textbf{Silnik reguł rekomendacji oparty na literaturze.} Prace cytują wartości referencyjne (Heiderscheit, Souza, Novacheck, Robinson, Daoud), ale nie operacjonalizują ich w~postaci wykonywalnych reguł z~poziomami ważności, źródłami i~regułami łączonymi.
+    \item \textbf{Automatyczna detekcja niskiej wiarygodności pomiaru.} Stenum~\cite{stenum2021} i~Menychtas~\cite{menychtas2023} identyfikują problem perspektywy, lecz żadna z~prac nie sygnalizuje automatycznie przypadków, w~których dany współczynnik staje się nieinterpretowalny.
+\end{enumerate}

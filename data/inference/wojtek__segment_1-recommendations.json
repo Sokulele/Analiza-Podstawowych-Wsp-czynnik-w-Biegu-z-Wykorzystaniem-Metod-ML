@@ -1,0 +1,81 @@
+{
+  "recommendations": [
+    {
+      "rule_id": "foot_strike_low_confidence",
+      "severity": "warning",
+      "category": "foot_strike",
+      "title": "Foot strike: niska wiarygodność (perspektywa kamery)",
+      "message": "Kąt stopy w momencie kontaktu wykracza poza fizjologiczny zakres (|kąt| > 45°). Najczęstsza przyczyna: ujęcie inne niż standardowe z boku (pionowe wideo, kamera pod kątem, asymetria perspektywy między nogami). Predykcja foot strike pattern jest dla tej strony niewiarygodna.",
+      "citation": "Walidacja wizualna 2026-05-14 (Sesja C)",
+      "detail": "Strony z niską wiarygodnością: lewa (mean=-90.5°), prawa (mean=-98.4°)",
+      "suggestion": "Do oceny wzorca lądowania użyj nagrania z boku (landscape, kamera na wysokości bieżni, prostopadle do toru biegu)."
+    },
+    {
+      "rule_id": "cadence_recreational",
+      "severity": "watch",
+      "category": "kadencja",
+      "title": "Kadencja rekreacyjna — możliwość poprawy",
+      "message": "Kadencja w zakresie 160–170 spm jest typowa dla biegaczy rekreacyjnych. Stopniowe podniesienie do 170–180 spm może zmniejszyć obciążenie stawów.",
+      "citation": "Heiderscheit et al. 2011",
+      "detail": "kadencja: 162 spm",
+      "suggestion": "Cel długoterminowy: 170–180 spm. Wprowadzaj zmianę stopniowo (~5%/tydzień)."
+    },
+    {
+      "rule_id": "knee_lewa_sitting",
+      "severity": "watch",
+      "category": "kolano@kontakt",
+      "title": "Kolano lewa przy kontakcie: zbyt ugięte ('siedzący' bieg)",
+      "message": "Kąt kolana < 155° przy kontakcie wskazuje na 'siedzący' wzorzec biegu — więcej pracy mięśni przy każdym kroku, mniejsze wykorzystanie energii elastycznej ścięgien. UWAGA: bardzo niskie wartości (<100°) zwykle oznaczają błąd predykcji klatki kontaktu.",
+      "citation": "Novacheck 1998",
+      "detail": "kąt kolana lewa: 120.1°",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "knee_prawa_sitting",
+      "severity": "watch",
+      "category": "kolano@kontakt",
+      "title": "Kolano prawa przy kontakcie: zbyt ugięte ('siedzący' bieg)",
+      "message": "Kąt kolana < 155° przy kontakcie wskazuje na 'siedzący' wzorzec biegu — więcej pracy mięśni przy każdym kroku, mniejsze wykorzystanie energii elastycznej ścięgien. UWAGA: bardzo niskie wartości (<100°) zwykle oznaczają błąd predykcji klatki kontaktu.",
+      "citation": "Novacheck 1998",
+      "detail": "kąt kolana prawa: 121.5°",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "symmetry_mild",
+      "severity": "watch",
+      "category": "symetria",
+      "title": "Łagodna asymetria L/P (5–10%)",
+      "message": "Wskaźnik symetrii Robinsona 5–10% to wartość 'do monitorowania' — drobne różnice między nogami są powszechne u rekreacyjnych biegaczy, ale warto obserwować trend w czasie.",
+      "citation": "Robinson et al. 1987",
+      "detail": "kąt kostki w fazie stance SI=9.5%",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "torso_optimal",
+      "severity": "info",
+      "category": "tułów",
+      "title": "Pochylenie tułowia prawidłowe",
+      "message": "Pochylenie tułowia w zakresie 5–15° to optymalne wykorzystanie grawitacji w biegu.",
+      "citation": "Novacheck 1998",
+      "detail": "pochylenie: 6.1°",
+      "suggestion": ""
+    },
+    {
+      "rule_id": "vert_osc_good",
+      "severity": "info",
+      "category": "vert_osc",
+      "title": "Oscylacja pionowa: ekonomiczny zakres",
+      "message": "Oscylacja 0.12–0.16 torso (≈ 6–8 cm) to wartość typowa dla dobrych biegaczy.",
+      "citation": "Diaz et al. 2019",
+      "detail": "vert osc / torso: 0.130",
+      "suggestion": ""
+    }
+  ],
+  "summary": {
+    "total": 7,
+    "critical": 0,
+    "warning": 1,
+    "watch": 4,
+    "info": 2
+  }
+}

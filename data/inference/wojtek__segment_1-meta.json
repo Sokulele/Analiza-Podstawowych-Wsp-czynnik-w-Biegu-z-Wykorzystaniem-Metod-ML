@@ -1,0 +1,14 @@
+{
+  "title": "Wojtek__segment_1",
+  "video": "Wojtek__segment_1.mov",
+  "fps": 29.97,
+  "n_frames": 1228,
+  "duration_s": 40.97,
+  "width": 1920,
+  "height": 1080,
+  "model_dir": "models\\lstm_run1_overfit",
+  "model_test_acc": 0.709,
+  "avg_confidence": 0.855,
+  "inference_time_s": 137.8,
+  "generated": "2026-06-03 21:02:57"
+}
