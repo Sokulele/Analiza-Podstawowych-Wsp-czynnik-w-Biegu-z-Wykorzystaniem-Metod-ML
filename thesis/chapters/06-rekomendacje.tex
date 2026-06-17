@@ -1,12 +1,12 @@
 \chapter{System rekomendacji biomechanicznych}
 \label{ch:rekomendacje}
 
-Pipeline kończy się modułem, który przekształca obliczone współczynniki (rozdział~\ref{ch:materialy-metody}) w~konkretne wskazówki treningowe. Rozdział ten opisuje, dlaczego rekomendacje oparłem na regułach z~literatury zamiast na uczeniu maszynowym, jak zbudowany jest silnik reguł, jakie reguły zawiera oraz jak wygląda wygenerowany raport dla rzeczywistego biegacza.
+Pipeline kończy się modułem, który przekształca obliczone współczynniki w~konkretne wskazówki treningowe. Rozdział ten opisuje, dlaczego rekomendacje oparłem na regułach z~literatury zamiast na uczeniu maszynowym, jak zbudowany jest silnik reguł, jakie reguły zawiera oraz jak wygląda wygenerowany raport dla rzeczywistego biegacza.
 
 \section{Dlaczego reguły, a~nie uczenie maszynowe}
 \label{sec:rule-based-vs-ml}
 
-Rekomendacje nie są uczone z~danych --- są zakodowanymi ręcznie regułami odzwierciedlającymi zakresy referencyjne i~wzorce ryzyka ustalone w~literaturze biomechanicznej. Wybór ten wynika z~czterech przesłanek:
+Rekomendacje nie są uczone z~danych --- są zakodowanymi na stałe regułami odzwierciedlającymi zakresy referencyjne i~wzorce ryzyka ustalone w~literaturze biomechanicznej. Wybór ten wynika z~czterech przesłanek:
 
 \begin{itemize}
     \item \textbf{Rozmiar zbioru danych.} Zbiór 15~nagrań i~$\approx$~12~biegaczy jest o~rzędy wielkości za mały, aby wytrenować model przewidujący rekomendacje. Model uczony na tak małej próbce nauczyłby się raczej idiosynkrazji konkretnych biegaczy niż ogólnych zasad techniki biegu.
@@ -20,17 +20,17 @@ Literatura biomechaniczna dostarcza przy tym dobrze udokumentowane i~wielokrotni
 \section{Architektura silnika reguł}
 \label{sec:rules-arch}
 
-Silnik składa się z~11~funkcji reguł, z~których każda analizuje jeden aspekt techniki biegu (np.~kadencję, czas kontaktu, pochylenie tułowia). Każda funkcja otrzymuje na wejściu wyniki obliczeń współczynników (sekcja~\ref{sec:obliczanie-wspolczynnikow}) i~zwraca listę rekomendacji --- obiektów zawierających:
+Silnik składa się z~11~funkcji reguł, z~których każda analizuje jeden aspekt techniki biegu (np.~kadencję, czas kontaktu, pochylenie tułowia). Każda funkcja otrzymuje na wejściu wyniki obliczeń współczynników i~zwraca listę rekomendacji --- obiektów zawierających:
 
 \begin{itemize}
-    \item \textbf{Poziom ważności} (\textit{severity}) --- czterostopniowa skala:
+    \item \textbf{Poziom ważności} --- czterostopniowa skala:
     \begin{itemize}
-        \item \texttt{critical} --- wartość wymagająca interwencji. Flaga ta zapala się w~dwóch sytuacjach: po pierwsze, gdy wynik wskazuje na rzeczywiste ryzyko biomechaniczne (np.~kąt kolana powyżej $175^\circ$ przy kontakcie = overstriding, kadencja poniżej~150~spm), po drugie, gdy wynik sugeruje, że klasyfikator faz coś źle sklasyfikował i~obliczone współczynniki są niewiarygodne (np.~asymetria liczby kroków lewej i~prawej nogi przekraczająca~20\%, co świadczy o~tym, że model myli fazy). Oba przypadki wymagają reakcji człowieka, ale innego rodzaju: w~pierwszym biegacz powinien skorygować technikę, w~drugim --- należy przenagrać film z~lepszą perspektywą kamery lub w~lepszych warunkach,
+        \item \texttt{critical} --- wartość wymagająca interwencji. Flaga ta zapala się w~dwóch sytuacjach: po pierwsze, gdy wynik wskazuje na rzeczywiste ryzyko biomechaniczne (np.~kąt kolana powyżej $175^\circ$ przy kontakcie = overstriding), po drugie, gdy wynik sugeruje, że klasyfikator faz coś źle sklasyfikował i~obliczone współczynniki są niewiarygodne (np.~asymetria liczby kroków lewej i~prawej nogi przekraczająca~20\%, co świadczy o~tym, że model myli fazy). Oba przypadki wymagają reakcji człowieka, ale innego rodzaju: w~pierwszym biegacz powinien skorygować technikę, w~drugim --- należy przenagrać film z~lepszą perspektywą kamery lub w~lepszych warunkach,
         \item \texttt{warning} --- wartość poza zalecanym zakresem, ale nie krytyczna,
         \item \texttt{watch} --- wartość w~zakresie akceptowalnym, ale warta monitorowania,
         \item \texttt{info} --- informacja pozytywna lub neutralna (np.~``kadencja w~zalecanym zakresie''),
     \end{itemize}
-    \item \textbf{Źródło literaturowe} (\textit{citation}) --- autor i~rok publikacji, na której oparta jest reguła,
+    \item \textbf{Źródło literaturowe}  --- autor i~rok publikacji, na której oparta jest reguła,
     \item \textbf{Szczegóły pomiaru} --- konkretne zmierzone wartości i~zakresy referencyjne,
     \item \textbf{Sugestia} --- konkretne działanie korygujące (np.~``zwiększ kadencję o~5--10\%'').
 \end{itemize}
@@ -49,22 +49,22 @@ Tabela~\ref{tab:rules} przedstawia reguły z~przykładowymi progami i~źródłam
 \small
 \begin{tabular}{p{3.2cm}p{5.5cm}p{3.8cm}}
 \hline
-\textbf{Kategoria} & \textbf{Przykładowa reguła} & \textbf{Źródło} \\
+\textbf{Aspekt} & \textbf{Przykładowa reguła (próg $\to$ poziom)} & \textbf{Źródło} \\
 \hline
-\multicolumn{3}{l}{\textit{Reguły temporalne}} \\
+\multicolumn{3}{l}{\textbf{Reguły temporalne} --- na podstawie czasu trwania faz biegu} \\
 Kadencja           & $<$160~spm $\to$ warning (overstriding) & Heiderscheit 2011 \\
 GCT                & $>$280~ms $\to$ warning (długi kontakt) & Souza 2016 \\
 Duty factor        & $\geq$0{,}5 $\to$ critical (chód)       & Souza 2016 \\
 Stride length      & $>$2{,}2~m $\wedge$ kadencja~$<$160 $\to$ overstriding & Heiderscheit 2011 \\
 \hline
-\multicolumn{3}{l}{\textit{Reguły przestrzenne}} \\
-Kolano @~kontakt   & $>175^\circ$ $\to$ critical (overstriding)   & Heiderscheit 2011 \\
+\multicolumn{3}{l}{\textbf{Reguły przestrzenne} --- na podstawie geometrii ciała w~kadrze} \\
+Kolano przy kontakcie & $>175^\circ$ $\to$ critical (overstriding)   & Heiderscheit 2011 \\
 Pochylenie tułowia & $<5^\circ$ $\to$ warning (zbyt pionowy)      & Novacheck 1998 \\
 Oscylacja pionowa  & $>$0{,}24 torso $\to$ warning           & Novacheck 1998 \\
 Symetria L/P       & SI~$>$10\% $\to$ warning                & Robinson 1987 \\
 Foot strike        & L$\neq$R $\to$ warning (niespójność)    & Daoud 2012 \\
 \hline
-\multicolumn{3}{l}{\textit{Reguły walidacyjne}} \\
+\multicolumn{3}{l}{\textbf{Reguły walidacyjne} --- wiarygodność samej predykcji} \\
 Pewność predykcji  & avg\_confidence $<$0{,}85 $\to$ warning & walidacja wewnętrzna \\
 Asymetria kroków   & $|$L$-$R$|$ / total $>$20\% $\to$ critical & walidacja wewnętrzna \\
 \hline
@@ -77,17 +77,17 @@ Asymetria kroków   & $|$L$-$R$|$ / total $>$20\% $\to$ critical & walidacja wew
 Część reguł analizuje kombinację dwóch współczynników jednocześnie, co pozwala wykryć wzorce niewidoczne przy analizie każdego współczynnika osobno. Zaimplementowałem trzy reguły łączone:
 
 \begin{enumerate}
-    \item \textbf{Overstriding (kadencja + GCT)}: kadencja poniżej~160~spm w~połączeniu ze~średnim GCT powyżej~270~ms to klasyczny wzorzec overstridingu --- stopa ląduje zbyt daleko przed środkiem ciężkości \cite{heiderscheit2011}.
+    \item \textbf{Overstriding (kadencja + GCT)}: kadencja poniżej~160~spm w~połączeniu ze~średnim GCT powyżej~280~ms to klasyczny wzorzec overstridingu --- stopa ląduje zbyt daleko przed środkiem ciężkości \cite{heiderscheit2011}.
     \item \textbf{Overstriding (stride + kadencja)}: stride powyżej~2{,}2~m przy kadencji poniżej~160~spm --- długi krok wynikający z~niskiej kadencji, a~nie z~dużej prędkości.
-    \item \textbf{Jakość predykcji (SI + confidence)}: maksymalny SI powyżej~50\% w~połączeniu ze~średnią pewnością predykcji poniżej~0{,}90 --- sygnał, że asymetria L/P jest artefaktem klasyfikatora, nie rzeczywistą cechą biegacza. Reguła ta powstała na podstawie analizy przypadku brzegowego jednego z~biegaczy, na których walidowałem cały pipeline (poza zbiorem treningowym, walidacyjnym i~testowym modelu), u~którego pojedyncze wskaźniki jakości (pewność predykcji, liczba kroków L/R) nie sygnalizowały problemu, podczas gdy asymetria GCT wynosiła~60\%.
+    \item \textbf{Jakość predykcji (SI + confidence)}: maksymalny SI powyżej~50\% w~połączeniu ze~średnią pewnością predykcji poniżej~0{,}90 --- sygnał, że asymetria L/P jest artefaktem klasyfikatora, nie rzeczywistą cechą biegacza. Reguła ta powstała na podstawie analizy przypadku brzegowego jednego z~biegaczy, na których walidowałem cały pipeline (poza zbiorem treningowym, walidacyjnym i~testowym modelu), u~którego żaden pojedynczy wskaźnik z~osobna nie przekraczał swojego progu ostrzegawczego, podczas gdy ich kombinacja --- wysoka asymetria GCT (60\%) przy obniżonej pewności predykcji --- ujawniała artefakt.
 \end{enumerate}
 
-Reguły łączone powstały z~obserwacji, że pojedyncze wskaźniki bywają zawodne na nietypowych nagraniach. Sprawdzenie dwóch warunków naraz wychwytuje sytuacje, które każdy z~nich osobno by przepuścił.
+Reguły łączone powstały z~obserwacji, że pojedyncze wskaźniki bywają zawodne na nietypowych nagraniach. Sprawdzenie dwóch warunków naraz wychwytuje sytuacje, które każdy z~nich osobno by nie wylapał.
 
-\section{Źródła literaturowe reguł}
+\section{Źródła reguł}
 \label{sec:rules-sources}
 
-Zakresy referencyjne i~progi reguł oparłem na sześciu źródłach:
+Zakresy referencyjne i~progi reguł oparłem na pięciu źródłach literaturowych oraz na walidacji wewnętrznej:
 \begin{itemize}
     \item \textbf{Heiderscheit i~wsp.\ (2011)} \cite{heiderscheit2011} --- zwiększenie kadencji o~5--10\% obniża obciążenia stawów, kąt kolana przy kontakcie i~overstriding,
     \item \textbf{Novacheck (1998)} \cite{novacheck1998} --- pochylenie tułowia, kąty stawów, oscylacja pionowa, fazy cyklu biegowego,
@@ -96,13 +96,13 @@ Zakresy referencyjne i~progi reguł oparłem na sześciu źródłach:
     \item \textbf{Robinson i~wsp.\ (1987)} \cite{robinson1987} --- wskaźnik symetrii SI z~progami 5\%/10\%,
     \item \textbf{walidacja wewnętrzna} --- progi jakości predykcji (pewność predykcji, asymetria kroków) kalibrowane na biegaczach użytych do walidacji całego pipeline'u.
 \end{itemize}
-
+\newpage
 \section{Przykład wygenerowanego raportu}
 \label{sec:rules-example}
 
 Aby pokazać, co system produkuje w~praktyce, przedstawiam raport wygenerowany dla biegacza Adama (film~12, kadencja 173~spm, pewność predykcji 0{,}91). Silnik zwrócił 8~rekomendacji: 0~krytycznych, 2~ostrzeżenia, 1~do monitorowania i~5~informacji pozytywnych (tabela~\ref{tab:rec-example}).
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \caption{Rekomendacje wygenerowane dla biegacza Adama}
 \label{tab:rec-example}
@@ -111,7 +111,7 @@ Aby pokazać, co system produkuje w~praktyce, przedstawiam raport wygenerowany d
 \hline
 \textbf{Poziom} & \textbf{Rekomendacja} & \textbf{Pomiar} & \textbf{Źródło} \\
 \hline
-warning & Tułów zbyt pionowy & pochylenie $2{,}3^\circ$ (cel $5$--$15^\circ$) & Novacheck 1998 \\
+warning & Tułów zbyt pionowy & pochylenie $2{,}3^\circ$ (cel $\geq 5^\circ$) & Novacheck 1998 \\
 warning & Asymetria L/P $>$10\% & GCT SI~=~18{,}7\%, duty factor SI~=~18{,}7\% & Robinson 1987 \\
 watch   & Łagodna asymetria L/P & kąt kostki SI~=~5{,}6\% & Robinson 1987 \\
 info    & Kadencja w~zakresie & 173~spm & Heiderscheit 2011 \\
@@ -123,14 +123,15 @@ info    & Spójny foot strike & L~=~P~=~forefoot & Daoud 2012 \\
 \end{tabular}
 \end{table}
 
-Każda rekomendacja zawiera nie tylko etykietę, ale też zmierzoną wartość, zakres referencyjny, źródło literaturowe oraz --- w~przypadku ostrzeżeń --- konkretną sugestię korygującą (np.~dla zbyt pionowego tułowia: ``ćwicz pochylenie z~kostek, nie z~bioder''). Warto zwrócić uwagę, że ostrzeżenie o~asymetrii (SI~=~18{,}7\%) opatrzone jest w~pełnym raporcie zastrzeżeniem, że część asymetrii w~danych monocularnych 2D może być artefaktem perspektywy --- system nie przedstawia więc swoich wyników jako pewnej diagnozy, lecz jako sygnał do dalszej weryfikacji.
+Każda rekomendacja zawiera nie tylko etykietę, ale też zmierzoną wartość, zakres referencyjny, źródło literaturowe oraz --- w~przypadku ostrzeżeń --- konkretną sugestię korygującą. Warto zwrócić uwagę, że ostrzeżenie o~asymetrii (SI~=~18{,}7\%) opatrzone jest w~pełnym raporcie zastrzeżeniem, że część asymetrii w~danych z~pojedynczej kamery może być artefaktem perspektywy --- system nie przedstawia więc swoich wyników jako pewnej diagnozy, lecz jako sygnał do dalszej obserwacji lub weryfikacji człowieka.
 
+\newpage
 \section{Ograniczenia systemu}
 \label{sec:ograniczenia-rekomendacji}
 
 \begin{itemize}
     \item \textbf{Progi ogólne, nie zindywidualizowane.} Zakresy referencyjne pochodzą z~literatury i~mają charakter populacyjny. Indywidualna sytuacja biegacza (historia kontuzji, budowa ciała, cel treningowy) może wymagać innych progów, których system nie uwzględnia.
-    \item \textbf{Operowanie na wartościach średnich.} Reguły działają na uśrednionych współczynnikach z~całego nagrania, nie na poszczególnych cyklach. Epizodyczne odchylenia (np.~chwilowe zmęczenie pod koniec biegu) mogą zostać uśrednione i~niezauważone.
-    \item \textbf{Zależność od jakości współczynników.} Rekomendacje są tak dobre, jak dane wejściowe. Błędy klasyfikatora faz lub artefakty perspektywy (rozdział~\ref{ch:wrazliwosc}) propagują się do rekomendacji --- stąd reguły walidacyjne, które mają wychwytywać najbardziej rażące przypadki.
+    \item \textbf{Operowanie na wartościach średnich.} Reguły działają na uśrednionych współczynnikach z~całego nagrania, nie na poszczególnych cyklach. Chwilowe odchylenia (np.zmęczenie pod koniec biegu) mogą zostać uśrednione i~niezauważone.
+    \item \textbf{Zależność od jakości współczynników.} Rekomendacje są tak dobre, jak dane wejściowe. Błędy klasyfikatora faz lub artefakty perspektywy propagują się do rekomendacji --- stąd reguły walidacyjne, które mają wychwytywać najbardziej rażące przypadki.
     \item \textbf{Konieczność aktualizacji przy rozszerzaniu.} Dodanie nowej reguły wymaga znalezienia i~zweryfikowania źródła literaturowego dla jej progów, co jest pracą manualną i~nie skaluje się automatycznie wraz z~danymi.
 \end{itemize}
